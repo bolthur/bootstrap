@@ -43,3 +43,13 @@ if [[ -z "$TRAVIS" && ! -f gdb-$PKG_GDB.tar.gz ]]; then
   wget "https://ftp.gnu.org/gnu/gdb/gdb-${PKG_GDB}.tar.gz"
   tar -xzf gdb-${PKG_GDB}.tar.gz
 fi
+# automake
+if [ ! -f automake-${PKG_AUTOMAKE}.tar.gz ]; then
+  wget "https://ftp.gnu.org/gnu/automake/automake-${PKG_AUTOMAKE}.tar.gz"
+  tar -xzf automake-${PKG_AUTOMAKE}.tar.gz
+fi
+# autoconf
+if [ ! -f autoconf-${PKG_AUTOCONF}.tar.gz ]; then
+  wget "https://ftp.gnu.org/gnu/autoconf/autoconf-${PKG_AUTOCONF}.tar.gz"
+  tar -xzf autoconf-${PKG_AUTOCONF}.tar.gz
+fi

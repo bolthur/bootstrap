@@ -4,6 +4,7 @@ set -ex
 # Target
 export TARGET=$1
 export MULTILIB_LIST=$2
+export SYSROOT=$3
 export MULTILIB=""
 
 # Get cpu count
@@ -11,6 +12,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   CPU_COUNT=$(sysctl -n hw.physicalcpu)
 else
   CPU_COUNT=$(nproc)
+fi
+
+export SYSROOT_OPTION="--without-headers"
+if [ ! -z $SYSROOT ]; then
+  export SYSROOT_OPTION="--with-newlib \
+    --with-sysroot=$SYSROOT"
 fi
 
 # check for already installed
@@ -27,6 +34,42 @@ fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/gcc-$TARGET"
 
+# apply necessary patches file by file
+if [ ! -f "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.patched" ]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
+  # set patchdir
+  GCC_PATCHDIR="$PATCHDIR/gcc"
+  # apply patch per patch
+  for patch in $GCC_PATCHDIR/*; do
+    patch -d $TARGET_COMPILE/source/gcc-$PKG_GCC -p0 < $patch
+  done;
+  # mark as patched
+  touch "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.patched"
+fi
+
+# configure gcc
+if [ ! -f "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.generated" ]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/gcc-$PKG_GCC/libstdc++-v3"
+  # reconfigure
+  autoconf
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc"
+  # reconfigure
+  autoconf
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+  # mark as generated
+  touch "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.generated"
+fi
+
 # configure gcc for target
 if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.configured" ]; then
   cd "$TARGET_COMPILE/build/gcc-$TARGET"
@@ -37,19 +80,19 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.configured" ]; then
       --prefix="$PREFIX" \
       --disable-nls \
       --enable-languages=c,c++ \
-      --without-headers \
       --with-gmp="$PREFIX" \
       --with-mpfr="$PREFIX" \
       --with-mpc="$PREFIX" \
-      $MULTILIB
+      $MULTILIB \
+      $SYSROOT_OPTION
   else
     ../../source/gcc-$PKG_GCC/configure \
       --target=$TARGET \
       --prefix="$PREFIX" \
       --disable-nls \
       --enable-languages=c,c++ \
-      --without-headers \
-      $MULTILIB
+      $MULTILIB \
+      $SYSROOT_OPTION
   fi
 
   if [ $? -ne 0 ]; then

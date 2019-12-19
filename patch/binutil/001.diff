@@ -1,0 +1,114 @@
+diff --git bfd/config.bfd bfd/config.bfd
+index 13d678e1f8..e701e7203d 100644
+--- bfd/config.bfd
++++ bfd/config.bfd
+@@ -261,6 +261,11 @@ case "${targ}" in
+     targ_selvecs="aarch64_elf64_le_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_be_vec arm_elf32_le_vec"
+     want64=true
+     ;;
++  aarch64-*-bolthur*)
++    targ_defvec=aarch64_elf64_le_vec
++    targ_selvecs="aarch64_elf64_be_vec"
++    want64=true
++    ;;
+   alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
+     targ_defvec=alpha_elf64_fbsd_vec
+     targ_selvecs="alpha_elf64_vec alpha_ecoff_le_vec"
+@@ -401,6 +406,10 @@ case "${targ}" in
+     targ_defvec=arm_elf32_le_vec
+     targ_selvecs=arm_elf32_be_vec
+     ;;
++  arm-*-bolthur*)
++    targ_defvec=arm_elf32_le_vec
++    targ_selvecs="arm_elf32_be_vec"
++    ;;
+ 
+   avr-*-*)
+     targ_defvec=avr_elf32_vec
+diff --git config.sub config.sub
+index 5b158ac41c..ff3be7c75e 100755
+--- config.sub
++++ config.sub
+@@ -1368,7 +1368,8 @@ case $os in
+ 	     | powermax* | dnix* | nx6 | nx7 | sei* | dragonfly* \
+ 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+-	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi*)
++	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
++	     | bolthur* )
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	qnx*)
+diff --git gas/configure.tgt gas/configure.tgt
+index a4828c4cae..ba81089b8c 100644
+--- gas/configure.tgt
++++ gas/configure.tgt
+@@ -6,12 +6,12 @@
+ # it under the terms of the GNU General Public License as published by
+ # the Free Software Foundation; either version 3 of the License, or
+ # (at your option) any later version.
+-# 
++#
+ # This program is distributed in the hope that it will be useful,
+ # but WITHOUT ANY WARRANTY; without even the implied warranty of
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ # GNU General Public License for more details.
+-# 
++#
+ # You should have received a copy of the GNU General Public License
+ # along with this program; see the file COPYING3.  If not see
+ # <http://www.gnu.org/licenses/>.
+@@ -123,6 +123,7 @@ generic_target=${cpu_type}-$vendor-$os
+ case ${generic_target} in
+   aarch64*-*-elf*)			fmt=elf;;
+   aarch64*-*-fuchsia*)			fmt=elf;;
++  aarch64-*-bolthur*)			fmt=elf ;;
+   aarch64*-*-linux*)			fmt=elf em=linux
+     case ${cpu}-${os} in
+       aarch64*-linux-gnu_ilp32)		arch=aarch64:32 ;;
+@@ -158,6 +159,7 @@ case ${generic_target} in
+ 					fmt=coff em=wince-pe ;;
+   arm-*-pe)				fmt=coff em=pe ;;
+   arm-*-fuchsia*)			fmt=elf ;;
++  arm-*-bolthur*)			fmt=elf ;;
+ 
+   avr-*-*)				fmt=elf bfd_gas=yes ;;
+ 
+@@ -326,7 +328,7 @@ case ${generic_target} in
+   moxie-*-uclinux)			fmt=elf em=linux ;;
+   moxie-*-moxiebox*)                    fmt=elf endian=little ;;
+   moxie-*-*)				fmt=elf ;;
+-    
++
+   mt-*-elf)				fmt=elf bfd_gas=yes ;;
+ 
+   msp430-*-*)				fmt=elf ;;
+@@ -414,7 +416,7 @@ case ${generic_target} in
+   wasm32-*-*)                           fmt=elf ;;
+ 
+   xstormy16-*-*)			fmt=elf ;;
+-  
++
+   xgate-*-*)    			fmt=elf ;;
+ 
+   xtensa*-*-*)				fmt=elf ;;
+diff --git ld/configure.tgt ld/configure.tgt
+index c81bc8a7d8..004c317da4 100644
+--- ld/configure.tgt
++++ ld/configure.tgt
+@@ -56,6 +56,7 @@ aarch64-*-freebsd*)	targ_emul=aarch64fbsd
+ 			targ_extra_emuls="aarch64fbsdb aarch64elf" ;;
+ aarch64-*-fuchsia*)	targ_emul=aarch64elf
+ 			targ_extra_emuls="aarch64elfb armelf armelfb" ;;
++aarch64-*-bolthur*)	targ_emul=aarch64elf ;;
+ aarch64_be-*-linux-gnu_ilp32)
+ 			targ_emul=aarch64linux32b
+ 			targ_extra_libpath="aarch64linuxb aarch64linux aarch64linux32 armelfb_linux_eabi armelf_linux_eabi"
+@@ -166,6 +167,7 @@ arm*-*-conix*)		targ_emul=armelf ;;
+ arm*-*-fuchsia*)	targ_emul=armelf_fuchsia
+ 			targ_extra_emuls="armelfb_fuchsia armelf armelfb"
+ 			;;
++arm-*-bolthur*)	targ_emul=armelf ;;
+ avr-*-*)		targ_emul=avr2
+ 			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega3 avrxmega4 avrxmega5 avrxmega6 avrxmega7 avrtiny"
+ 			;;

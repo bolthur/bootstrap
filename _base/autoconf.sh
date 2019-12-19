@@ -9,7 +9,7 @@ else
 fi
 
 # check for already installed
-AUTOCONF_VERSION=$( "$TOOL_PREFIX/bin/autoconf" --version 2>&1 | head -n1 | cut -d" " -f3- )
+AUTOCONF_VERSION=$( "$TOOL_PREFIX/bin/autoconf" --version 2>&1 | head -n1 | cut -d" " -f4- )
 if [[ $AUTOCONF_VERSION == $PKG_AUTOCONF ]]; then
   exit 0
 fi

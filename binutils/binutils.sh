@@ -3,12 +3,18 @@ set -ex
 
 # Target
 export TARGET=$1
+export SYSROOT=$2
 
 # Get cpu count
 if [[ "$OSTYPE" == "darwin"* ]]; then
   CPU_COUNT=$(sysctl -n hw.physicalcpu)
 else
   CPU_COUNT=$(nproc)
+fi
+
+export SYSROOT_OPTION="--with-sysroot"
+if [ ! -z $SYSROOT ]; then
+  export SYSROOT_OPTION="--with-sysroot=$SYSROOT"
 fi
 
 # check for already installed
@@ -20,6 +26,34 @@ fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/binutils-$TARGET"
 
+# apply necessary patches file by file
+if [ ! -f "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.patched" ]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS"
+  # set patchdir
+  BINTUIL_PATCHDIR="$PATCHDIR/binutil"
+  # apply patch per patch
+  for patch in $BINTUIL_PATCHDIR/*; do
+    patch -d $TARGET_COMPILE/source/binutils-$PKG_BINUTILS -p0 < $patch
+  done;
+  # mark as patched
+  touch "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.patched"
+fi
+
+# configure automake
+if [ ! -f "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.generated" ]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/ld"
+  # reconfigure
+  automake
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+  # mark as generated
+  touch "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.generated"
+fi
+
 # configure binutils for target
 if [ ! -f "$TARGET_COMPILE/build/binutils-$TARGET/crosscompiler.configured" ]; then
   cd "$TARGET_COMPILE/build/binutils-$TARGET"
@@ -27,7 +61,7 @@ if [ ! -f "$TARGET_COMPILE/build/binutils-$TARGET/crosscompiler.configured" ]; t
   if [[ "$OSTYPE" == "darwin"* ]]; then
     ../../source/binutils-$PKG_BINUTILS/configure --target=$TARGET \
       --prefix="$PREFIX" \
-      --with-sysroot \
+      $SYSROOT_OPTION \
       --disable-nls \
       --disable-werror \
       --with-gmp="$PREFIX" \
@@ -37,7 +71,7 @@ if [ ! -f "$TARGET_COMPILE/build/binutils-$TARGET/crosscompiler.configured" ]; t
   else
     ../../source/binutils-$PKG_BINUTILS/configure --target=$TARGET \
       --prefix="$PREFIX" \
-      --with-sysroot \
+      $SYSROOT_OPTION \
       --disable-nls \
       --disable-werror
   fi
@@ -54,7 +88,7 @@ fi
 if [ ! -f "$TARGET_COMPILE/build/binutils-$TARGET/crosscompiler.built" ]; then
   cd "$TARGET_COMPILE/build/binutils-$TARGET"
 
-  make all -j${CPU_COUNT}
+  make all-binutils all-gas all-ld -j${CPU_COUNT}
   if [ $? -ne 0 ]; then
     exit 1
   fi
@@ -67,7 +101,7 @@ fi
 if [ ! -f "$TARGET_COMPILE/build/binutils-$TARGET/crosscompiler.installed" ]; then
   cd "$TARGET_COMPILE/build/binutils-$TARGET"
 
-  make install
+  make install-binutils install-gas install-ld
   if [ $? -ne 0 ]; then
     exit 1
   fi

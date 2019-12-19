@@ -23,7 +23,6 @@ fi
 mkdir -p "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET"
 
 # apply necessary patches file by file
-# https://stackoverflow.com/questions/3418277/how-to-apply-git-diff-patch-without-git-installed
 if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB"

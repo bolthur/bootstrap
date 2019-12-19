@@ -9,9 +9,7 @@ else
 fi
 
 # check for already installed
-AUTOMAKE_VERSION=$( "$TOOL_PREFIX/bin/automake" --version 2>&1 | head -n1 | cut -d" " -f3- )
-echo $AUTOMAKE_VERSION
-exit 1
+AUTOMAKE_VERSION=$( "$TOOL_PREFIX/bin/automake" --version 2>&1 | head -n1 | cut -d" " -f4- )
 if [[ $AUTOMAKE_VERSION == $PKG_AUTOMAKE ]]; then
   exit 0
 fi
@@ -59,11 +57,16 @@ if [ ! -f "$TARGET_COMPILE/build/automake-$PKG_AUTOMAKE/automake.installed" ]; t
   fi
   # switch to dir
   cd $TOOL_PREFIX/share
-  # symlink
-  ln -s "$TOOL_PREFIX/share/automake-$PKG_AUTOMAKE_INSTALL" automake
-  ln -s "$TOOL_PREFIX/share/aclocal-$PKG_AUTOMAKE_INSTALL" aclocal
   # mark as installed
   touch "$TARGET_COMPILE/build/automake-$PKG_AUTOMAKE/automake.installed"
+fi
+
+# symlink
+if [ ! -d "$TOOL_PREFIX/share/automake" ]; then
+  ln -s "$TOOL_PREFIX/share/automake-$PKG_AUTOMAKE_INSTALL" automake
+fi
+if [ ! -d "$TOOL_PREFIX/share/aclocal" ]; then
+  ln -s "$TOOL_PREFIX/share/aclocal-$PKG_AUTOMAKE_INSTALL" aclocal
 fi
 
 # cleanup
