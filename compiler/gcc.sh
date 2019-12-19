@@ -119,6 +119,13 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.built" ]; then
     exit 1
   fi
 
+  if [ ! -z $SYSROOT ]; then
+    make all-target-libstdc++-v3 -j${CPU_COUNT}
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
+  fi
+
   # mark as built
   touch "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.built"
 fi
@@ -134,6 +141,13 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.installed" ]; then
   make install-target-libgcc
   if [ $? -ne 0 ]; then
     exit 1
+  fi
+
+  if [ ! -z $SYSROOT ]; then
+    make install-target-libstdc++-v3
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
   fi
 
   # mark as installed
