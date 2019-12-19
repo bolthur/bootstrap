@@ -17,8 +17,7 @@ fi
 export SYSROOT_OPTION="--without-headers\
   --disable-shared"
 if [ ! -z $SYSROOT ]; then
-  export SYSROOT_OPTION="--with-newlib \
-    --with-sysroot=$SYSROOT \
+  export SYSROOT_OPTION="--with-sysroot=$SYSROOT \
     --disable-werror \
     --disable-shared"
 fi
