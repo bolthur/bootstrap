@@ -17,6 +17,22 @@ fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/automake-$PKG_AUTOMAKE"
 
+# apply necessary patches file by file
+if [ ! -f "$TARGET_COMPILE/source/automake-$PKG_AUTOMAKE/automake.patched" ]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/automake-$PKG_AUTOMAKE"
+  # set patchdir
+  AUTOMAKE_PATCHDIR="$PATCHDIR/automake-$PKG_AUTOMAKE"
+  # apply patch per patch
+  if [ -d $AUTOMAKE_PATCHDIR ]; then
+    for patch in $AUTOMAKE_PATCHDIR/*; do
+      patch -d $TARGET_COMPILE/source/automake-$PKG_AUTOMAKE -p0 < $patch
+    done;
+    # mark as patched
+    touch "$TARGET_COMPILE/source/automake-$PKG_AUTOMAKE/automake.patched"
+  fi
+fi
+
 # configure automake
 if [ ! -f "$TARGET_COMPILE/build/automake-$PKG_AUTOMAKE/automake.configured" ]; then
   # switch to build directory

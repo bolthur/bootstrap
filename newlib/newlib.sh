@@ -5,6 +5,7 @@ set -ex
 export CROSS_TARGET=$1
 export BUILD_TARGET=$2
 export SYSROOT=$3
+export REBUILD=$4
 
 # Get cpu count
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -80,20 +81,22 @@ if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.generated" ]; then
 fi
 
 # hack cross compiler to hosted compiler via symlink
-if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-ar" ]; then
-  ln $CROSS_PREFIX/bin/$CROSS_TARGET-ar $CROSS_PREFIX/bin/$BUILD_TARGET-ar
-fi
-if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-as" ]; then
-  ln $CROSS_PREFIX/bin/$CROSS_TARGET-as $CROSS_PREFIX/bin/$BUILD_TARGET-as
-fi
-if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-gcc" ]; then
-  ln $CROSS_PREFIX/bin/$CROSS_TARGET-gcc $CROSS_PREFIX/bin/$BUILD_TARGET-gcc
-fi
-if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-cc" ]; then
-  ln $CROSS_PREFIX/bin/$CROSS_TARGET-gcc $CROSS_PREFIX/bin/$BUILD_TARGET-cc
-fi
-if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-ranlib" ]; then
-  ln $CROSS_PREFIX/bin/$CROSS_TARGET-ranlib $CROSS_PREFIX/bin/$BUILD_TARGET-ranlib
+if [ -z $REBUILD ]; then
+  if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-ar" ]; then
+    ln $CROSS_PREFIX/bin/$CROSS_TARGET-ar $CROSS_PREFIX/bin/$BUILD_TARGET-ar
+  fi
+  if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-as" ]; then
+    ln $CROSS_PREFIX/bin/$CROSS_TARGET-as $CROSS_PREFIX/bin/$BUILD_TARGET-as
+  fi
+  if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-gcc" ]; then
+    ln $CROSS_PREFIX/bin/$CROSS_TARGET-gcc $CROSS_PREFIX/bin/$BUILD_TARGET-gcc
+  fi
+  if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-cc" ]; then
+    ln $CROSS_PREFIX/bin/$CROSS_TARGET-gcc $CROSS_PREFIX/bin/$BUILD_TARGET-cc
+  fi
+  if [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-ranlib" ]; then
+    ln $CROSS_PREFIX/bin/$CROSS_TARGET-ranlib $CROSS_PREFIX/bin/$BUILD_TARGET-ranlib
+  fi
 fi
 
 # configure newlib
@@ -143,18 +146,20 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.install
 fi
 
 # remove cross compiler hack to hosted compiler
-if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-ar" ]; then
-  rm $CROSS_PREFIX/bin/$BUILD_TARGET-ar
-fi
-if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-as" ]; then
-  rm $CROSS_PREFIX/bin/$BUILD_TARGET-as
-fi
-if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-gcc" ]; then
-  rm $CROSS_PREFIX/bin/$BUILD_TARGET-gcc
-fi
-if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-cc" ]; then
-  rm $CROSS_PREFIX/bin/$BUILD_TARGET-cc
-fi
-if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-ranlib" ]; then
-  rm $CROSS_PREFIX/bin/$BUILD_TARGET-ranlib
+if [ -z $REBUILD ]; then
+  if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-ar" ]; then
+    rm $CROSS_PREFIX/bin/$BUILD_TARGET-ar
+  fi
+  if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-as" ]; then
+    rm $CROSS_PREFIX/bin/$BUILD_TARGET-as
+  fi
+  if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-gcc" ]; then
+    rm $CROSS_PREFIX/bin/$BUILD_TARGET-gcc
+  fi
+  if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-cc" ]; then
+    rm $CROSS_PREFIX/bin/$BUILD_TARGET-cc
+  fi
+  if [ -f "$CROSS_PREFIX/bin/$BUILD_TARGET-ranlib" ]; then
+    rm $CROSS_PREFIX/bin/$BUILD_TARGET-ranlib
+  fi
 fi

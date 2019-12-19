@@ -8,7 +8,7 @@ export PKG_AUTOCONF="2.64"
 export PKG_NEWLIB="3.1.0"
 
 # Bunch of prefixes
-export CROSS_PREFIX="/opt/bolthur/cross"
+export CROSS_PREFIX="/opt/bolthur/$CROSS_SUFFIX"
 export SYSROOT_BASE="/opt/bolthur/sysroot"
 export TARGET_COMPILE="/opt/bolthur/tool"
 export TOOL_PREFIX="/opt/bolthur/tool/$TOOL_PREFIX_SUFFIX"

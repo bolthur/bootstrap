@@ -1451,7 +1451,7 @@ index 000000000..a196352b5
 +	return _reboot(0xfee1dead, 0x28121969, flag, NULL);
 +}
 diff --git libgloss/arm/configure.in libgloss/arm/configure.in
-index 5fa901d14..109a01d32 100644
+index 5fa901d14..9ca05e6be 100644
 --- libgloss/arm/configure.in
 +++ libgloss/arm/configure.in
 @@ -49,7 +49,7 @@ AC_PROG_RANLIB
@@ -1459,7 +1459,7 @@ index 5fa901d14..109a01d32 100644
  
  case "${target}" in
 -  *-*-elf | *-*-eabi* | *-*-tirtos*)
-+  *-*-elf | *-*-eabi* | *-*-tirtos* | *-*-bolthur*)
++  *-*-elf | *-*-eabi* | *-*-tirtos* )
  	objtype=elf-
  	;;
    *-*-coff)
@@ -1481,7 +1481,7 @@ index 000000000..d2ad3e850
 +bolthur-crt0%O%s crti%O%s crtbegin%O%s
 +
 diff --git newlib/configure.host newlib/configure.host
-index 6c49cb750..90ef739b7 100644
+index 6c49cb750..7f540285a 100644
 --- newlib/configure.host
 +++ newlib/configure.host
 @@ -184,11 +184,11 @@ case "${host_cpu}" in
@@ -1520,7 +1520,7 @@ index 6c49cb750..90ef739b7 100644
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
-+  *-*-bolthur*)
++  *-bolthur*-*)
 +  sys_dir=bolthur
 +  default_newlib_io_long_long="yes"
 +  ;;
