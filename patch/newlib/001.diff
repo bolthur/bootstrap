@@ -803,53 +803,39 @@ index e1bad1710..b9bda6146 100644
  	set -e; for x in ${REDBOOT_SCRIPTS}; do ${INSTALL_DATA} ${srcdir}/${objtype}$$x $(DESTDIR)${tooldir}/lib${MULTISUBDIR}/$$x; done
 diff --git libgloss/arm/bolthur-crt0.c libgloss/arm/bolthur-crt0.c
 new file mode 100644
-index 000000000..6b2d62a9b
+index 000000000..348d7ad70
 --- /dev/null
 +++ libgloss/arm/bolthur-crt0.c
-@@ -0,0 +1,44 @@
-+/** Linux startup code for the ARM processor.
-+ * Written by Shaun Jackman <sjackman@gmail.com>.
-+ * Copyright 2006 Pathway Connectivity
-+ *
-+ * Permission to use, copy, modify, and distribute this software
-+ * is freely granted, provided that this notice is preserved.
+@@ -0,0 +1,30 @@
++/**
++ * Bolthur startup code for arm processor
 + */
-+
 +#include <stdlib.h>
 +#include <unistd.h>
 +#include "arm.h"
 +
 +/* forward declaration */
-+int main(int argc, char *argv[], char *env[]);
-+static int _main(int argc, char *argv[]) __attribute__((noreturn));
++int main( int argc, char *argv[], char *env[] );
 +
-+#if __thumb__ && !defined(PREFER_THUMB)
-+asm("\n"
-+	".code 32\n"
-+	".global _start\n"
-+	".type _start, %function\n"
-+	"_start:\n"
-+	"\tldr r0, .LC0\n"
-+	"\tbx r0\n"
-+	".LC0:\n"
-+	"\t.word _start_thumb\n"
-+	".size _start, .-_start\n");
-+
-+__attribute__((naked, used))
-+static void _start_thumb(void)
-+#else
-+__attribute__((naked))
-+void _start(void)
-+#endif
-+{
-+	register int *sp asm("sp");
-+	_main(*sp, (char **)(sp + 1));
++/**
++ * @brief Function called bevore c main
++ */
++__attribute__((noreturn))
++static int _main( int argc, char *argv[] ) {
++  environ = argv + argc + 1;
++  exit( main( argc, argv, environ ) );
 +}
 +
-+static int _main(int argc, char *argv[])
-+{
-+	environ = argv + argc + 1;
-+	exit(main(argc, argv, environ));
++/**
++ * @brief Start entry function
++ */
++__attribute__((naked))
++void _start( void ) {
++  // get stack pointer
++  register int *sp __asm__( "sp" );
++
++  // call main
++  _main( *sp, ( char** )( sp + 1 ) );
 +}
 diff --git libgloss/arm/bolthur-syscall.h libgloss/arm/bolthur-syscall.h
 new file mode 100644
@@ -1587,7 +1573,7 @@ index 6c49cb750..7f540285a 100644
  
 diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
 new file mode 100644
-index 000000000..55fd0c6ff
+index 000000000..e4c032c6a
 --- /dev/null
 +++ newlib/libc/sys/bolthur/Makefile.am
 @@ -0,0 +1,26 @@
@@ -1606,7 +1592,7 @@ index 000000000..55fd0c6ff
 +
 +lib_a_SOURCES =
 +lib_a_LIBADD = $(extra_objs)
-+EXTRA_lib_a_SOURCES = syscalls.c crt0.c # add more source files here if you split up
++EXTRA_lib_a_SOURCES = crt0.c syscalls.c # add more source files here if you split up
 +lib_a_DEPENDENCIES = $(extra_objs)      # syscalls.c into multiple files
 +lib_a_CCASFLAGS = $(AM_CCASFLAGS)
 +lib_a_CFLAGS = $(AM_CFLAGS)
@@ -1635,10 +1621,10 @@ index 000000000..8c994faf8
 +AC_OUTPUT
 diff --git newlib/libc/sys/bolthur/crt0.c newlib/libc/sys/bolthur/crt0.c
 new file mode 100644
-index 000000000..06b0bf4e4
+index 000000000..fd9be9af8
 --- /dev/null
 +++ newlib/libc/sys/bolthur/crt0.c
-@@ -0,0 +1,10 @@
+@@ -0,0 +1,9 @@
 +
 +#include <fcntl.h>
 +
@@ -1646,8 +1632,7 @@ index 000000000..06b0bf4e4
 +extern int main();
 +
 +void _start() {
-+  int ex = main();
-+  exit( ex );
++  exit( main() );
 +}
 diff --git newlib/libc/sys/bolthur/syscalls.c newlib/libc/sys/bolthur/syscalls.c
 new file mode 100644

@@ -27,7 +27,7 @@ index 0f9648608e9..f58caa70146 100755
  	#  THEN create a no-op fixer and exit
  	(echo "#! /bin/sh" ; echo "exit 0" ) > ${target}
 diff --git gcc/config.gcc gcc/config.gcc
-index ddd3b8f4d9d..57ddad9d789 100644
+index ddd3b8f4d9d..1118d209263 100644
 --- gcc/config.gcc
 +++ gcc/config.gcc
 @@ -180,7 +180,7 @@
@@ -80,21 +80,21 @@ index ddd3b8f4d9d..57ddad9d789 100644
  	case ${target} in
  	arm*eb-*-eabi*)
  	  tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=1"
-@@ -1228,6 +1237,11 @@ arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-*-fuchsia*)
- 	  tmake_file="${tmake_file} arm/t-bpabi arm/t-fuchsia"
- 	  target_cpu_cname="generic-armv7-a"
- 	  ;;
+@@ -1218,6 +1227,11 @@ arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-*-fuchsia*)
+ 	tmake_file="${tmake_file} arm/t-arm arm/t-arm-elf"
+ 	target_cpu_cname="arm7tdmi"
+ 	case ${target} in
 +	arm*-bolthur-*)
 +	  tm_file="${tm_file} newlib-stdint.h bolthur.h"
 +	  tmake_file="${tmake_file} arm/t-bpabi"
 +	  use_gcc_stdint=wrap
 +	  ;;
- 	arm*-*-rtems*)
- 	  tm_file="${tm_file} rtems.h arm/rtems.h newlib-stdint.h"
- 	  tmake_file="${tmake_file} arm/t-bpabi arm/t-rtems"
+ 	arm*-*-eabi*)
+ 	  tm_file="$tm_file newlib-stdint.h"
+ 	  tmake_file="${tmake_file} arm/t-bpabi"
 diff --git gcc/config/bolthur.h gcc/config/bolthur.h
 new file mode 100644
-index 00000000000..d9fedcfa351
+index 00000000000..7eb251c57bb
 --- /dev/null
 +++ gcc/config/bolthur.h
 @@ -0,0 +1,29 @@
@@ -123,7 +123,7 @@ index 00000000000..d9fedcfa351
 +  do {                                \
 +    builtin_define ("__bolthur__");      \
 +    builtin_define ("__unix__");      \
-+    builtin_assert ("system=myos");   \
++    builtin_assert ("system=bolthur");   \
 +    builtin_assert ("system=unix");   \
 +    builtin_assert ("system=posix");   \
 +  } while(0);
