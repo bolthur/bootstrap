@@ -94,10 +94,10 @@ index ddd3b8f4d9d..1118d209263 100644
  	  tmake_file="${tmake_file} arm/t-bpabi"
 diff --git gcc/config/bolthur.h gcc/config/bolthur.h
 new file mode 100644
-index 00000000000..68c85041133
+index 00000000000..5f6932fbb54
 --- /dev/null
 +++ gcc/config/bolthur.h
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,29 @@
 +
 +/* Useful if you wish to make target-specific GCC changes. */
 +#undef TARGET_BOLTHUR
@@ -106,15 +106,12 @@ index 00000000000..68c85041133
 +/* Default arguments you want when running your
 +   i686-myos-gcc/x86_64-myos-gcc toolchain */
 +#undef LIB_SPEC
-+#define LIB_SPEC "-lc -lg -lm " /* -lnosys" */ /* link against C standard library */
-+//#define LIB_SPEC "-lgloss -lc -lg -lm -lnosys" /* link against C standard library */
-+//#define LIB_SPEC "--start-group -lc %{!specs=bolthur.specs:-lgloss} -lg -lm --end-group" /* link against C standard library */
-+//#define LIB_SPEC "--start-group -lc -lg -lm %{!specs=bolthur.specs:-lgloss} --end-group"
++#define LIB_SPEC "-lc -lgloss-bolthur -lg -lm" /* link against C standard library */
 +
 +/* Files that are linked before user code.
 +   The %s tells GCC to look for these files in the library directory. */
 +#undef STARTFILE_SPEC
-+#define STARTFILE_SPEC "crt0.o%s crti.o%s crtbegin.o%s"
++#define STARTFILE_SPEC "bolthur-crt0.o%s crti.o%s crtbegin.o%s"
 +
 +/* Files that are linked after user code. */
 +#undef ENDFILE_SPEC
