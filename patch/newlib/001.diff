@@ -712,19 +712,6 @@ index 000000000..a196352b5
 +{
 +	return _reboot(0xfee1dead, 0x28121969, flag, NULL);
 +}
-diff --git libgloss/aarch64/configure.in libgloss/aarch64/configure.in
-index 73d11b54d..136c6294a 100644
---- libgloss/aarch64/configure.in
-+++ libgloss/aarch64/configure.in
-@@ -29,7 +29,7 @@ AC_PROG_RANLIB
- LIB_AM_PROG_AS
- 
- case "${target}" in
--  *-*-elf)
-+  *-*-elf | *-*-bolthur*)
- 	objtype=elf-
- 	;;
- esac
 diff --git libgloss/aarch64/elf-bolthur.specs libgloss/aarch64/elf-bolthur.specs
 new file mode 100644
 index 000000000..d2ad3e850
@@ -1361,10 +1348,10 @@ index 000000000..5c89fa2e6
 +SOCKETCALL4(socketpair, SOCKETPAIR)
 diff --git libgloss/arm/bolthur-syscalls1.c libgloss/arm/bolthur-syscalls1.c
 new file mode 100644
-index 000000000..a196352b5
+index 000000000..48d4815a0
 --- /dev/null
 +++ libgloss/arm/bolthur-syscalls1.c
-@@ -0,0 +1,71 @@
+@@ -0,0 +1,73 @@
 +/** Linux system call interface.
 + * Written by Shaun Jackman <sjackman@gmail.com>.
 + * Copyright 2006 Pathway Connectivity
@@ -1403,7 +1390,9 @@ index 000000000..a196352b5
 +	return oldbrk;
 +}
 +
-+void *sbrk(intptr_t incr) __attribute__((alias("_sbrk")));
++int _isatty(int file) {
++	return -1;
++}
 +
 +int _set_errno(int n)
 +{
@@ -1436,19 +1425,6 @@ index 000000000..a196352b5
 +{
 +	return _reboot(0xfee1dead, 0x28121969, flag, NULL);
 +}
-diff --git libgloss/arm/configure.in libgloss/arm/configure.in
-index 5fa901d14..9ca05e6be 100644
---- libgloss/arm/configure.in
-+++ libgloss/arm/configure.in
-@@ -49,7 +49,7 @@ AC_PROG_RANLIB
- LIB_AM_PROG_AS
- 
- case "${target}" in
--  *-*-elf | *-*-eabi* | *-*-tirtos*)
-+  *-*-elf | *-*-eabi* | *-*-tirtos* )
- 	objtype=elf-
- 	;;
-   *-*-coff)
 diff --git libgloss/arm/elf-bolthur.specs libgloss/arm/elf-bolthur.specs
 new file mode 100644
 index 000000000..d2ad3e850
@@ -1467,7 +1443,7 @@ index 000000000..d2ad3e850
 +bolthur-crt0%O%s crti%O%s crtbegin%O%s
 +
 diff --git newlib/configure.host newlib/configure.host
-index 6c49cb750..7f540285a 100644
+index 6c49cb750..d9631faa2 100644
 --- newlib/configure.host
 +++ newlib/configure.host
 @@ -184,11 +184,11 @@ case "${host_cpu}" in
@@ -1522,7 +1498,18 @@ index 6c49cb750..7f540285a 100644
  	gcc_dir=`gcc -print-search-dirs | awk '/^install:/{print $2}'`
  	default_newlib_io_c99_formats="yes"
  	default_newlib_io_long_double="yes"
-@@ -641,7 +645,7 @@ case "${host}" in
+@@ -612,6 +616,10 @@ esac
+ # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
+ 
+ case "${host}" in
++	*-bolthur*-*)
++	syscall_dir=syscalls
++	default_newlib_io_long_long="yes"
++	;;
+   *-*-cygwin*)
+ 	test -z "$cygwin_srcdir" && cygwin_srcdir=`cd ${srcdir}/../winsup/cygwin; pwd`
+ 	export cygwin_srcdir
+@@ -641,7 +649,7 @@ case "${host}" in
  	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections "
  	newlib_cflags="${newlib_cflags} -D_COMPILING_NEWLIB"
  newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVIDED -DSIGNAL_PROVIDED -DGETREENT_PROVIDED -DREENTRANT_SYSCALLS_PROVIDED -DHAVE_NANOSLEEP -DHAVE_BLKSIZE -DHAVE_FCNTL -DHAVE_ASSERT_FUNC"
@@ -1531,7 +1518,7 @@ index 6c49cb750..7f540285a 100644
  	newlib_cflags="${newlib_cflags} -D_NO_GETLOGIN -D_NO_GETPWENT -D_NO_GETUT -D_NO_GETPASS -D_NO_SIGSET -D_NO_WORDEXP -D_NO_POPEN -D_NO_POSIX_SPAWN"
  	;;
  # VxWorks supplies its own version of malloc, and the newlib one
-@@ -728,17 +732,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -728,17 +736,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
          syscall_dir=syscalls
          ;;
    h8300*-*-*)
@@ -1553,7 +1540,7 @@ index 6c49cb750..7f540285a 100644
    i[34567]86-*-sco*)
  	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DHAVE_FCNTL"
  	;;
-@@ -881,7 +885,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -881,7 +889,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
  	syscall_dir=
  	;;
    w65-*-*)
@@ -1562,7 +1549,7 @@ index 6c49cb750..7f540285a 100644
  	newlib_cflags="${newlib_cflags} -DSMALL_DTOA -DSMALL_MEMORY"
  	;;
    xc16x-*)
-@@ -932,7 +936,7 @@ fi
+@@ -932,7 +940,7 @@ fi
  # Disable atexit dynamic allocation if requested.
  if [ "x${newlib_atexit_dynamic_alloc}" = "x" ]; then
  	if [ ${default_newlib_atexit_dynamic_alloc} = "yes" ]; then
@@ -1573,7 +1560,7 @@ index 6c49cb750..7f540285a 100644
  
 diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
 new file mode 100644
-index 000000000..e4c032c6a
+index 000000000..ea88879a4
 --- /dev/null
 +++ newlib/libc/sys/bolthur/Makefile.am
 @@ -0,0 +1,26 @@
@@ -1584,15 +1571,15 @@ index 000000000..e4c032c6a
 +
 +noinst_LIBRARIES = lib.a
 +
-+if MAY_SUPPLY_SYSCALLS
-+extra_objs = syscalls.o # add more object files here if you split up
-+else                    # syscalls.c into multiple files in the previous step
-+extra_objs =
-+endif
++#if MAY_SUPPLY_SYSCALLS
++#extra_objs = syscalls.o # add more object files here if you split up
++#else                    # syscalls.c into multiple files in the previous step
++#extra_objs =
++#endif
 +
 +lib_a_SOURCES =
 +lib_a_LIBADD = $(extra_objs)
-+EXTRA_lib_a_SOURCES = crt0.c syscalls.c # add more source files here if you split up
++EXTRA_lib_a_SOURCES = crt0.c # syscalls.c  # add more source files here if you split up
 +lib_a_DEPENDENCIES = $(extra_objs)      # syscalls.c into multiple files
 +lib_a_CCASFLAGS = $(AM_CCASFLAGS)
 +lib_a_CFLAGS = $(AM_CFLAGS)
@@ -1603,6 +1590,7 @@ index 000000000..e4c032c6a
 +
 +ACLOCAL_AMFLAGS = -I ../../..
 +CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
+\ No newline at end of file
 diff --git newlib/libc/sys/bolthur/configure.in newlib/libc/sys/bolthur/configure.in
 new file mode 100644
 index 000000000..8c994faf8
@@ -1621,112 +1609,7 @@ index 000000000..8c994faf8
 +AC_OUTPUT
 diff --git newlib/libc/sys/bolthur/crt0.c newlib/libc/sys/bolthur/crt0.c
 new file mode 100644
-index 000000000..fd9be9af8
---- /dev/null
-+++ newlib/libc/sys/bolthur/crt0.c
-@@ -0,0 +1,9 @@
-+
-+#include <fcntl.h>
-+
-+extern void exit( int code );
-+extern int main();
-+
-+void _start() {
-+  exit( main() );
-+}
-diff --git newlib/libc/sys/bolthur/syscalls.c newlib/libc/sys/bolthur/syscalls.c
-new file mode 100644
-index 000000000..c07531363
---- /dev/null
-+++ newlib/libc/sys/bolthur/syscalls.c
-@@ -0,0 +1,87 @@
-+
-+/* note these headers are all provided by newlib - you don't need to provide them */
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+#include <sys/fcntl.h>
-+#include <sys/times.h>
-+#include <sys/errno.h>
-+#include <sys/time.h>
-+#include <stdio.h>
-+
-+void _exit() {
-+}
-+
-+int close(int file) {
-+  return 0;
-+}
-+
-+char **environ; /* pointer to array of char * strings that define the current environment variables */
-+
-+int execve(char *name, char **argv, char **env) {
-+  return 0;
-+}
-+
-+int fork() {
-+  return 0;
-+}
-+
-+int fstat(int file, struct stat *st) {
-+  return 0;
-+}
-+
-+int getpid() {
-+  return 0;
-+}
-+
-+int isatty(int file) {
-+  return 0;
-+}
-+
-+int kill(int pid, int sig) {
-+  return 0;
-+}
-+
-+int link(char *old, char *new) {
-+  return 0;
-+}
-+
-+int lseek(int file, int ptr, int dir) {
-+  return 0;
-+}
-+
-+int open(const char *name, int flags, ...) {
-+  return 0;
-+}
-+
-+int read(int file, char *ptr, int len) {
-+  return 0;
-+}
-+
-+caddr_t sbrk(int incr) {
-+  return 0;
-+}
-+
-+int stat(const char *file, struct stat *st) {
-+  return 0;
-+}
-+
-+clock_t times(struct tms *buf) {
-+  clock_t foo;
-+  return foo;
-+}
-+
-+int unlink(char *name) {
-+  return 0;
-+}
-+
-+int wait(int *status) {
-+  return 0;
-+}
-+
-+int write(int file, char *ptr, int len) {
-+  return 0;
-+}
-+
-+int gettimeofday ( struct timeval *p, void *z ) {
-+  return 0;
-+}
+index 000000000..e69de29bb
 diff --git newlib/libc/sys/configure.in newlib/libc/sys/configure.in
 index bc6cb881c..b33726b3e 100644
 --- newlib/libc/sys/configure.in

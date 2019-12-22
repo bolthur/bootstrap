@@ -18,6 +18,7 @@ export SYSROOT_OPTION="--without-headers\
   --disable-shared"
 if [ ! -z $SYSROOT ]; then
   export SYSROOT_OPTION="--with-sysroot=$SYSROOT \
+    --with-newlib \
     --disable-werror \
     --disable-shared"
 fi
@@ -154,4 +155,4 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.installed" ]; then
 fi
 
 # cleanup
-rm -rf "$TARGET_COMPILE/build/gcc-$TARGET"
+#rm -rf "$TARGET_COMPILE/build/gcc-$TARGET"
