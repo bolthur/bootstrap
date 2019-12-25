@@ -8,6 +8,16 @@ else
   exit 0
 fi
 
+# Set sysroot variable
+export SYSROOT=$1
+# Check for set sysroot
+if [ ! -z $SYSROOT ]; then
+  # Change prefix to sysroot
+  export PREFIX=$SYSROOT
+  # Extend path for sub script calls
+  export PATH="$PREFIX/bin:$PATH"
+fi
+
 # Create build directories
 mkdir -p "$TARGET_COMPILE/build/gmp"
 mkdir -p "$TARGET_COMPILE/build/mpfr"
