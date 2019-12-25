@@ -15,6 +15,10 @@ fi
 export SYSROOT_OPTION="--with-sysroot"
 if [ ! -z $SYSROOT ]; then
   export SYSROOT_OPTION="--with-sysroot=$SYSROOT"
+  # Change prefix to sysroot
+  export PREFIX=$SYSROOT
+  # Extend path for sub script calls
+  export PATH="$PREFIX/bin:$PATH"
 fi
 
 # check for already installed

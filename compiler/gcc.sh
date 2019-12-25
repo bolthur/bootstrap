@@ -17,10 +17,14 @@ fi
 export SYSROOT_OPTION="--without-headers\
   --disable-shared"
 if [ ! -z $SYSROOT ]; then
-  export SYSROOT_OPTION="--with-sysroot=$SYSROOT \
+  export SYSROOT_OPTION="$SYSROOT_OPTION \
+    --with-sysroot=$SYSROOT \
     --with-newlib \
-    --disable-werror \
-    --disable-shared"
+    --disable-werror"
+  # Change prefix to sysroot
+  export PREFIX=$SYSROOT
+  # Extend path for sub script calls
+  export PATH="$PREFIX/bin:$PATH"
 fi
 
 # check for already installed

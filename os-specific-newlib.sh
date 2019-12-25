@@ -9,9 +9,9 @@ export TOOL_PREFIX_SUFFIX="newlib-os-specific"
 . $(dirname "$0")/_newlib.sh
 
 # wipe out previous sysroot
-if [ -d "$SYSROOT_BASE" ]; then
-  rm -rf "$SYSROOT_BASE"
-fi
+#if [ -d "$SYSROOT_BASE" ]; then
+#  rm -rf "$SYSROOT_BASE"
+#fi
 
 # Download everything
 sh "$BASEDIR/newlib/download.sh"

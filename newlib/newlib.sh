@@ -14,6 +14,13 @@ else
   CPU_COUNT=$(nproc)
 fi
 
+# On rebuild handle extend path
+if [ ! -z $REBUILD ]; then
+  # Extend path for sub script calls
+  export CROSS_PREFIX="$SYSROOT"
+  export PATH="$CROSS_PREFIX/bin:$PATH"
+fi
+
 ## check for already installed
 #AUTOMAKE_VERSION=$( "$TOOL_PREFIX/bin/automake" --version 2>&1 | head -n1 | cut -d" " -f3- )
 #if [[ $AUTOMAKE_VERSION == $PKG_AUTOMAKE ]]; then
@@ -99,8 +106,13 @@ if [ -z $REBUILD ]; then
   fi
 fi
 
+# create cc if not created for rebuild
+if [ ! -z $REBUILD ] && [ ! -f "$CROSS_PREFIX/bin/$BUILD_TARGET-cc" ]; then
+  ln $CROSS_PREFIX/bin/$BUILD_TARGET-gcc $CROSS_PREFIX/bin/$BUILD_TARGET-cc
+fi
+
 # configure newlib
-if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.configured" ]; then
+if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.configured" ] || [ ! -z $REBUILD ]; then
   # switch to build directory
   cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET"
   # configure
@@ -114,7 +126,7 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.configu
 fi
 
 # build newlib
-if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.built" ]; then
+if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.built" ] || [ ! -z $REBUILD ]; then
   # switch to build directory
   cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET"
   # build it
@@ -128,7 +140,7 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.built" 
 fi
 
 # install binutils for build target
-if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.installed" ]; then
+if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.installed" ] || [ ! -z $REBUILD ]; then
   # switch into build directory
   cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET"
   # install
@@ -141,7 +153,11 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.install
   touch "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET/newlib.installed"
 
   # copy library headers
-  cp -ar $SYSROOT/usr/$BUILD_TARGET/* $SYSROOT/usr/
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    cp -a $SYSROOT/usr/$BUILD_TARGET/* $SYSROOT/usr/
+  else
+    cp -ar $SYSROOT/usr/$BUILD_TARGET/* $SYSROOT/usr/
+  fi
   rm -rf $SYSROOT/usr/$BUILD_TARGET
 fi
 
