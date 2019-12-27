@@ -27,6 +27,10 @@ fi
 #  exit 0
 #fi
 
+# Clear build directory on rebuild
+if [ ! -z $REBUILD ] && [ -d "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET" ]; then
+  rm -rf $TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET
+fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$BUILD_TARGET"
 
@@ -35,7 +39,7 @@ if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB"
   # set patchdir
-  NEWLIB_PATCHDIR="$PATCHDIR/newlib"
+  NEWLIB_PATCHDIR="$PATCHDIR/newlib-$PKG_NEWLIB"
   # apply patch per patch
   for patch in $NEWLIB_PATCHDIR/*; do
     patch -d $TARGET_COMPILE/source/newlib-$PKG_NEWLIB -p0 < $patch

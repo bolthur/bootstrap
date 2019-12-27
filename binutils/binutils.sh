@@ -35,7 +35,7 @@ if [ ! -f "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.patched" ]; th
   # switch to source directory
   cd "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS"
   # set patchdir
-  BINTUIL_PATCHDIR="$PATCHDIR/binutil"
+  BINTUIL_PATCHDIR="$PATCHDIR/binutils-$PKG_BINUTILS"
   # apply patch per patch
   for patch in $BINTUIL_PATCHDIR/*; do
     patch -d $TARGET_COMPILE/source/binutils-$PKG_BINUTILS -p0 < $patch

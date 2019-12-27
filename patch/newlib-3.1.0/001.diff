@@ -1609,7 +1609,14 @@ index 000000000..8c994faf8
 +AC_OUTPUT
 diff --git newlib/libc/sys/bolthur/crt0.c newlib/libc/sys/bolthur/crt0.c
 new file mode 100644
-index 000000000..e69de29bb
+index 000000000..107d5b67b
+--- /dev/null
++++ newlib/libc/sys/bolthur/crt0.c
+@@ -0,0 +1,4 @@
++
++/**
++ * Dummy file
++ */
 diff --git newlib/libc/sys/configure.in newlib/libc/sys/configure.in
 index bc6cb881c..b33726b3e 100644
 --- newlib/libc/sys/configure.in
