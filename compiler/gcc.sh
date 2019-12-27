@@ -46,7 +46,7 @@ if [ ! -f "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
   # set patchdir
-  GCC_PATCHDIR="$PATCHDIR/gcc"
+  GCC_PATCHDIR="$PATCHDIR/gcc-$PKG_GCC"
   # apply patch per patch
   for patch in $GCC_PATCHDIR/*; do
     patch -d $TARGET_COMPILE/source/gcc-$PKG_GCC -p0 < $patch
@@ -123,12 +123,12 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.built" ]; then
     exit 1
   fi
 
-  if [ ! -z $SYSROOT ]; then
-    make all-target-libstdc++-v3 -j${CPU_COUNT}
-    if [ $? -ne 0 ]; then
-      exit 1
-    fi
-  fi
+  #if [ ! -z $SYSROOT ]; then
+  #  make all-target-libstdc++-v3 -j${CPU_COUNT}
+  #  if [ $? -ne 0 ]; then
+  #    exit 1
+  #  fi
+  #fi
 
   # mark as built
   touch "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.built"
@@ -147,12 +147,12 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.installed" ]; then
     exit 1
   fi
 
-  if [ ! -z $SYSROOT ]; then
-    make install-target-libstdc++-v3
-    if [ $? -ne 0 ]; then
-      exit 1
-    fi
-  fi
+  #if [ ! -z $SYSROOT ]; then
+  #  make install-target-libstdc++-v3
+  #  if [ $? -ne 0 ]; then
+  #    exit 1
+  #  fi
+  #fi
 
   # mark as installed
   touch "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.installed"

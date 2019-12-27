@@ -94,22 +94,24 @@ index ddd3b8f4d9d..1118d209263 100644
  	  tmake_file="${tmake_file} arm/t-bpabi"
 diff --git gcc/config/bolthur.h gcc/config/bolthur.h
 new file mode 100644
-index 00000000000..5f6932fbb54
+index 00000000000..9853261ad60
 --- /dev/null
 +++ gcc/config/bolthur.h
-@@ -0,0 +1,29 @@
+@@ -0,0 +1,45 @@
 +
 +/* Useful if you wish to make target-specific GCC changes. */
 +#undef TARGET_BOLTHUR
 +#define TARGET_BOLTHUR 1
 +
-+/* Default arguments you want when running your
-+   i686-myos-gcc/x86_64-myos-gcc toolchain */
++/* Machine dependent libraries. */
 +#undef LIB_SPEC
 +#define LIB_SPEC "-lc -lgloss-bolthur -lg -lm" /* link against C standard library */
 +
-+/* Files that are linked before user code.
-+   The %s tells GCC to look for these files in the library directory. */
++/* Linker enforce 4K pages */
++#undef LINK_SPEC
++#define LINK_SPEC "-z max-page-size=4096"
++
++/* Files that are linked before user code. */
 +#undef STARTFILE_SPEC
 +#define STARTFILE_SPEC "bolthur-crt0.o%s crti.o%s crtbegin.o%s"
 +
@@ -117,15 +119,29 @@ index 00000000000..5f6932fbb54
 +#undef ENDFILE_SPEC
 +#define ENDFILE_SPEC "crtend.o%s crtn.o%s"
 +
++///* Include directory */
++//#undef GPLUSPLUS_INCLUDE_DIR
++//#define GPLUSPLUS_INCLUDE_DIR "/usr/include/g++"
++//
++//#undef GCC_INCLUDE_DIR
++//#define GCC_INCLUDE_DIR "/usr/include"
++//
++///* Compiler backend folder */
++//#undef STANDARD_EXEC_PREFIX
++//#define STANDARD_EXEC_PREFIX "/usr/libexec/"
++//
++///* Start file prefix  */
++//#undef STANDARD_STARTFILE_PREFIX
++//#define STANDARD_STARTFILE_PREFIX "/usr/lib/"
++
 +/* Additional predefined macros. */
 +#undef TARGET_OS_CPP_BUILTINS
-+#define TARGET_OS_CPP_BUILTINS()      \
-+  do {                                \
-+    builtin_define ("__bolthur__");      \
-+    builtin_define ("__unix__");      \
-+    builtin_assert ("system=bolthur");   \
-+    builtin_assert ("system=unix");   \
-+    builtin_assert ("system=posix");   \
++#define TARGET_OS_CPP_BUILTINS() \
++  do { \
++    builtin_define ( "__bolthur__" ); \
++    builtin_define ( "__unix__" ); \
++    builtin_assert ( "system=bolthur"); \
++    builtin_assert ( "system=unix"); \
 +  } while(0);
 diff --git libgcc/config.host libgcc/config.host
 index 91abc84da03..3c1fe836d03 100644
