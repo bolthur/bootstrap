@@ -24,18 +24,9 @@ mkdir -p "$TARGET_COMPILE/build/gdb-$TARGET"
 if [ ! -f "$TARGET_COMPILE/build/gdb-$TARGET/crosscompiler.configured" ]; then
   cd "$TARGET_COMPILE/build/gdb-$TARGET"
 
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    ../../source/gdb-$PKG_GDB/configure \
-      --target=$TARGET \
-      --prefix="$PREFIX" \
-      --with-gmp="$PREFIX" \
-      --with-mpfr="$PREFIX" \
-      --with-mpc="$PREFIX"
-  else
-    ../../source/gdb-$PKG_GDB/configure \
-      --target=$TARGET \
-      --prefix="$PREFIX"
-  fi
+  ../../source/gdb-$PKG_GDB/configure \
+    --target=$TARGET \
+    --prefix="$PREFIX"
 
   if [ $? -ne 0 ]; then
     exit 1
@@ -68,3 +59,6 @@ if [ ! -f "$TARGET_COMPILE/build/gdb-$TARGET/crosscompiler.installed" ]; then
   # mark as installed
   touch "$TARGET_COMPILE/build/gdb-$TARGET/crosscompiler.installed"
 fi
+
+# cleanup
+rm -rf "$TARGET_COMPILE/build/gdb-$TARGET"

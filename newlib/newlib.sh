@@ -39,14 +39,16 @@ if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB"
   # set patchdir
-  NEWLIB_PATCHDIR="$PATCHDIR/newlib-$PKG_NEWLIB"
-  # apply patch per patch
-  for patch in $NEWLIB_PATCHDIR/*; do
-    patch -d $TARGET_COMPILE/source/newlib-$PKG_NEWLIB -p0 < $patch
-    # maybe better to use `git apply "$patch"` instead of patch
-  done;
-  # mark as patched
-  touch "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.patched"
+  NEWLIB_PATCHDIR="$PATCHDIR/newlib/$PKG_NEWLIB"
+  if [ -d $NEWLIB_PATCHDIR ]; then
+    # apply patch per patch
+    for patch in $NEWLIB_PATCHDIR/*; do
+      patch -d $TARGET_COMPILE/source/newlib-$PKG_NEWLIB -p0 < $patch
+      # maybe better to use `git apply "$patch"` instead of patch
+    done;
+    # mark as patched
+    touch "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.patched"
+  fi
 fi
 
 # configure automake
@@ -183,3 +185,6 @@ if [ -z $REBUILD ]; then
     rm $CROSS_PREFIX/bin/$BUILD_TARGET-ranlib
   fi
 fi
+
+# cleanup
+rm -rf "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB"
