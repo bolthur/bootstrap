@@ -1,2 +1,2 @@
 # bootstrap
-Stuff to build bolthur distribution
+Stuff necessary to build bolthur distribution

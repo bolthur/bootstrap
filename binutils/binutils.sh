@@ -35,13 +35,15 @@ if [ ! -f "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.patched" ]; th
   # switch to source directory
   cd "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS"
   # set patchdir
-  BINTUIL_PATCHDIR="$PATCHDIR/binutils-$PKG_BINUTILS"
+  BINTUIL_PATCHDIR="$PATCHDIR/binutils/$PKG_BINUTILS"
   # apply patch per patch
-  for patch in $BINTUIL_PATCHDIR/*; do
-    patch -d $TARGET_COMPILE/source/binutils-$PKG_BINUTILS -p0 < $patch
-  done;
-  # mark as patched
-  touch "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.patched"
+  if [ -d $BINTUIL_PATCHDIR ]; then
+    for patch in $BINTUIL_PATCHDIR/*; do
+      patch -d $TARGET_COMPILE/source/binutils-$PKG_BINUTILS -p0 < $patch
+    done;
+    # mark as patched
+    touch "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.patched"
+  fi
 fi
 
 # configure automake
@@ -62,23 +64,11 @@ fi
 if [ ! -f "$TARGET_COMPILE/build/binutils-$TARGET/crosscompiler.configured" ]; then
   cd "$TARGET_COMPILE/build/binutils-$TARGET"
 
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    ../../source/binutils-$PKG_BINUTILS/configure --target=$TARGET \
-      --prefix="$PREFIX" \
-      $SYSROOT_OPTION \
-      --disable-nls \
-      --disable-werror \
-      --with-gmp="$PREFIX" \
-      --with-mpfr="$PREFIX" \
-      --with-mpc="$PREFIX" \
-      --with-isl="$PREFIX"
-  else
-    ../../source/binutils-$PKG_BINUTILS/configure --target=$TARGET \
-      --prefix="$PREFIX" \
-      $SYSROOT_OPTION \
-      --disable-nls \
-      --disable-werror
-  fi
+  ../../source/binutils-$PKG_BINUTILS/configure --target=$TARGET \
+    --prefix="$PREFIX" \
+    $SYSROOT_OPTION \
+    --disable-nls \
+    --disable-werror
 
   if [ $? -ne 0 ]; then
     exit 1

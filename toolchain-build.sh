@@ -14,3 +14,6 @@ sh "$BASEDIR/os-specific-compiler.sh"
 
 # build newlib again
 sh "$BASEDIR/os-specific-newlib.sh"
+
+# remove sources and build related files
+rm -rf /opt/bolthur/tool

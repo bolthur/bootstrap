@@ -22,7 +22,7 @@ if [ ! -f "$TARGET_COMPILE/source/automake-$PKG_AUTOMAKE/automake.patched" ]; th
   # switch to source directory
   cd "$TARGET_COMPILE/source/automake-$PKG_AUTOMAKE"
   # set patchdir
-  AUTOMAKE_PATCHDIR="$PATCHDIR/automake-$PKG_AUTOMAKE"
+  AUTOMAKE_PATCHDIR="$PATCHDIR/automake/$PKG_AUTOMAKE"
   # apply patch per patch
   if [ -d $AUTOMAKE_PATCHDIR ]; then
     for patch in $AUTOMAKE_PATCHDIR/*; do

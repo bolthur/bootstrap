@@ -14,9 +14,6 @@ sh "$BASEDIR/binutils.sh" "arm-none-eabi"
 # Download everything
 sh "$BASEDIR/compiler/download.sh"
 
-# Build dependencies
-sh "$BASEDIR/compiler/dependency.sh"
-
 # Binutils, gcc and gdb for arm-none-eabi
 sh "$BASEDIR/compiler/gcc.sh" "arm-none-eabi" "rmprofile,aprofile"
 sh "$BASEDIR/compiler/gdb.sh" "arm-none-eabi"

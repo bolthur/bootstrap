@@ -14,10 +14,6 @@ sh "$BASEDIR/binutils.sh" "arm-bolthur-eabi" "/opt/bolthur/sysroot/arm"
 # Download everything
 sh "$BASEDIR/compiler/download.sh"
 
-# Build dependencies
-sh "$BASEDIR/compiler/dependency.sh" "/opt/bolthur/sysroot/arm"
-#sh "$BASEDIR/compiler/dependency.sh" "/opt/bolthur/sysroot/aarch64"
-
 # automake autoconf for gcc
 sh "$BASEDIR/_base/automake.sh"
 sh "$BASEDIR/_base/autoconf.sh"

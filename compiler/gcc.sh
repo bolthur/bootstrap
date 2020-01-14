@@ -41,18 +41,32 @@ fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/gcc-$TARGET"
 
+# download prerequisites
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
+  # download prerequisites
+  ./contrib/download_prerequisites
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+fi
+
 # apply necessary patches file by file
 if [ ! -f "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
   # set patchdir
-  GCC_PATCHDIR="$PATCHDIR/gcc-$PKG_GCC"
-  # apply patch per patch
-  for patch in $GCC_PATCHDIR/*; do
-    patch -d $TARGET_COMPILE/source/gcc-$PKG_GCC -p0 < $patch
-  done;
-  # mark as patched
-  touch "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.patched"
+  GCC_PATCHDIR="$PATCHDIR/gcc/$PKG_GCC"
+  if [ -d $GCC_PATCHDIR ]; then
+    # apply patch per patch
+    for patch in $GCC_PATCHDIR/*; do
+      patch -d $TARGET_COMPILE/source/gcc-$PKG_GCC -p0 < $patch
+    done;
+    # mark as patched
+    touch "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.patched"
+  fi
 fi
 
 # configure gcc
@@ -81,26 +95,13 @@ fi
 if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.configured" ]; then
   cd "$TARGET_COMPILE/build/gcc-$TARGET"
 
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    ../../source/gcc-$PKG_GCC/configure \
-      --target=$TARGET \
-      --prefix="$PREFIX" \
-      --disable-nls \
-      --enable-languages=c,c++ \
-      --with-gmp="$PREFIX" \
-      --with-mpfr="$PREFIX" \
-      --with-mpc="$PREFIX" \
-      $MULTILIB \
-      $SYSROOT_OPTION
-  else
-    ../../source/gcc-$PKG_GCC/configure \
-      --target=$TARGET \
-      --prefix="$PREFIX" \
-      --disable-nls \
-      --enable-languages=c,c++ \
-      $MULTILIB \
-      $SYSROOT_OPTION
-  fi
+  ../../source/gcc-$PKG_GCC/configure \
+    --target=$TARGET \
+    --prefix="$PREFIX" \
+    --disable-nls \
+    --enable-languages=c,c++ \
+    $MULTILIB \
+    $SYSROOT_OPTION
 
   if [ $? -ne 0 ]; then
     exit 1
@@ -123,12 +124,12 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.built" ]; then
     exit 1
   fi
 
-  #if [ ! -z $SYSROOT ]; then
-  #  make all-target-libstdc++-v3 -j${CPU_COUNT}
-  #  if [ $? -ne 0 ]; then
-  #    exit 1
-  #  fi
-  #fi
+  if [ ! -z $SYSROOT ]; then
+    make all-target-libstdc++-v3 -j${CPU_COUNT}
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
+  fi
 
   # mark as built
   touch "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.built"
@@ -147,16 +148,16 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.installed" ]; then
     exit 1
   fi
 
-  #if [ ! -z $SYSROOT ]; then
-  #  make install-target-libstdc++-v3
-  #  if [ $? -ne 0 ]; then
-  #    exit 1
-  #  fi
-  #fi
+  if [ ! -z $SYSROOT ]; then
+    make install-target-libstdc++-v3
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
+  fi
 
   # mark as installed
   touch "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.installed"
 fi
 
 # cleanup
-#rm -rf "$TARGET_COMPILE/build/gcc-$TARGET"
+rm -rf "$TARGET_COMPILE/build/gcc-$TARGET"

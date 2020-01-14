@@ -10,9 +10,6 @@ SYSROOT=$2
 # Download everything
 sh "$BASEDIR/binutils/download.sh"
 
-# Build dependencies
-sh "$BASEDIR/binutils/dependency.sh" $SYSROOT
-
 # automake
 sh "$BASEDIR/_base/automake.sh"
 sh "$BASEDIR/_base/autoconf.sh"
