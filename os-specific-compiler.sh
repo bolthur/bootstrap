@@ -21,3 +21,7 @@ sh "$BASEDIR/_base/autoconf.sh"
 # gcc
 sh "$BASEDIR/compiler/gcc.sh" "arm-bolthur-eabi" "rmprofile,aprofile" "/opt/bolthur/sysroot/arm"
 #sh "$BASEDIR/compiler/gcc.sh" "aarch64-bolthur-elf" "ilp32,lp64" "/opt/bolthur/sysroot/aarch64"
+
+# gdb
+sh "$BASEDIR/compiler/gdb.sh" "arm-bolthur-eabi" "/opt/bolthur/sysroot/arm"
+#sh "$BASEDIR/compiler/gdb.sh" "aarch64-bolthur-elf" "/opt/bolthur/sysroot/aarch64"

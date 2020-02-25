@@ -2,7 +2,7 @@
 set -ex
 
 # Package Verions
-export PKG_BINUTILS="2.33.1"
+export PKG_BINUTILS="2.34"
 export PKG_AUTOMAKE="1.15.1"
 export PKG_AUTOMAKE_INSTALL="1.15"
 export PKG_AUTOCONF="2.69"
