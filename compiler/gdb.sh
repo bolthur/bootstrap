@@ -3,12 +3,23 @@ set -ex
 
 # Target
 export TARGET=$1
+export SYSROOT=$2
 
 # Get cpu count
 if [[ "$OSTYPE" == "darwin"* ]]; then
   CPU_COUNT=$(sysctl -n hw.physicalcpu)
 else
   CPU_COUNT=$(nproc)
+fi
+
+export SYSROOT_OPTION=""
+if [ ! -z $SYSROOT ]; then
+  export SYSROOT_OPTION=" \
+    --with-sysroot=$SYSROOT"
+  # Change prefix to sysroot
+  export PREFIX=$SYSROOT
+  # Extend path for sub script calls
+  export PATH="$PREFIX/bin:$PATH"
 fi
 
 # check for already installed
@@ -26,7 +37,8 @@ if [ ! -f "$TARGET_COMPILE/build/gdb-$TARGET/crosscompiler.configured" ]; then
 
   ../../source/gdb-$PKG_GDB/configure \
     --target=$TARGET \
-    --prefix="$PREFIX"
+    --prefix="$PREFIX" \
+    $SYSROOT_OPTION
 
   if [ $? -ne 0 ]; then
     exit 1
