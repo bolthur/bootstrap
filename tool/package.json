@@ -4,7 +4,7 @@
   "description": "toolchain helper",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/toolchain.ts",
+    "start": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/toolchain.ts -- -p cross-binutils@2.34,cross-gcc@9.2.0 -i",
     "create": "npm run build && npm run test",
     "build": "tsc -p ./",
     "test": "npm run build && sudo npm install -g && bolthur-toolchain",
