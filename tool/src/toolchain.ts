@@ -24,7 +24,7 @@ program
 // handle no parameters
 if ( 0 >= program.args.length ) {
   program.outputHelp();
-  process.exit( 1 );
+  process.exit( 0 );
 }
 
 // TODO: Add handle for option -i/--install
