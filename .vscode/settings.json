@@ -1,0 +1,10 @@
+{
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "files.trimTrailingWhitespace": true,
+  "editor.renderWhitespace": "all",
+  "editor.tabSize": 2,
+  "workbench.colorTheme": "Visual Studio Dark",
+  "editor.rulers": [ 80, 120 ]
+}
