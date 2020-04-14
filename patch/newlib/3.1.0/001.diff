@@ -1443,7 +1443,7 @@ index 000000000..d2ad3e850
 +bolthur-crt0%O%s crti%O%s crtbegin%O%s
 +
 diff --git newlib/configure.host newlib/configure.host
-index 6c49cb750..d9631faa2 100644
+index 6c49cb750..0b45fbb02 100644
 --- newlib/configure.host
 +++ newlib/configure.host
 @@ -184,11 +184,11 @@ case "${host_cpu}" in
@@ -1482,7 +1482,7 @@ index 6c49cb750..d9631faa2 100644
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
-+  *-bolthur*-*)
++  *-*-bolthur*)
 +  sys_dir=bolthur
 +  default_newlib_io_long_long="yes"
 +  ;;
@@ -1502,7 +1502,7 @@ index 6c49cb750..d9631faa2 100644
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
-+	*-bolthur*-*)
++	*-*-bolthur*)
 +	syscall_dir=syscalls
 +	default_newlib_io_long_long="yes"
 +	;;

@@ -1,11 +1,32 @@
 #!/bin/bash
 set -ex
 
-# Target
-export TARGET=$1
+
+
+# internal dependencies
+export PKG_AUTOMAKE="1.15.1"
+export PKG_AUTOCONF="2.69"
+# download
+sh "$BASEDIR/download-internal.sh"
+# tool prefix
+export TOOL_PREFIX="/opt/bolthur/tool/gcc-$TARGET"
+# Extend path for sub script calls
+export PATH="$TOOL_PREFIX/bin:$PATH"
+# automake and autoconf
+sh "$BASEDIR/automake.sh"
+sh "$BASEDIR/autoconf.sh"
+
+
+
+# build type
+export BUILD_STAGE=$1
 export MULTILIB_LIST=$2
-export SYSROOT=$3
+
+# add multilib parameter if set
 export MULTILIB=""
+if [ -n "$MULTILIB_LIST" ]; then
+  export MULTILIB="--with-multilib-list=$MULTILIB_LIST"
+fi
 
 # Get cpu count
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -14,43 +35,16 @@ else
   CPU_COUNT=$(nproc)
 fi
 
-export SYSROOT_OPTION="--without-headers\
-  --disable-shared"
-if [ ! -z $SYSROOT ]; then
-  export SYSROOT_OPTION="$SYSROOT_OPTION \
-    --with-sysroot=$SYSROOT \
-    --with-newlib \
-    --disable-werror"
-  # Change prefix to sysroot
-  export PREFIX=$SYSROOT
-  # Extend path for sub script calls
-  export PATH="$PREFIX/bin:$PATH"
-fi
-
-# check for already installed
-GCC_VERSION=$( "$PREFIX/bin/$TARGET-gcc" --version 2>&1 | head -n1 | cut -d" " -f3- )
-if [[ $GCC_VERSION == $PKG_GCC ]]; then
-  exit 0
-fi
-
-# add multilib parameter if set
-if [ -n "$MULTILIB_LIST" ]; then
-  export MULTILIB="--with-multilib-list=$MULTILIB_LIST"
-fi
-
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/gcc-$TARGET"
 
+# switch to source directory
+cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
 # download prerequisites
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  # switch to source directory
-  cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
-  # download prerequisites
-  ./contrib/download_prerequisites
-  # check for error
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi
+./contrib/download_prerequisites
+# check for error
+if [ $? -ne 0 ]; then
+  exit 1
 fi
 
 # apply necessary patches file by file
@@ -92,26 +86,39 @@ if [ ! -f "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.generated" ]; then
 fi
 
 # configure gcc for target
-if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.configured" ]; then
+if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.configured" ]; then
   cd "$TARGET_COMPILE/build/gcc-$TARGET"
+
+  # cleanup build stage for stage 2 build
+  BUILD_OPTION="--without-headers"
+  if [[ "$BUILD_STAGE" == "stage2"* ]]; then
+    # clear build option
+    BUILD_OPTION=""
+    # cleanup folder
+    rm -rf ./*
+  fi
 
   ../../source/gcc-$PKG_GCC/configure \
     --target=$TARGET \
     --prefix="$PREFIX" \
     --disable-nls \
     --enable-languages=c,c++ \
-    $MULTILIB \
-    $SYSROOT_OPTION
+    --disable-shared \
+    --disable-werror \
+    --with-newlib \
+    --with-pkgversion="GCC; bolthur bootstrap cross" \
+    $BUILD_OPTION \
+    $MULTILIB
 
   if [ $? -ne 0 ]; then
     exit 1
   fi
 
   # mark as configured
-  touch "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.configured"
+  touch "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.configured"
 fi
 # build gcc for target
-if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.built" ]; then
+if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.built" ]; then
   cd "$TARGET_COMPILE/build/gcc-$TARGET"
 
   make all-gcc -j${CPU_COUNT}
@@ -119,45 +126,40 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.built" ]; then
     exit 1
   fi
 
-  make all-target-libgcc -j${CPU_COUNT}
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi
-
-  if [ ! -z $SYSROOT ]; then
-    make all-target-libstdc++-v3 -j${CPU_COUNT}
+  if [[ "$BUILD_STAGE" == "stage2"* ]]; then
+    make all-target-libgcc -j${CPU_COUNT}
     if [ $? -ne 0 ]; then
       exit 1
     fi
+    #make all-target-libstdc++-v3 -j${CPU_COUNT}
+    #if [ $? -ne 0 ]; then
+    #  exit 1
+    #fi
   fi
 
   # mark as built
-  touch "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.built"
+  touch "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.built"
 fi
 # install gcc for target
-if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.installed" ]; then
+if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.installed" ]; then
   cd "$TARGET_COMPILE/build/gcc-$TARGET"
 
-  make install-gcc
+  make install-strip-gcc -j${CPU_COUNT}
   if [ $? -ne 0 ]; then
     exit 1
   fi
 
-  make install-target-libgcc
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi
-
-  if [ ! -z $SYSROOT ]; then
-    make install-target-libstdc++-v3
+  if [[ "$BUILD_STAGE" == "stage2"* ]]; then
+    make install-strip-target-libgcc -j${CPU_COUNT}
     if [ $? -ne 0 ]; then
       exit 1
     fi
+    #make install-strip-target-libstdc++-v3 -j${CPU_COUNT}
+    #if [ $? -ne 0 ]; then
+    #  exit 1
+    #fi
   fi
 
   # mark as installed
-  touch "$TARGET_COMPILE/build/gcc-$TARGET/crosscompiler.installed"
+  touch "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.installed"
 fi
-
-# cleanup
-rm -rf "$TARGET_COMPILE/build/gcc-$TARGET"
