@@ -22,7 +22,7 @@ index 0f9648608e9..f58caa70146 100755
      powerpcle-*-eabi* | \
 -    *-musl* )
 +    *-musl* | \
-+    *-bolthur-* )
++    *-*-bolthur* )
  	#  IF there is no include fixing,
  	#  THEN create a no-op fixer and exit
  	(echo "#! /bin/sh" ; echo "exit 0" ) > ${target}
@@ -43,7 +43,7 @@ index ddd3b8f4d9d..1118d209263 100644
  
  # Common parts for widely ported systems.
  case ${target} in
-+*-bolthur-*)
++*-*-bolthur*)
 +  gas=yes
 +  gnu_ld=yes
 +  default_use_cxa_atexit=yes
@@ -57,7 +57,7 @@ index ddd3b8f4d9d..1118d209263 100644
  
  case ${target} in
 -aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)
-+aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems* | aarch64-*-bolthur*)
++aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems* | aarch64*-*-bolthur*)
  	tm_file="${tm_file} dbxelf.h elfos.h newlib-stdint.h"
  	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-elf-raw.h"
  	tmake_file="${tmake_file} aarch64/t-aarch64"
@@ -76,7 +76,7 @@ index ddd3b8f4d9d..1118d209263 100644
  	target_cpu_cname="arm7tdmi"
  	;;
 -arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-*-fuchsia*)
-+arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-*-fuchsia* | arm*-bolthur-*)
++arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-*-fuchsia* | arm*-*-bolthur*)
  	case ${target} in
  	arm*eb-*-eabi*)
  	  tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=1"
@@ -84,7 +84,7 @@ index ddd3b8f4d9d..1118d209263 100644
  	tmake_file="${tmake_file} arm/t-arm arm/t-arm-elf"
  	target_cpu_cname="arm7tdmi"
  	case ${target} in
-+	arm*-bolthur-*)
++	arm*-*-bolthur*)
 +	  tm_file="${tm_file} newlib-stdint.h bolthur.h"
 +	  tmake_file="${tmake_file} arm/t-bpabi"
 +	  use_gcc_stdint=wrap
@@ -160,7 +160,7 @@ index 91abc84da03..3c1fe836d03 100644
    tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-eh-dw2-dip t-slibgcc t-slibgcc-fuchsia"
    extra_parts="crtbegin.o crtend.o"
    ;;
-+*-bolthur-*)
++*-*-bolthur*)
 +  tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-slibgcc"
 +  extra_parts="crtbegin.o crtend.o"
 +  ;;
@@ -172,7 +172,7 @@ index 91abc84da03..3c1fe836d03 100644
  
  case ${host} in
 -aarch64*-*-elf | aarch64*-*-rtems*)
-+aarch64*-*-elf | aarch64*-*-rtems* | aarch64*-bolthur-* )
++aarch64*-*-elf | aarch64*-*-rtems* | aarch64*-*-bolthur* )
  	extra_parts="$extra_parts crtbegin.o crtend.o crti.o crtn.o"
  	extra_parts="$extra_parts crtfastmath.o"
  	tmake_file="${tmake_file} ${cpu_type}/t-aarch64"
@@ -181,12 +181,12 @@ index 91abc84da03..3c1fe836d03 100644
  	unwind_header=config/arm/unwind-arm.h
  	;;
 -arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems*)
-+arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-bolthur-* )
++arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-*-bolthur* )
  	tmake_file="${tmake_file} arm/t-arm arm/t-elf t-fixedpoint-gnu-prefix"
  	tm_file="$tm_file arm/bpabi-lib.h"
  	case ${host} in
 -	arm*-*-eabi* | arm*-*-rtems*)
-+	arm*-*-eabi* | arm*-*-rtems* | arm*-bolthur-*)
++	arm*-*-eabi* | arm*-*-rtems* | arm*-*-bolthur*)
  	  tmake_file="${tmake_file} arm/t-bpabi t-crtfm"
  	  extra_parts="crtbegin.o crtend.o crti.o crtn.o"
  	  ;;

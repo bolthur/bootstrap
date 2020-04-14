@@ -1,19 +1,51 @@
 #!/bin/bash
 set -ex
 
-. $(dirname "$0")/_base.sh
+# article with build order hint https://preshing.com/20141119/how-to-build-a-gcc-cross-compiler/
 
-# build cross compiler
-sh "$BASEDIR/baremetal-compiler.sh"
+# Package Verions
+export PKG_BINUTILS="2.34"
+export PKG_GCC="9.2.0"
+export PKG_GDB="9.1"
+export PKG_GLIBC="2.31"
+export PKG_NEWLIB="3.1.0"
 
-# build newlib
-sh "$BASEDIR/baremetal-newlib.sh"
+# Get directory path and patch dir
+export BASEDIR="$( cd "$( dirname "$0" )" && pwd )"
+export PATCHDIR="$BASEDIR/patch"
 
-# os specific toolchain
-sh "$BASEDIR/os-specific-compiler.sh"
+# prefix and path extension
+export TARGET_COMPILE="/opt/bolthur/tool"
+export PREFIX="/opt/bolthur/cross"
+export PATH="$PREFIX/bin:$PATH"
 
-# build newlib again
-sh "$BASEDIR/os-specific-newlib.sh"
+# Get cpu count
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  CPU_COUNT=$(sysctl -n hw.physicalcpu)
+else
+  CPU_COUNT=$(nproc)
+fi
 
-# remove sources and build related files
-rm -rf /opt/bolthur/tool
+# target to build
+export TARGET="arm-unknown-bolthur-eabi"
+
+# Download everything
+sh "$BASEDIR/download.sh"
+
+# Build and install binutils
+sh "$BASEDIR/binutils.sh"
+
+# Build and install gcc executable
+sh "$BASEDIR/gcc.sh" "stage1" "aprofile"
+
+# Build and install newlib
+sh "$BASEDIR/newlib.sh"
+
+# Build and install libgcc
+sh "$BASEDIR/gcc.sh" "stage2" "aprofile"
+
+# FIXME: Build and install gdb
+
+# FIXME: Add cleanup when gdb is added
+## Cleanup
+##rm -rf /opt/bolthur/tool

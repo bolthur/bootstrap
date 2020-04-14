@@ -6,7 +6,7 @@ index 13d678e1f8..9983dab804 100644
      targ_archs="$targ_archs bfd_i386_arch bfd_powerpc_arch bfd_rs6000_arch"
      want64=true
      ;;
-+  aarch64-bolthur-*)
++  aarch64*-*-bolthur*)
 +    targ_defvec=aarch64_elf64_le_vec
 +    targ_selvecs="aarch64_elf64_be_vec"
 +    want64=true
@@ -18,7 +18,7 @@ index 13d678e1f8..9983dab804 100644
      targ_defvec=arm_elf32_le_vec
      targ_selvecs=arm_elf32_be_vec
      ;;
-+  arm*-bolthur-*)
++  arm*-*-bolthur*)
 +    targ_defvec=arm_elf32_le_vec
 +    targ_selvecs="arm_elf32_be_vec"
 +    ;;
@@ -62,7 +62,7 @@ index a4828c4cae..b5eba719f5 100644
  case ${generic_target} in
    aarch64*-*-elf*)			fmt=elf;;
    aarch64*-*-fuchsia*)			fmt=elf;;
-+  aarch64*-bolthur-*)			fmt=elf ;;
++  aarch64*-*-bolthur*)			fmt=elf ;;
    aarch64*-*-linux*)			fmt=elf em=linux
      case ${cpu}-${os} in
        aarch64*-linux-gnu_ilp32)		arch=aarch64:32 ;;
@@ -70,7 +70,7 @@ index a4828c4cae..b5eba719f5 100644
  					fmt=coff em=wince-pe ;;
    arm-*-pe)				fmt=coff em=pe ;;
    arm-*-fuchsia*)			fmt=elf ;;
-+  arm-bolthur-*)			fmt=elf ;;
++  arm-*-bolthur*)			fmt=elf ;;
  
    avr-*-*)				fmt=elf bfd_gas=yes ;;
  
@@ -100,7 +100,7 @@ index c81bc8a7d8..bce13cc1ea 100644
  			targ_extra_emuls="aarch64fbsdb aarch64elf" ;;
  aarch64-*-fuchsia*)	targ_emul=aarch64elf
  			targ_extra_emuls="aarch64elfb armelf armelfb" ;;
-+aarch64-*-bolthur*)	targ_emul=aarch64elf ;;
++aarch64*-*-bolthur*)	targ_emul=aarch64elf ;;
  aarch64_be-*-linux-gnu_ilp32)
  			targ_emul=aarch64linux32b
  			targ_extra_libpath="aarch64linuxb aarch64linux aarch64linux32 armelfb_linux_eabi armelf_linux_eabi"
@@ -108,7 +108,7 @@ index c81bc8a7d8..bce13cc1ea 100644
  arm*-*-fuchsia*)	targ_emul=armelf_fuchsia
  			targ_extra_emuls="armelfb_fuchsia armelf armelfb"
  			;;
-+arm*-bolthur-*)	targ_emul=armelf ;;
++arm*-*-bolthur*)	targ_emul=armelf ;;
  avr-*-*)		targ_emul=avr2
  			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega3 avrxmega4 avrxmega5 avrxmega6 avrxmega7 avrtiny"
  			;;
