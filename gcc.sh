@@ -5,6 +5,7 @@ set -ex
 
 # internal dependencies
 export PKG_AUTOMAKE="1.15.1"
+export PKG_AUTOMAKE_INSTALL="1.15"
 export PKG_AUTOCONF="2.69"
 # download
 sh "$BASEDIR/download-internal.sh"
@@ -90,7 +91,7 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.configured" ]; the
   cd "$TARGET_COMPILE/build/gcc-$TARGET"
 
   # cleanup build stage for stage 2 build
-  BUILD_OPTION="--without-headers"
+  BUILD_OPTION="--without-headers --with-newlib"
   if [[ "$BUILD_STAGE" == "stage2"* ]]; then
     # clear build option
     BUILD_OPTION=""
@@ -105,7 +106,6 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.configured" ]; the
     --enable-languages=c,c++ \
     --disable-shared \
     --disable-werror \
-    --with-newlib \
     --with-pkgversion="GCC; bolthur bootstrap cross" \
     $BUILD_OPTION \
     $MULTILIB

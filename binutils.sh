@@ -5,6 +5,7 @@ set -ex
 
 # internal dependencies
 export PKG_AUTOMAKE="1.15.1"
+export PKG_AUTOMAKE_INSTALL="1.15"
 export PKG_AUTOCONF="2.69"
 # download
 sh "$BASEDIR/download-internal.sh"
