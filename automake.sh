@@ -77,5 +77,13 @@ if [ ! -f "$TARGET_COMPILE/build/automake-$PKG_AUTOMAKE/automake.installed" ]; t
   touch "$TARGET_COMPILE/build/automake-$PKG_AUTOMAKE/automake.installed"
 fi
 
+# symlink
+if [ ! -d "$TOOL_PREFIX/share/automake" ]; then
+  ln -s "$TOOL_PREFIX/share/automake-$PKG_AUTOMAKE_INSTALL" automake
+fi
+if [ ! -d "$TOOL_PREFIX/share/aclocal" ]; then
+  ln -s "$TOOL_PREFIX/share/aclocal-$PKG_AUTOMAKE_INSTALL" aclocal
+fi
+
 # cleanup
 rm -rf "$TARGET_COMPILE/build/automake-$PKG_AUTOMAKE"
