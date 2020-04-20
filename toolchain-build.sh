@@ -44,7 +44,8 @@ sh "$BASEDIR/newlib.sh"
 # Build and install libgcc
 sh "$BASEDIR/gcc.sh" "stage2" "aprofile"
 
-# FIXME: Build and install gdb
+# Build and install gdb
+sh "$BASEDIR/gdb.sh"
 
 # FIXME: Add cleanup when gdb is added
 ## Cleanup

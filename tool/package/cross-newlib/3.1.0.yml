@@ -1,9 +1,0 @@
-
-package:
-  version: 3.1.0
-require:
-  - "cross-binutils"
-  - "cross-gcc"
-download:
-  base: "ftp://sourceware.org/pub/newlib"
-  file: "newlib-%s.tar.gz"
