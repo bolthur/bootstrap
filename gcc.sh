@@ -37,7 +37,7 @@ else
 fi
 
 # Create build directory
-mkdir -p "$TARGET_COMPILE/build/gcc-$TARGET"
+mkdir -p "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 
 # switch to source directory
 cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
@@ -87,16 +87,14 @@ if [ ! -f "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.generated" ]; then
 fi
 
 # configure gcc for target
-if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.configured" ]; then
-  cd "$TARGET_COMPILE/build/gcc-$TARGET"
+if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.configured" ]; then
+  cd "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 
   # cleanup build stage for stage 2 build
   BUILD_OPTION="--without-headers --with-newlib"
   if [[ "$BUILD_STAGE" == "stage2"* ]]; then
     # clear build option
     BUILD_OPTION=""
-    # cleanup folder
-    rm -rf ./*
   fi
 
   ../../source/gcc-$PKG_GCC/configure \
@@ -115,11 +113,11 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.configured" ]; the
   fi
 
   # mark as configured
-  touch "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.configured"
+  touch "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.configured"
 fi
 # build gcc for target
-if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.built" ]; then
-  cd "$TARGET_COMPILE/build/gcc-$TARGET"
+if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.built" ]; then
+  cd "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 
   make all-gcc -j${CPU_COUNT}
   if [ $? -ne 0 ]; then
@@ -138,11 +136,11 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.built" ]; then
   fi
 
   # mark as built
-  touch "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.built"
+  touch "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.built"
 fi
 # install gcc for target
-if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.installed" ]; then
-  cd "$TARGET_COMPILE/build/gcc-$TARGET"
+if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.installed" ]; then
+  cd "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 
   make install-strip-gcc -j${CPU_COUNT}
   if [ $? -ne 0 ]; then
@@ -161,5 +159,5 @@ if [ ! -f "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.installed" ]; then
   fi
 
   # mark as installed
-  touch "$TARGET_COMPILE/build/gcc-$TARGET/gcc.$BUILD_STAGE.installed"
+  touch "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.installed"
 fi

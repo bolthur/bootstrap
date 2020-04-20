@@ -31,10 +31,6 @@ if [ ! -f "$PREFIX/bin/$TARGET-cc" ]; then
   ln $PREFIX/bin/$TARGET-gcc $PREFIX/bin/$TARGET-cc
 fi
 
-# Clear build directory on rebuild
-if [ -d "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET" ]; then
-  rm -rf $TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET
-fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
 
