@@ -98,7 +98,7 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.configured" ]
   # switch to build directory
   cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
   # configure
-  ../../../source/newlib-$PKG_NEWLIB/configure --prefix=$PREFIX --target=$TARGET
+  ../../../source/newlib-$PKG_NEWLIB/configure --prefix= --target=$TARGET
   # check for error
   if [ $? -ne 0 ]; then
     exit 1
@@ -126,7 +126,23 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.installed" ];
   # switch into build directory
   cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
   # install
-  make install
+  make DESTDIR=${SYSROOT} install
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+  # move to usr subfolder folder
+  rsync -av \
+    $SYSROOT/$TARGET/* \
+    $SYSROOT/$TARGET/usr \
+    --exclude $SYSROOT/$TARGET/usr \
+    --remove-source-files
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+  # Cleanup empty directories
+  find $SYSROOT/$TARGET -type d -empty -delete
   # check for error
   if [ $? -ne 0 ]; then
     exit 1

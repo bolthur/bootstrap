@@ -17,6 +17,22 @@ fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/autoconf-$PKG_AUTOCONF"
 
+# apply necessary patches file by file
+if [ ! -f "$TARGET_COMPILE/source/autoconf-$PKG_AUTOCONF/autoconf.patched" ]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/autoconf-$PKG_AUTOCONF"
+  # set patchdir
+  AUTOCONF_PATCHDIR="$PATCHDIR/autoconf/$PKG_AUTOCONF"
+  if [ -d $AUTOCONF_PATCHDIR ]; then
+    # apply patch per patch
+    for patch in $AUTOCONF_PATCHDIR/*; do
+      patch -d $TARGET_COMPILE/source/autoconf-$PKG_AUTOCONF -p0 < $patch
+    done;
+    # mark as patched
+    touch "$TARGET_COMPILE/source/autoconf-$PKG_AUTOCONF/autoconf.patched"
+  fi
+fi
+
 # configure automake
 if [ ! -f "$TARGET_COMPILE/build/autoconf-$PKG_AUTOCONF/autoconf.configured" ]; then
   # switch to build directory
