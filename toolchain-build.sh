@@ -1,14 +1,12 @@
 #!/bin/bash
 set -ex
 
-# article with build order hint https://preshing.com/20141119/how-to-build-a-gcc-cross-compiler/
-
 # Package Verions
 export PKG_BINUTILS="2.34"
 export PKG_GCC="9.2.0"
 export PKG_GDB="9.1"
 export PKG_GLIBC="2.31"
-export PKG_NEWLIB="3.1.0"
+export PKG_NEWLIB="3.3.0"
 
 # Get directory path and patch dir
 export BASEDIR="$( cd "$( dirname "$0" )" && pwd )"
@@ -18,6 +16,7 @@ export PATCHDIR="$BASEDIR/patch"
 export TARGET_COMPILE="/opt/bolthur/tool"
 export PREFIX="/opt/bolthur/cross"
 export PATH="$PREFIX/bin:$PATH"
+export SYSROOT="/opt/bolthur/sysroot"
 
 # Get cpu count
 if [[ "$OSTYPE" == "darwin"* ]]; then

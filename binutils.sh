@@ -61,6 +61,7 @@ if [ ! -f "$TARGET_COMPILE/build/binutils-$TARGET/binutils.configured" ]; then
     --prefix="$PREFIX" \
     --disable-nls \
     --disable-werror \
+    --with-sysroot=$SYSROOT/$TARGET \
     --with-pkgversion="GNU Binutils; bolthur bootstrap cross"
 
   if [ $? -ne 0 ]; then

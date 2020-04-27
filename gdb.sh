@@ -34,8 +34,8 @@ if [ ! -f "$TARGET_COMPILE/build/gdb-$TARGET/gdb.configured" ]; then
   cd "$TARGET_COMPILE/build/gdb-$TARGET"
 
   ../../source/gdb-$PKG_GDB/configure \
-      --target=$TARGET \
-      --prefix="$PREFIX"
+    --target=$TARGET \
+    --prefix="$PREFIX"
 
   if [ $? -ne 0 ]; then
     exit 1
