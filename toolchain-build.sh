@@ -85,4 +85,4 @@ if [[ -z "$TRAVIS" && $GDB_VERSION != $PKG_GDB ]]; then
 fi
 
 # Cleanup everything unnecessary
-rm -rf "$TARGET_COMPILE"
+rm -rf "$TARGET_COMPILE/build"
