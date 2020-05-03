@@ -27,7 +27,7 @@ if [ ! -f glibc-$PKG_GLIBC.tar.gz ]; then
 fi
 # newlib
 if [ ! -f newlib-${PKG_NEWLIB}.tar.gz ]; then
-  wget "ftp://sourceware.org/pub/newlib/newlib-${PKG_NEWLIB}.tar.gz"
+  wget "https://www.sourceware.org/pub/newlib/newlib-${PKG_NEWLIB}.tar.gz"
   tar -xzf newlib-${PKG_NEWLIB}.tar.gz
 fi
 # cppcheck
