@@ -18,14 +18,6 @@ export PATH="$TOOL_PREFIX/bin:$PATH"
 sh "$BASEDIR/automake.sh"
 sh "$BASEDIR/autoconf.sh"
 
-
-# Get cpu count
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  CPU_COUNT=$(sysctl -n hw.physicalcpu)
-else
-  CPU_COUNT=$(nproc)
-fi
-
 # create cc if not created for rebuild
 if [ ! -f "$PREFIX/bin/$TARGET-cc" ]; then
   ln $PREFIX/bin/$TARGET-gcc $PREFIX/bin/$TARGET-cc
