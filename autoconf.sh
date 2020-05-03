@@ -1,13 +1,6 @@
 #!/bin/bash
 set -ex
 
-# Get cpu count
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  CPU_COUNT=$(sysctl -n hw.physicalcpu)
-else
-  CPU_COUNT=$(nproc)
-fi
-
 # check for already installed
 AUTOCONF_VERSION=$( "$TOOL_PREFIX/bin/autoconf" --version 2>&1 | head -n1 | cut -d" " -f4- )
 if [[ $AUTOCONF_VERSION == $PKG_AUTOCONF ]]; then

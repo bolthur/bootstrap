@@ -29,13 +29,6 @@ if [ -n "$MULTILIB_LIST" ]; then
   export MULTILIB="--with-multilib-list=$MULTILIB_LIST"
 fi
 
-# Get cpu count
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  CPU_COUNT=$(sysctl -n hw.physicalcpu)
-else
-  CPU_COUNT=$(nproc)
-fi
-
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 

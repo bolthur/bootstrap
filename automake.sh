@@ -1,13 +1,6 @@
 #!/bin/bash
 set -ex
 
-# Get cpu count
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  CPU_COUNT=$(sysctl -n hw.physicalcpu)
-else
-  CPU_COUNT=$(nproc)
-fi
-
 # check for already installed
 AUTOMAKE_VERSION=$( "$TOOL_PREFIX/bin/automake" --version 2>&1 | head -n1 | cut -d" " -f4- )
 if [[ $AUTOMAKE_VERSION == $PKG_AUTOMAKE ]]; then
