@@ -32,13 +32,15 @@ fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 
-# switch to source directory
-cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
 # download prerequisites
-./contrib/download_prerequisites
-# check for error
-if [ $? -ne 0 ]; then
-  exit 1
+if [ -z "$TRAVIS" ]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
+  ./contrib/download_prerequisites
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
 fi
 
 # apply necessary patches file by file
