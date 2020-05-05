@@ -16,7 +16,7 @@ if [ ! -f gcc-$PKG_GCC.tar.gz ]; then
   tar -xzf gcc-${PKG_GCC}.tar.gz
 fi
 # gdb
-if [ -z "$TRAVIS" && ! -f gdb-$PKG_GDB.tar.gz ]; then
+if [[ ! -f gdb-$PKG_GDB.tar.gz ]]; then
   wget "https://ftp.gnu.org/gnu/gdb/gdb-${PKG_GDB}.tar.gz"
   tar -xzf gdb-${PKG_GDB}.tar.gz
 fi
@@ -32,6 +32,6 @@ if [ ! -f newlib-${PKG_NEWLIB}.tar.gz ]; then
 fi
 # cppcheck
 if [ ! -f cppcheck-${PKG_CPPCHECK}.tar.gz ]; then
-  wget -q -O "cppcheck-${PKG_CPPCHECK}.tar.gz" "https://github.com/danmar/cppcheck/archive/${PKG_CPPCHECK}.tar.gz"
+  wget -O "cppcheck-${PKG_CPPCHECK}.tar.gz" "https://github.com/danmar/cppcheck/archive/${PKG_CPPCHECK}.tar.gz"
   tar -xzf cppcheck-${PKG_CPPCHECK}.tar.gz
 fi

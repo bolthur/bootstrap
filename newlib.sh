@@ -4,7 +4,6 @@ set -ex
 
 
 # internal dependencies
-# FIXME: ADD INSTALL OF PERL VERSION NECESSARY FOR AUTOMAKE 1.11.6
 export PKG_AUTOMAKE="1.11.6"
 export PKG_AUTOMAKE_INSTALL="1.11"
 export PKG_AUTOCONF="2.64"

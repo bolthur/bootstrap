@@ -86,7 +86,7 @@ if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.configured" ]; the
   cd "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 
   # cleanup build stage for stage 2 build
-  BUILD_OPTION="--without-headers --with-newlib"
+  BUILD_OPTION="--without-headers"
   if [[ "$BUILD_STAGE" == "stage2"* ]]; then
     # clear build option
     BUILD_OPTION=""
@@ -99,6 +99,7 @@ if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.configured" ]; the
     --enable-languages=c,c++ \
     --disable-shared \
     --disable-werror \
+    --with-newlib \
     --with-sysroot=$SYSROOT/$TARGET \
     --with-pkgversion="GCC; bolthur bootstrap cross" \
     $BUILD_OPTION \
@@ -125,10 +126,11 @@ if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.built" ]; then
     if [ $? -ne 0 ]; then
       exit 1
     fi
-    #make all-target-libstdc++-v3 -j${CPU_COUNT}
-    #if [ $? -ne 0 ]; then
-    #  exit 1
-    #fi
+
+    make all-target-libstdc++-v3 -j${CPU_COUNT}
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
   fi
 
   # mark as built
@@ -148,10 +150,11 @@ if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.installed" ]; then
     if [ $? -ne 0 ]; then
       exit 1
     fi
-    #make install-strip-target-libstdc++-v3 -j${CPU_COUNT}
-    #if [ $? -ne 0 ]; then
-    #  exit 1
-    #fi
+
+    make install-strip-target-libstdc++-v3 -j${CPU_COUNT}
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
   fi
 
   # mark as installed
