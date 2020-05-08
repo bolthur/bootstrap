@@ -89,7 +89,10 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.configured" ]
   # switch to build directory
   cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
   # configure
-  ../../../source/newlib-$PKG_NEWLIB/configure --prefix= --target=$TARGET
+  ../../../source/newlib-$PKG_NEWLIB/configure \
+    --prefix= \
+    --target=$TARGET \
+    --with-pkgversion="newlib 3.3.0; bolthur bootstrap"
   # check for error
   if [ $? -ne 0 ]; then
     exit 1

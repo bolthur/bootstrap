@@ -16,7 +16,7 @@ if [ ! -f gcc-$PKG_GCC.tar.gz ]; then
   tar -xzf gcc-${PKG_GCC}.tar.gz
 fi
 # gdb
-if [[ ! -f gdb-$PKG_GDB.tar.gz ]]; then
+if [ ! -f gdb-$PKG_GDB.tar.gz ]; then
   wget "https://ftp.gnu.org/gnu/gdb/gdb-${PKG_GDB}.tar.gz"
   tar -xzf gdb-${PKG_GDB}.tar.gz
 fi

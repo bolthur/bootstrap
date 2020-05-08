@@ -20,9 +20,10 @@ GCC_INSTALL=1;
 if [[ $GCC_VERSION == $PKG_GCC ]]; then
   # check for libgcc.a and libstdc++ if gcc is installed
   LIBGCC=$( "$PREFIX/bin/$TARGET-gcc" --print-file-name=libgcc.a 2>&1 | head -n1 )
+  LIBC=$( "$PREFIX/bin/$TARGET-gcc" --print-file-name=libc.a 2>&1 | head -n1 )
   LIBCPP=$( "$PREFIX/bin/$TARGET-g++" --print-file-name=libstdc++.a 2>&1 | head -n1 )
   # reset GCC_INSTALL if both libraries are existing
-  if [[ -f "$LIBGCC" && -f "$LIBCPP" ]]; then
+  if [[ -f "$LIBGCC" && -f "$LIBC" && -f "$LIBCPP" ]]; then
     GCC_INSTALL=0
   fi
 fi
@@ -37,9 +38,6 @@ if [[ 1 == $GCC_INSTALL ]]; then
   # Build and install libgcc
   sh "$BASEDIR/gcc.sh" "stage2" "$GCC_MULTILIB_LIST"
 fi
-
-# Build and install libgcc
-sh "$BASEDIR/gcc.sh" "stage2" "$GCC_MULTILIB_LIST"
 
 # Build and install gdb if not installed
 GDB_VERSION=$( "$PREFIX/bin/$TARGET-gdb" --version 2>&1 | head -n1 | cut -d" " -f4- )

@@ -56,4 +56,4 @@ else
 fi
 
 ## Cleanup everything unnecessary
-#rm -rf "$TARGET_COMPILE"
+rm -rf "$TARGET_COMPILE"
