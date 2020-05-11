@@ -3,7 +3,7 @@ set -ex
 
 # Package Verions
 export PKG_BINUTILS="2.34"
-export PKG_GCC="9.2.0"
+export PKG_GCC="10.1.0"
 export PKG_GDB="9.1"
 export PKG_GLIBC="2.31"
 export PKG_NEWLIB="3.3.0"
