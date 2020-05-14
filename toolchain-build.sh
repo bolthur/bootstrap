@@ -7,7 +7,8 @@ export PKG_GCC="10.1.0"
 export PKG_GDB="9.1"
 export PKG_GLIBC="2.31"
 export PKG_NEWLIB="3.3.0"
-export PKG_CPPCHECK="1.90"
+export PKG_CPPCHECK="2.0"
+export PKG_DTC="1.6.0"
 
 # Get directory path and patch dir
 export BASEDIR="$( cd "$( dirname "$0" )" && pwd )"
@@ -40,6 +41,19 @@ fi
 
 # Download everything
 sh "$BASEDIR/download.sh"
+
+# Build and install device tree tools
+DTC_VERSION=$( "$PREFIX/bin/dtc" --version 2>&1 | head -n1 | cut -d" " -f3- )
+if [[ $DTC_VERSION != $PKG_DTC ]]; then
+  sh "$BASEDIR/dtc.sh"
+fi
+
+
+# Build and install cppcheck if not installed
+CPPCHECK_VERSION=$( "$PREFIX/bin/cppcheck" --version 2>&1 | head -n1 | cut -d" " -f2- )
+if [[ $CPPCHECK_VERSION != $PKG_CPPCHECK ]]; then
+  sh "$BASEDIR/cppcheck.sh"
+fi
 
 # handle specific build
 if [[ ! -z $BUILD_TARGET && -f "$BASEDIR/target/$BUILD_TARGET.sh" ]]; then

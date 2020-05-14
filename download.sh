@@ -35,3 +35,8 @@ if [ ! -f cppcheck-${PKG_CPPCHECK}.tar.gz ]; then
   wget -O "cppcheck-${PKG_CPPCHECK}.tar.gz" "https://github.com/danmar/cppcheck/archive/${PKG_CPPCHECK}.tar.gz"
   tar -xzf cppcheck-${PKG_CPPCHECK}.tar.gz
 fi
+# dtc
+if [ ! -f dtc-${PKG_DTC}.tar.gz ]; then
+  wget -O "dtc-${PKG_DTC}.tar.gz" "https://github.com/dgibson/dtc/archive/v${PKG_DTC}.tar.gz"
+  tar -xzf dtc-${PKG_DTC}.tar.gz
+fi
