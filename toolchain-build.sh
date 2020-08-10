@@ -2,12 +2,12 @@
 set -ex
 
 # Package Verions
-export PKG_BINUTILS="2.34"
-export PKG_GCC="10.1.0"
-export PKG_GDB="9.1"
-export PKG_GLIBC="2.31"
+export PKG_BINUTILS="2.35"
+export PKG_GCC="10.2.0"
+export PKG_GDB="9.2"
+export PKG_GLIBC="2.32"
 export PKG_NEWLIB="3.3.0"
-export PKG_CPPCHECK="2.0"
+export PKG_CPPCHECK="2.1"
 export PKG_DTC="1.6.0"
 
 # Get directory path and patch dir

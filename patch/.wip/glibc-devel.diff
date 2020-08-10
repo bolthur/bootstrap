@@ -1,0 +1,85 @@
+diff --git .gitignore .gitignore
+index 07d4a12..1d2375b 100644
+--- .gitignore
++++ .gitignore
+@@ -1,3 +1,5 @@
++build/
++
+ *~
+ *.gz
+ *.Z
+diff --git abi-tags abi-tags
+index 87cd681..802e0e7 100644
+--- abi-tags
++++ abi-tags
+@@ -18,6 +18,8 @@
+ 
+ .*-.*-linux.*		0	2.0.0	# earliest compatible kernel version
+ 
++.*-.*-bolthur.*		1	0.0.0
++
+ .*-.*-gnu-gnu.*		1	0.0.0
+ 
+ .*-sun-solaris2.*	2	2.0.0	# just an arbitrary value
+diff --git configure configure
+index 4795e72..37351c9 100755
+--- configure
++++ configure
+@@ -3728,6 +3728,8 @@ fi
+ case "$host_os" in
+ linux*)
+   ;;
++bolthur*)
++  ;;
+ gnu*)
+   host_os=`echo $host_os | sed -e 's/gnu/gnu-gnu/'`
+   ;;
+@@ -3833,7 +3835,7 @@ fi
+ ###
+ if test -z "$enable_hacker_mode" && test x"$libc_config_ok" != xyes; then
+   case "$machine-$host_os" in
+-  *-linux* | *-gnu*)
++  *-linux* | *-bolthur* | *-gnu*)
+     ;;
+   *)
+     as_fn_error $? "
+@@ -4153,7 +4155,7 @@ os="`echo $os | sed 's/\([0-9A-Z]\)[v_]\([0-9A-Z]\)/\1.\2/g'`"
+ test "x$base_os" != x || case "$os" in
+ gnu*)
+   base_os=mach/hurd ;;
+-linux*)
++linux* | bolthur*)
+   base_os=unix/sysv ;;
+ esac
+ 
+diff --git configure.ac configure.ac
+index 93e68fb..b07af89 100644
+--- configure.ac
++++ configure.ac
+@@ -440,6 +440,8 @@ fi
+ case "$host_os" in
+ linux*)
+   ;;
++bolthur*)
++  ;;
+ gnu*)
+   host_os=`echo $host_os | sed -e 's/gnu/gnu-gnu/'`
+   ;;
+@@ -515,7 +517,7 @@ LIBC_PRECONFIGURE([$srcdir], [for sysdeps])
+ ###
+ if test -z "$enable_hacker_mode" && test x"$libc_config_ok" != xyes; then
+   case "$machine-$host_os" in
+-  *-linux* | *-gnu*)
++  *-linux* | *-bolthur* | *-gnu*)
+     ;;
+   *)
+     AC_MSG_ERROR([
+@@ -752,7 +754,7 @@ os="`echo $os | sed 's/\([0-9A-Z]\)[v_]\([0-9A-Z]\)/\1.\2/g'`"
+ test "x$base_os" != x || case "$os" in
+ gnu*)
+   base_os=mach/hurd ;;
+-linux*)
++linux* | bolthur*)
+   base_os=unix/sysv ;;
+ esac
+ 
