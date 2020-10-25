@@ -15,15 +15,30 @@ export BASEDIR="$( cd "$( dirname "$0" )" && pwd )"
 export PATCHDIR="$BASEDIR/patch"
 export PREFIX_BASE="/opt/bolthur"
 export BUILD_TARGET=
+export REBUILD_NEWLIB=0
 
-# consider possible prefix option
-while getopts ":p:t:" opt; do
-  case $opt in
-    p) PREFIX_BASE="$OPTARG"
-    ;;
-    t) BUILD_TARGET="$OPTARG"
-    ;;
+# consider possible options
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -p|--prefix)
+      PREFIX_BASE="$2"
+      # shift due to additional argument
+      shift
+      ;;
+    -t|--target)
+      BUILD_TARGET="$2"
+      # shift due to additional argument
+      shift
+      ;;
+    -rn|--rebuild-newlib)
+      # set rebuild newlib to true
+      REBUILD_NEWLIB=1
+      ;;
+    *)
+      break
   esac
+  # next argument
+  shift
 done
 
 # prefix and path extension

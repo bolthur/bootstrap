@@ -22,14 +22,16 @@ if [[ $GCC_VERSION == $PKG_GCC ]]; then
   fi
 fi
 
+# Build and install gcc stage 1 executable
 if [[ 1 == $GCC_INSTALL ]]; then
-  # Build and install gcc executable
   sh "$BASEDIR/gcc.sh" "stage1" "$GCC_MULTILIB_LIST"
-
-  # Build and install newlib
+fi
+# Build and install newlib or rebuild newlib
+if [[ 1 == $GCC_INSTALL ]] || [[ 1 == $REBUILD_NEWLIB ]]; then
   sh "$BASEDIR/newlib.sh"
-
-  # Build and install libgcc
+fi
+# Build and install libgcc stage2 build
+if [[ 1 == $GCC_INSTALL ]]; then
   sh "$BASEDIR/gcc.sh" "stage2" "$GCC_MULTILIB_LIST"
 fi
 
