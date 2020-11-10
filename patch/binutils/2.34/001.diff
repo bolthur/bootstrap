@@ -8,7 +8,7 @@ index b96931f..93e8bb2 100644
      ;;
 +  aarch64*-*-bolthur*)
 +    targ_defvec=aarch64_elf64_le_vec
-+    targ_selvecs="aarch64_elf64_be_vec"
++    targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec"
 +    want64=true
 +    ;;
    aarch64-*-elf | aarch64-*-rtems*)
@@ -20,7 +20,7 @@ index b96931f..93e8bb2 100644
      ;;
 +  arm*-*-bolthur*)
 +    targ_defvec=arm_elf32_le_vec
-+    targ_selvecs="arm_elf32_be_vec"
++    targ_selvecs="arm_elf32_fdpic_le_vec arm_elf32_be_vec arm_elf32_fdpic_be_vec"
 +    ;;
    arm-*-elf | arm*-*-freebsd* | arm*-*-linux-* | arm*-*-conix* | \
    arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \

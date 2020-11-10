@@ -1,0 +1,575 @@
+diff --git config.sub config.sub
+index 75bb6a313..c7dd7440e 100755
+--- config.sub
++++ config.sub
+@@ -1363,7 +1363,8 @@ case $os in
+ 	     | powermax* | dnix* | nx6 | nx7 | sei* | dragonfly* \
+ 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+-	     | midnightbsd* | amdhsa* | unleashed* | emscripten*)
++	     | midnightbsd* | amdhsa* | unleashed* | emscripten* \
++	     | bolthur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	qnx*)
+diff --git libgloss/arm/Makefile.in libgloss/arm/Makefile.in
+index e1bad1710..a62db2cf0 100644
+--- libgloss/arm/Makefile.in
++++ libgloss/arm/Makefile.in
+@@ -71,7 +71,13 @@ LINUX_OBJS    = linux-syscalls0.o linux-syscalls1.o
+ LINUX_SCRIPTS = linux.specs
+ LINUX_INSTALL = install-linux
+ 
+-REDBOOT_CRT0	= redboot-crt0.o 
++BOLTHUR_CRT0    = bolthur-crt0.o
++BOLTHUR_BSP     = libgloss-bolthur.a
++BOLTHUR_OBJS    = bolthur-syscalls0.o
++BOLTHUR_SCRIPTS = bolthur.specs
++BOLTHUR_INSTALL = install-bolthur
++
++REDBOOT_CRT0	= redboot-crt0.o
+ REDBOOT_OBJS	= redboot-syscalls.o
+ REDBOOT_SCRIPTS	= redboot.ld redboot.specs
+ REDBOOT_INSTALL	= install-redboot
+@@ -109,7 +115,7 @@ INCLUDES += `if [ -d ${objroot}/newlib ]; then echo -I$(srcroot)/newlib/libc/mac
+ # build a test program for each target board. Just trying to get
+ # it to link is a good test, so we ignore all the errors for now.
+ #
+-all: ${CRT0} ${LINUX_CRT0} ${LINUX_BSP} ${REDBOOT_CRT0} ${REDBOOT_OBJS} ${RDPMON_CRT0} ${RDPMON_BSP} ${RDIMON_CRT0} ${RDIMON_BSP}
++all: ${CRT0} ${LINUX_CRT0} ${LINUX_BSP} ${BOLTHUR_CRT0} ${BOLTHUR_BSP} ${REDBOOT_CRT0} ${REDBOOT_OBJS} ${RDPMON_CRT0} ${RDPMON_BSP} ${RDIMON_CRT0} ${RDIMON_BSP}
+ 	@rootpre=`pwd`/; export rootpre; \
+ 	srcrootpre=`cd $(srcdir); pwd`/; export srcrootpre; \
+ 	for dir in .. ${SUBDIRS}; do \
+@@ -164,6 +170,10 @@ $(LINUX_BSP): $(LINUX_OBJS)
+ 	${AR} ${ARFLAGS} $@ $^
+ 	${RANLIB} $@
+ 
++$(BOLTHUR_BSP): $(BOLTHUR_OBJS)
++	${AR} ${ARFLAGS} $@ $^
++	${RANLIB} $@
++
+ $(RDPMON_BSP): $(RDPMON_OBJS)
+ 	${AR} ${ARFLAGS} $@ $^
+ 	${RANLIB} $@
+@@ -206,7 +216,7 @@ distclean maintainer-clean realclean: clean
+ 	rm -f Makefile config.status *~
+ 
+ .PHONY: install info install-info clean-info
+-install: ${CRT0_INSTALL} ${LINUX_INSTALL} ${REDBOOT_INSTALL} ${RDPMON_INSTALL} ${RDIMON_INSTALL} ${IQ80310_INSTALL}  ${PID_INSTALL} ${NANO_INSTALL}
++install: ${CRT0_INSTALL} ${LINUX_INSTALL} ${BOLTHUR_INSTALL} ${REDBOOT_INSTALL} ${RDPMON_INSTALL} ${RDIMON_INSTALL} ${IQ80310_INSTALL}  ${PID_INSTALL} ${NANO_INSTALL}
+ 	@rootpre=`pwd`/; export rootpre; \
+ 	srcrootpre=`cd $(srcdir); pwd`/; export srcrootpre; \
+ 	for dir in .. ${SUBDIRS}; do \
+@@ -228,6 +238,10 @@ install-linux:
+ 	set -e; for x in ${LINUX_CRT0} ${LINUX_BSP}; do ${INSTALL_DATA} $$x $(DESTDIR)${tooldir}/lib${MULTISUBDIR}/$$x; done
+ 	set -e; for x in ${LINUX_SCRIPTS}; do ${INSTALL_DATA} ${srcdir}/${objtype}$$x $(DESTDIR)${tooldir}/lib${MULTISUBDIR}/$$x; done
+ 
++install-bolthur:
++	set -e; for x in ${BOLTHUR_CRT0} ${BOLTHUR_BSP}; do ${INSTALL_DATA} $$x $(DESTDIR)${tooldir}/lib${MULTISUBDIR}/$$x; done
++	set -e; for x in ${BOLTHUR_SCRIPTS}; do ${INSTALL_DATA} ${srcdir}/${objtype}$$x $(DESTDIR)${tooldir}/lib${MULTISUBDIR}/$$x; done
++
+ install-redboot:
+ 	set -e; for x in ${REDBOOT_CRT0} ${REDBOOT_OBJS}; do ${INSTALL_DATA} $$x $(DESTDIR)${tooldir}/lib${MULTISUBDIR}/$$x; done
+ 	set -e; for x in ${REDBOOT_SCRIPTS}; do ${INSTALL_DATA} ${srcdir}/${objtype}$$x $(DESTDIR)${tooldir}/lib${MULTISUBDIR}/$$x; done
+diff --git libgloss/arm/bolthur-crt0.c libgloss/arm/bolthur-crt0.c
+new file mode 100644
+index 000000000..3a6f205c4
+--- /dev/null
++++ libgloss/arm/bolthur-crt0.c
+@@ -0,0 +1,32 @@
++
++/**
++ * Bolthur startup code for arm processor
++ */
++#include <stdlib.h>
++#include <unistd.h>
++#include <stdnoreturn.h>
++#include "arm.h"
++
++/* forward declaration */
++int main( int argc, char* argv[], char* env[] );
++extern char** environ;
++
++/**
++ * @brief Function called bevore c main
++ */
++noreturn static int _main( int argc, char* argv[] ) {
++  environ = argv + argc + 1;
++  exit( main( argc, argv, environ ) );
++}
++
++/**
++ * @brief Start entry function
++ */
++__attribute__((naked))
++void _start( void ) {
++  // get stack pointer
++  register int *sp __asm__( "sp" );
++
++  // call main
++  _main( *sp, ( char** )( sp + 1 ) );
++}
+diff --git libgloss/arm/bolthur-syscall.h libgloss/arm/bolthur-syscall.h
+new file mode 100644
+index 000000000..b3e4ff788
+--- /dev/null
++++ libgloss/arm/bolthur-syscall.h
+@@ -0,0 +1,20 @@
++
++/**
++ * Bolthur system call numbers for the ARM processor.
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#ifndef _LIBGLOSS_ARM_BOLTHUR_UNISTD_H
++#define _LIBGLOSS_ARM_BOLTHUR_UNISTD_H
++
++#define SYSCALL_PROCESS_EXIT 2
++#define SYSCALL_PROCESS_ID 3
++
++#define SYSCALL_MEMORY_ACQUIRE 21
++#define SYSCALL_MEMORY_RELEASE 22
++
++#endif /* _LIBGLOSS_ARM_LINUX_UNISTD_H */
+diff --git libgloss/arm/bolthur-syscalls0.S libgloss/arm/bolthur-syscalls0.S
+new file mode 100644
+index 000000000..521f4a369
+--- /dev/null
++++ libgloss/arm/bolthur-syscalls0.S
+@@ -0,0 +1,33 @@
++
++/**
++ * Bolthur system call numbers for the ARM processor.
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#include "bolthur-syscall.h"
++
++.global _memory_acquire
++_memory_acquire:
++  swi #SYSCALL_MEMORY_ACQUIRE
++  bx lr
++
++.global _memory_release
++_memory_release:
++  swi #SYSCALL_MEMORY_RELEASE
++  bx lr
++
++.global _process_exit
++_process_exit:
++  // exit
++  swi #SYSCALL_PROCESS_EXIT
++  // jump again to exit ( should not happen )
++  b _process_exit
++
++.global _getpid
++_getpid:
++  swi #SYSCALL_PROCESS_ID
++  bx lr
+diff --git libgloss/arm/elf-bolthur.specs libgloss/arm/elf-bolthur.specs
+new file mode 100644
+index 000000000..d2ad3e850
+--- /dev/null
++++ libgloss/arm/elf-bolthur.specs
+@@ -0,0 +1,11 @@
++%rename lib libc
++
++*libgloss:
++-lgloss-bolthur
++
++*lib:
++%(libc) %(libgloss)
++
++*startfile:
++bolthur-crt0%O%s crti%O%s crtbegin%O%s
++
+diff --git newlib/configure.host newlib/configure.host
+index a84c0c80a..130423774 100644
+--- newlib/configure.host
++++ newlib/configure.host
+@@ -191,11 +191,11 @@ case "${host_cpu}" in
+   i[34567]86)
+ 	# Don't use for these since they provide their own setjmp.
+ 	case ${host} in
+-	*-*-sco* | *-*-cygwin*) 
++	*-*-sco* | *-*-cygwin*)
+ 		libm_machine_dir=i386
+ 		machine_dir=i386
+ 		;;
+-	*) 
++	*)
+ 		libm_machine_dir=i386
+ 		machine_dir=i386
+ 		mach_add_setjmp=true
+@@ -211,7 +211,7 @@ case "${host_cpu}" in
+ 	machine_dir=lm32
+ 	;;
+   m32c)
+-	machine_dir=m32c	
++	machine_dir=m32c
+ 	newlib_cflags="${newlib_cflags} -DPREFER_SIZE_OVER_SPEED -DSMALL_MEMORY"
+ 	;;
+ 
+@@ -224,7 +224,7 @@ case "${host_cpu}" in
+ 	newlib_cflags="-DPREFER_SIZE_OVER_SPEED -Os -mrelax"
+ 	CFLAGS="-g -Os"
+ 	;;
+-  
++
+   m68*)
+ 	machine_dir=m68k
+ 	newlib_cflags="${newlib_cflags} -DCOMPACT_CTYPE"
+@@ -429,6 +429,10 @@ esac
+ # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
+ 
+ case "${host}" in
++  *-*-bolthur*)
++  sys_dir=bolthur
++  default_newlib_io_long_long="yes"
++  ;;
+   *-*-cygwin*)
+ 	posix_dir=posix
+ 	stdio64_dir=stdio64
+@@ -528,7 +532,7 @@ case "${host}" in
+ 	unix_dir=unix
+ 	posix_dir=posix
+ 	crt1=crt1.o
+-	crt1_dir=libc/sys/${sys_dir}	
++	crt1_dir=libc/sys/${sys_dir}
+ 	gcc_dir=`gcc -print-search-dirs | awk '/^install:/{print $2}'`
+ 	default_newlib_io_c99_formats="yes"
+ 	default_newlib_io_long_double="yes"
+@@ -633,6 +637,11 @@ esac
+ # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
+ 
+ case "${host}" in
++	*-*-bolthur*)
++	syscall_dir=syscalls
++	default_newlib_io_long_long="yes"
++	newlib_cflags="${newlib_cflags}"
++	;;
+   *-*-cygwin*)
+ 	test -z "$cygwin_srcdir" && cygwin_srcdir=`cd ${srcdir}/../winsup/cygwin; pwd`
+ 	export cygwin_srcdir
+@@ -662,7 +671,7 @@ case "${host}" in
+ 	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections "
+ 	newlib_cflags="${newlib_cflags} -D_COMPILING_NEWLIB"
+ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVIDED -DSIGNAL_PROVIDED -DGETREENT_PROVIDED -DREENTRANT_SYSCALLS_PROVIDED -DHAVE_NANOSLEEP -DHAVE_BLKSIZE -DHAVE_FCNTL -DHAVE_ASSERT_FUNC"
+-        # turn off unsupported items in posix directory 
++        # turn off unsupported items in posix directory
+ 	newlib_cflags="${newlib_cflags} -D_NO_GETLOGIN -D_NO_GETPWENT -D_NO_GETUT -D_NO_GETPASS -D_NO_SIGSET -D_NO_WORDEXP -D_NO_POPEN -D_NO_POSIX_SPAWN"
+ 	;;
+ # VxWorks supplies its own version of malloc, and the newlib one
+@@ -749,17 +758,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+         syscall_dir=syscalls
+         ;;
+   h8300*-*-*)
+-	syscall_dir=syscalls	
++	syscall_dir=syscalls
+ 	default_newlib_io_long_long="yes"
+ 	newlib_cflags="${newlib_cflags} -DSMALL_DTOA -DSMALL_MEMORY"
+ 	# Simulator only extensions for H8300.
+ 	# Uncomment the next line to enable them.
+ 	# newlib_cflags="${newlib_cflags} -D__SIMULATOR__"
+-	;;	
++	;;
+   h8500-*-*)
+-	syscall_dir=syscalls	
++	syscall_dir=syscalls
+ 	newlib_cflags="${newlib_cflags} -DSMALL_DTOA -DSMALL_MEMORY"
+-	;;	
++	;;
+   i[34567]86-*-sco*)
+ 	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DHAVE_FCNTL"
+ 	;;
+@@ -906,7 +915,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+ 	syscall_dir=
+ 	;;
+   w65-*-*)
+-	syscall_dir=syscalls	
++	syscall_dir=syscalls
+ 	newlib_cflags="${newlib_cflags} -DSMALL_DTOA -DSMALL_MEMORY"
+ 	;;
+   xc16x-*)
+@@ -957,7 +966,7 @@ fi
+ # Disable atexit dynamic allocation if requested.
+ if [ "x${newlib_atexit_dynamic_alloc}" = "x" ]; then
+ 	if [ ${default_newlib_atexit_dynamic_alloc} = "yes" ]; then
+-		newlib_atexit_dynamic_alloc="yes"; 
++		newlib_atexit_dynamic_alloc="yes";
+ 	fi
+ fi
+ 
+diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
+new file mode 100644
+index 000000000..27b157aab
+--- /dev/null
++++ newlib/libc/sys/bolthur/Makefile.am
+@@ -0,0 +1,26 @@
++
++AUTOMAKE_OPTIONS = cygnus
++INCLUDES = $(NEWLIB_CFLAGS) $(CROSS_CFLAGS) $(TARGET_CFLAGS)
++AM_CCASFLAGS = $(INCLUDES)
++
++noinst_LIBRARIES = lib.a
++
++if MAY_SUPPLY_SYSCALLS
++extra_objs = malloc.o
++else
++extra_objs =
++endif
++
++lib_a_SOURCES =
++lib_a_LIBADD = $(extra_objs)
++EXTRA_lib_a_SOURCES = syscall.c sbrk.c exit.c crt0.c
++lib_a_DEPENDENCIES = $(extra_objs)
++lib_a_CCASFLAGS = $(AM_CCASFLAGS)
++lib_a_CFLAGS = $(AM_CFLAGS)
++
++if MAY_SUPPLY_SYSCALLS
++all: crt0.o
++endif
++
++ACLOCAL_AMFLAGS = -I ../../.. -I ../../../..
++CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
+diff --git newlib/libc/sys/bolthur/configure.in newlib/libc/sys/bolthur/configure.in
+new file mode 100644
+index 000000000..8c994faf8
+--- /dev/null
++++ newlib/libc/sys/bolthur/configure.in
+@@ -0,0 +1,10 @@
++
++AC_PREREQ(2.59)
++AC_INIT([newlib], [NEWLIB_VERSION])
++AC_CONFIG_SRCDIR([crt0.c])
++
++AC_CONFIG_AUX_DIR(../../../..)
++NEWLIB_CONFIGURE(../../..)
++
++AC_CONFIG_FILES([Makefile])
++AC_OUTPUT
+diff --git newlib/libc/sys/bolthur/crt0.c newlib/libc/sys/bolthur/crt0.c
+new file mode 100644
+index 000000000..107d5b67b
+--- /dev/null
++++ newlib/libc/sys/bolthur/crt0.c
+@@ -0,0 +1,4 @@
++
++/**
++ * Dummy file
++ */
+diff --git newlib/libc/sys/bolthur/exit.c newlib/libc/sys/bolthur/exit.c
+new file mode 100644
+index 000000000..c9eb3339a
+--- /dev/null
++++ newlib/libc/sys/bolthur/exit.c
+@@ -0,0 +1,14 @@
++
++#include <stdnoreturn.h>
++
++// system call from libgloss
++extern noreturn void _process_exit( void );
++// some system function
++extern void sbrk_cleanup( void );
++
++void __exit() {
++  // cleanup
++  sbrk_cleanup();
++  // exit process
++  _process_exit();
++}
+diff --git newlib/libc/sys/bolthur/sbrk.c newlib/libc/sys/bolthur/sbrk.c
+new file mode 100644
+index 000000000..70eb58e1f
+--- /dev/null
++++ newlib/libc/sys/bolthur/sbrk.c
+@@ -0,0 +1,65 @@
++
++// highlevel "system calls"
++
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <sys/fcntl.h>
++#include <sys/times.h>
++#include <sys/errno.h>
++#include <sys/time.h>
++#include <stdio.h>
++#include <errno.h>
++
++#define MAX_POOL_ENTRIES 100
++
++static int next_pool;
++void* pool[ MAX_POOL_ENTRIES ];
++
++extern caddr_t _allocate_memory( int );
++extern void _release_memory( uintptr_t, int );
++
++/**
++ * @brief sbrk fake syscall ( non contiguous )
++ *
++ * @param incr
++ * @return caddr_t
++ */
++caddr_t _sbrk( int incr ) {
++  void *ptr = 0;
++  static caddr_t sbrk_top = 0;
++
++  if ( incr > 0 ) {
++    // allocate memory
++    _allocate_memory( incr );
++    // handle error
++    if ( 0 == ptr ) {
++      return ( caddr_t )-1;
++    }
++    // save for free during cleanup
++    pool[ next_pool++ ] = ptr;
++    // FIXME: ADJUST HERE
++    ptr = ( caddr_t )( ( ( ( size_t )ptr ) + RM_PAGE_MASK ) & ~RM_PAGE_MASK );
++    // set new top
++    sbrk_top = ( caddr_t )ptr + incr;
++    // return pointer
++    return ptr;
++  // shrink is not supported
++  } else if ( incr < 0 ) {
++    return ( void* )-1;
++  } else {
++    return sbrk_top;
++  }
++}
++
++void sbrk_cleanup( void ) {
++  void** ptr;
++  // cleanup pool entries
++  for ( ptr = pool; ptr < &pool[ MAX_POOL_ENTRIES ]; ptr++ ) {
++    if ( *ptr ) {
++      // release memory
++      _release_memory( *ptr, 1 ); // FIXME: ADD CORRECT SIZE HERE
++      // set to 0
++      *ptr = 0;
++    }
++  }
++}
+diff --git newlib/libc/sys/bolthur/syscall.c newlib/libc/sys/bolthur/syscall.c
+new file mode 100644
+index 000000000..c13bde51d
+--- /dev/null
++++ newlib/libc/sys/bolthur/syscall.c
+@@ -0,0 +1,89 @@
++
++// highlevel "system calls"
++
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <sys/fcntl.h>
++#include <sys/times.h>
++#include <sys/errno.h>
++#include <sys/time.h>
++#include <stdio.h>
++#include <errno.h>
++
++#undef errno
++extern int errno;
++
++char *__env[ 1 ] = { 0 };
++char **environ = __env;
++
++int _close( int file ) {
++  return -1;
++}
++
++int _execve( char* name, char** argv, char** env ) {
++  errno = ENOMEM;
++  return -1;
++}
++
++int _fork() {
++  errno = EAGAIN;
++  return -1;
++}
++
++int _fstat( int file, struct stat* st ) {
++  st->st_mode = S_IFCHR;
++  return 0;
++}
++
++int _isatty( int file ) {
++  return 1;
++}
++
++int _kill( int pid, int sig ) {
++  errno = EINVAL;
++  return -1;
++}
++
++int _link( char* old, char* new ) {
++  errno = EMLINK;
++  return -1;
++}
++
++int _lseek( int file, int ptr, int dir ) {
++  return 0;
++}
++
++int _open( const char* name, int flags, ... ) {
++  return -1;
++}
++
++int _read( int file, char* ptr, int len ) {
++  return 0;
++}
++
++int _stat( const char* file, struct stat* st ) {
++  st->st_mode = S_IFCHR;
++  return 0;
++}
++
++clock_t _times( struct tms* buf ) {
++  return -1;
++}
++
++int _unlink( char* name ) {
++  errno = ENOENT;
++  return -1;
++}
++
++int _wait( int* status ) {
++  errno = ECHILD;
++  return -1;
++}
++
++int _write( int file, char* ptr, int len ) {
++  return -1;
++}
++
++int _gettimeofday( struct timeval* p, struct timezone* z ) {
++  return -1;
++}
+diff --git newlib/libc/sys/configure.in newlib/libc/sys/configure.in
+index a65d1e71f..44a6528df 100644
+--- newlib/libc/sys/configure.in
++++ newlib/libc/sys/configure.in
+@@ -5,7 +5,7 @@ AC_PREREQ(2.59)
+ AC_INIT([newlib],[NEWLIB_VERSION])
+ AC_CONFIG_SRCDIR([a29khif])
+ 
+-dnl Can't be done in NEWLIB_CONFIGURE because that confuses automake. 
++dnl Can't be done in NEWLIB_CONFIGURE because that confuses automake.
+ AC_CONFIG_AUX_DIR(../../..)
+ 
+ NEWLIB_CONFIGURE(../..)
+@@ -50,6 +50,7 @@ if test -n "${sys_dir}"; then
+ 	tirtos) AC_CONFIG_SUBDIRS(tirtos) ;;
+ 	w65) AC_CONFIG_SUBDIRS(w65) ;;
+ 	z8ksim) AC_CONFIG_SUBDIRS(z8ksim) ;;
++	bolthur) AC_CONFIG_SUBDIRS(bolthur) ;;
+   esac;
+ fi
+ 
