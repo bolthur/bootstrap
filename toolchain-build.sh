@@ -16,6 +16,7 @@ export PATCHDIR="$BASEDIR/patch"
 export PREFIX_BASE="/opt/bolthur"
 export BUILD_TARGET=
 export REBUILD_NEWLIB=0
+export EXPERIMENTAL=0
 
 # consider possible options
 while [[ $# -gt 0 ]]; do
@@ -33,6 +34,10 @@ while [[ $# -gt 0 ]]; do
     -rn|--rebuild-newlib)
       # set rebuild newlib to true
       REBUILD_NEWLIB=1
+      ;;
+    -e|--experimental)
+      # set experimental to 1
+      EXPERIMENTAL=1
       ;;
     *)
       break

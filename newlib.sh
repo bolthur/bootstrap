@@ -29,8 +29,13 @@ mkdir -p "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
 if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB"
-  # set patchdir
+  # set default patchdir
   NEWLIB_PATCHDIR="$PATCHDIR/newlib/$PKG_NEWLIB"
+  # handle experimental / work in progress
+  if [[ 1 == $EXPERIMENTAL ]]; then
+    NEWLIB_PATCHDIR="$PATCHDIR/.experimental/newlib/$PKG_NEWLIB"
+  fi
+  # apply patches
   if [ -d $NEWLIB_PATCHDIR ]; then
     # apply patch per patch
     for patch in $NEWLIB_PATCHDIR/*; do
@@ -64,15 +69,6 @@ if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.generated" ]; then
 
   # switch to source directory
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/libgloss/arm"
-  # reconfigure
-  autoreconf
-  # check for error
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi
-
-  # switch to source directory
-  cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/libgloss/aarch64"
   # reconfigure
   autoreconf
   # check for error
