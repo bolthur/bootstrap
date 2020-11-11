@@ -310,7 +310,7 @@ index a84c0c80a..130423774 100644
  
 diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
 new file mode 100644
-index 000000000..27b157aab
+index 000000000..07ef0a9fd
 --- /dev/null
 +++ newlib/libc/sys/bolthur/Makefile.am
 @@ -0,0 +1,26 @@
@@ -322,7 +322,7 @@ index 000000000..27b157aab
 +noinst_LIBRARIES = lib.a
 +
 +if MAY_SUPPLY_SYSCALLS
-+extra_objs = malloc.o
++extra_objs = syscall.o sbrk.o exit.o
 +else
 +extra_objs =
 +endif
@@ -388,7 +388,7 @@ index 000000000..c9eb3339a
 +}
 diff --git newlib/libc/sys/bolthur/sbrk.c newlib/libc/sys/bolthur/sbrk.c
 new file mode 100644
-index 000000000..70eb58e1f
+index 000000000..7548c4aa7
 --- /dev/null
 +++ newlib/libc/sys/bolthur/sbrk.c
 @@ -0,0 +1,65 @@
@@ -432,7 +432,7 @@ index 000000000..70eb58e1f
 +    // save for free during cleanup
 +    pool[ next_pool++ ] = ptr;
 +    // FIXME: ADJUST HERE
-+    ptr = ( caddr_t )( ( ( ( size_t )ptr ) + RM_PAGE_MASK ) & ~RM_PAGE_MASK );
++    //ptr = ( caddr_t )( ( ( ( size_t )ptr ) + RM_PAGE_MASK ) & ~RM_PAGE_MASK );
 +    // set new top
 +    sbrk_top = ( caddr_t )ptr + incr;
 +    // return pointer
@@ -451,7 +451,7 @@ index 000000000..70eb58e1f
 +  for ( ptr = pool; ptr < &pool[ MAX_POOL_ENTRIES ]; ptr++ ) {
 +    if ( *ptr ) {
 +      // release memory
-+      _release_memory( *ptr, 1 ); // FIXME: ADD CORRECT SIZE HERE
++      _release_memory( ( uintptr_t )*ptr, 1 ); // FIXME: ADD CORRECT SIZE HERE
 +      // set to 0
 +      *ptr = 0;
 +    }
