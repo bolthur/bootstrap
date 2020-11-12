@@ -88,6 +88,9 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.configured" ]
   ../../../source/newlib-$PKG_NEWLIB/configure \
     --prefix= \
     --target=$TARGET \
+    --disable-newlib-supplied-syscalls \
+    --enable-newlib-io-long-long \
+    --enable-newlib-io-long-double \
     --with-pkgversion="newlib 3.3.0; bolthur bootstrap"
   # check for error
   if [ $? -ne 0 ]; then
@@ -123,9 +126,9 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.installed" ];
   fi
   # move to usr subfolder folder
   rsync -av \
+    --exclude usr \
     $SYSROOT/$TARGET/* \
     $SYSROOT/$TARGET/usr \
-    --exclude $SYSROOT/$TARGET/usr \
     --remove-source-files
   # check for error
   if [ $? -ne 0 ]; then

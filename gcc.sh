@@ -59,14 +59,14 @@ fi
 
 # configure gcc
 if [ ! -f "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.generated" ]; then
-  # switch to source directory
-  cd "$TARGET_COMPILE/source/gcc-$PKG_GCC/libstdc++-v3"
-  # reconfigure
-  autoconf
-  # check for error
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi
+  ## switch to source directory
+  #cd "$TARGET_COMPILE/source/gcc-$PKG_GCC/libstdc++-v3"
+  ## reconfigure
+  #autoconf
+  ## check for error
+  #if [ $? -ne 0 ]; then
+  #  exit 1
+  #fi
   # switch to source directory
   cd "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc"
   # reconfigure
@@ -125,10 +125,10 @@ if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.built" ]; then
       exit 1
     fi
 
-    make all-target-libstdc++-v3 -j${CPU_COUNT}
-    if [ $? -ne 0 ]; then
-      exit 1
-    fi
+    #make all-target-libstdc++-v3 -j${CPU_COUNT}
+    #if [ $? -ne 0 ]; then
+    #  exit 1
+    #fi
   fi
 
   # mark as built
@@ -149,10 +149,10 @@ if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.installed" ]; then
       exit 1
     fi
 
-    make install-strip-target-libstdc++-v3 -j${CPU_COUNT}
-    if [ $? -ne 0 ]; then
-      exit 1
-    fi
+    #make install-strip-target-libstdc++-v3 -j${CPU_COUNT}
+    #if [ $? -ne 0 ]; then
+    #  exit 1
+    #fi
   fi
 
   # mark as installed
