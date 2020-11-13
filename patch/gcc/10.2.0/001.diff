@@ -93,7 +93,7 @@ index 6a34996..33cda57 100644
  	  tmake_file="${tmake_file} arm/t-bpabi"
 diff --git gcc/config/bolthur.h gcc/config/bolthur.h
 new file mode 100644
-index 0000000..65f0da0
+index 0000000..cc73513
 --- /dev/null
 +++ gcc/config/bolthur.h
 @@ -0,0 +1,45 @@
@@ -104,7 +104,7 @@ index 0000000..65f0da0
 +
 +/* Machine dependent libraries. */
 +#undef LIB_SPEC
-+#define LIB_SPEC "-lgloss-bolthur -lc -lg -lm" /* link against C standard library */
++#define LIB_SPEC "-lc -lg -lm  %{!specs=bolthur.specs:-lgloss-bolthur}" /* link against C standard library */
 +
 +/* Linker enforce 4K pages */
 +#undef LINK_SPEC

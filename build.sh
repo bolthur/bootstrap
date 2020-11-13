@@ -13,7 +13,7 @@ GCC_VERSION=$( "$PREFIX/bin/$TARGET-gcc" --version 2>&1 | head -n1 | cut -d" " -
 GCC_INSTALL=1;
 if [[ $GCC_VERSION == $PKG_GCC ]]; then
   # check for libgcc.a and libstdc++ if gcc is installed
-  LIBC=$( "$PREFIX/bin/$TARGET-gcc" --print-file-name=libc.a 2>&1 | head -n1 )
+  LIBGCC=$( "$PREFIX/bin/$TARGET-gcc" --print-file-name=libgcc.a 2>&1 | head -n1 )
   #LIBCPP=$( "$PREFIX/bin/$TARGET-g++" --print-file-name=libstdc++.a 2>&1 | head -n1 )
   # reset GCC_INSTALL libgcc is existing
   # && -f "$LIBCPP" &&
@@ -23,7 +23,7 @@ if [[ $GCC_VERSION == $PKG_GCC ]]; then
 fi
 
 # check for newlib
-LIBGCC=$( "$PREFIX/bin/$TARGET-gcc" --print-file-name=libgcc.a 2>&1 | head -n1 )
+LIBC=$( "$PREFIX/bin/$TARGET-gcc" --print-file-name=libc.a 2>&1 | head -n1 )
 # default = install
 NEWLIB_INSTALL=1;
 if [[ -f "$LIBC" ]]; then

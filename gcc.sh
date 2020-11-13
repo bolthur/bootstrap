@@ -29,6 +29,11 @@ if [ -n "$MULTILIB_LIST" ]; then
   export MULTILIB="--with-multilib-list=$MULTILIB_LIST"
 fi
 
+# Handle rebuild
+if [[ 1 == $REBUILD_GCC ]]; then
+  rm -rf "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
+fi
+
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 

@@ -73,7 +73,6 @@ if [[ $DTC_VERSION != $PKG_DTC ]]; then
   sh "$BASEDIR/dtc.sh"
 fi
 
-
 # Build and install cppcheck if not installed
 CPPCHECK_VERSION=$( "$PREFIX/bin/cppcheck" --version 2>&1 | head -n1 | cut -d" " -f2- )
 if [[ $CPPCHECK_VERSION != $PKG_CPPCHECK ]]; then
