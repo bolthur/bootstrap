@@ -17,6 +17,8 @@ export PREFIX_BASE="/opt/bolthur"
 export BUILD_TARGET=
 export REBUILD_NEWLIB=0
 export REBUILD_GCC=0
+export REBUILD_GDB=0
+export REBUILD_BINUTILS=0
 export EXPERIMENTAL=0
 
 # consider possible options
@@ -32,13 +34,27 @@ while [[ $# -gt 0 ]]; do
       # shift due to additional argument
       shift
       ;;
-    --rebuild-newlib)
-      # set rebuild newlib to true
-      REBUILD_NEWLIB=1
+    --rebuild-binutils)
+      # set rebuild binutils to true
+      REBUILD_BINUTILS=1
       ;;
     --rebuild-gcc)
       # set rebuild gcc to true
       REBUILD_GCC=1
+      ;;
+    --rebuild-newlib)
+      # set rebuild newlib to true
+      REBUILD_NEWLIB=1
+      ;;
+    --rebuild-gdb)
+      # set rebuild newlib to true
+      REBUILD_GDB=1
+      ;;
+    --rebuild-all)
+      REBUILD_BINUTILS=1
+      REBUILD_GCC=1
+      REBUILD_NEWLIB=1
+      REBUILD_GDB=1
       ;;
     --experimental)
       # set experimental to 1

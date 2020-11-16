@@ -1,5 +1,5 @@
 diff --git config.sub config.sub
-index 75bb6a3..c7dd744 100755
+index 75bb6a313..c7dd7440e 100755
 --- config.sub
 +++ config.sub
 @@ -1363,7 +1363,8 @@ case $os in
@@ -13,7 +13,7 @@ index 75bb6a3..c7dd744 100755
  		;;
  	qnx*)
 diff --git libgloss/arm/Makefile.in libgloss/arm/Makefile.in
-index e1bad17..00027a8 100644
+index e1bad1710..00027a85f 100644
 --- libgloss/arm/Makefile.in
 +++ libgloss/arm/Makefile.in
 @@ -71,7 +71,13 @@ LINUX_OBJS    = linux-syscalls0.o linux-syscalls1.o
@@ -80,10 +80,10 @@ index e1bad17..00027a8 100644
 +include $(srcdir)/../multi-build.in
 diff --git libgloss/arm/bolthur-crt0.c libgloss/arm/bolthur-crt0.c
 new file mode 100644
-index 0000000..37fe259
+index 000000000..7011d6cee
 --- /dev/null
 +++ libgloss/arm/bolthur-crt0.c
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,65 @@
 +
 +/**
 + * Bolthur system startup for the ARM processor.
@@ -107,14 +107,6 @@ index 0000000..37fe259
 +extern char** environ;
 +
 +/**
-+ * @brief Function called bevore c main
-+ */
-+noreturn static int _main( int argc, char* argv[] ) {
-+  environ = argv + argc + 1;
-+  exit( main( argc, argv, environ ) );
-+}
-+
-+/**
 + * @brief Start entry function
 + */
 +__attribute__((naked))
@@ -125,9 +117,41 @@ index 0000000..37fe259
 +  // call main
 +  _main( *sp, ( char** )( sp + 1 ) );
 +}
++
++
++#if __thumb__ && !defined(PREFER_THUMB)
++asm("\n"
++  ".code 32\n"
++  ".global _start\n"
++  ".type _start, %function\n"
++  "_start:\n"
++  "\tldr r0, .LC0\n"
++  "\tbx r0\n"
++  ".LC0:\n"
++  "\t.word _start_thumb\n"
++  ".size _start, .-_start\n");
++
++__attribute__((naked, used))
++static void _start_thumb(void)
++#else
++__attribute__((naked))
++void _start(void)
++#endif
++{
++	register int *sp asm("sp");
++	_main(*sp, (char **)(sp + 1));
++}
++
++/**
++ * @brief Function called before c main
++ */
++noreturn static int _main( int argc, char* argv[] ) {
++  environ = argv + argc + 1;
++  exit( main( argc, argv, environ ) );
++}
 diff --git libgloss/arm/bolthur-syscall.h libgloss/arm/bolthur-syscall.h
 new file mode 100644
-index 0000000..2a64c7d
+index 000000000..2a64c7d55
 --- /dev/null
 +++ libgloss/arm/bolthur-syscall.h
 @@ -0,0 +1,24 @@
@@ -157,7 +181,7 @@ index 0000000..2a64c7d
 +#endif /* _LIBGLOSS_ARM_BOLTHUR_UNISTD_H */
 diff --git libgloss/arm/bolthur-syscalls0.S libgloss/arm/bolthur-syscalls0.S
 new file mode 100644
-index 0000000..6095182
+index 000000000..6095182ba
 --- /dev/null
 +++ libgloss/arm/bolthur-syscalls0.S
 @@ -0,0 +1,38 @@
@@ -201,7 +225,7 @@ index 0000000..6095182
 +SYSCALL( exit )
 diff --git libgloss/arm/bolthur-syscalls1.c libgloss/arm/bolthur-syscalls1.c
 new file mode 100644
-index 0000000..245803d
+index 000000000..245803d4e
 --- /dev/null
 +++ libgloss/arm/bolthur-syscalls1.c
 @@ -0,0 +1,30 @@
@@ -237,7 +261,7 @@ index 0000000..245803d
 +}
 diff --git libgloss/arm/elf-bolthur.specs libgloss/arm/elf-bolthur.specs
 new file mode 100644
-index 0000000..d2ad3e8
+index 000000000..d2ad3e850
 --- /dev/null
 +++ libgloss/arm/elf-bolthur.specs
 @@ -0,0 +1,11 @@
@@ -253,7 +277,7 @@ index 0000000..d2ad3e8
 +bolthur-crt0%O%s crti%O%s crtbegin%O%s
 +
 diff --git newlib/configure.host newlib/configure.host
-index a84c0c8..078cf5e 100644
+index a84c0c80a..078cf5e84 100644
 --- newlib/configure.host
 +++ newlib/configure.host
 @@ -191,11 +191,11 @@ case "${host_cpu}" in
@@ -370,7 +394,7 @@ index a84c0c8..078cf5e 100644
  
 diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
 new file mode 100644
-index 0000000..e97f5f2
+index 000000000..e97f5f24f
 --- /dev/null
 +++ newlib/libc/sys/bolthur/Makefile.am
 @@ -0,0 +1,15 @@
@@ -391,7 +415,7 @@ index 0000000..e97f5f2
 +CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
 diff --git newlib/libc/sys/bolthur/configure.in newlib/libc/sys/bolthur/configure.in
 new file mode 100644
-index 0000000..712ed2b
+index 000000000..712ed2b9f
 --- /dev/null
 +++ newlib/libc/sys/bolthur/configure.in
 @@ -0,0 +1,12 @@
@@ -409,7 +433,7 @@ index 0000000..712ed2b
 +AC_OUTPUT
 diff --git newlib/libc/sys/bolthur/highlevel.c newlib/libc/sys/bolthur/highlevel.c
 new file mode 100644
-index 0000000..2b46065
+index 000000000..2b460659f
 --- /dev/null
 +++ newlib/libc/sys/bolthur/highlevel.c
 @@ -0,0 +1,123 @@
@@ -537,7 +561,7 @@ index 0000000..2b46065
 +  return -1;
 +}
 diff --git newlib/libc/sys/configure.in newlib/libc/sys/configure.in
-index a65d1e7..44a6528 100644
+index a65d1e71f..44a6528df 100644
 --- newlib/libc/sys/configure.in
 +++ newlib/libc/sys/configure.in
 @@ -5,7 +5,7 @@ AC_PREREQ(2.59)

@@ -23,10 +23,9 @@ if [ ! -f "$PREFIX/bin/$TARGET-cc" ]; then
 fi
 
 # Handle rebuild
-if [[ 1 == $REBUILD_NEWLIB ]]; then
+if [[ -d "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET" ]] && [[ 1 == $REBUILD_NEWLIB ]]; then
   rm -rf "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
 fi
-
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
 
@@ -34,11 +33,12 @@ mkdir -p "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
 if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB"
-  # set default patchdir
+  # set patch directories
   NEWLIB_PATCHDIR="$PATCHDIR/newlib/$PKG_NEWLIB"
+  EXPERIMENTAL_NEWLIB_PATCHDIR="$PATCHDIR/.experimental/newlib/$PKG_NEWLIB"
   # handle experimental / work in progress
-  if [[ 1 == $EXPERIMENTAL ]]; then
-    NEWLIB_PATCHDIR="$PATCHDIR/.experimental/newlib/$PKG_NEWLIB"
+  if [[ 1 == $EXPERIMENTAL ]] && [[ -d "$EXPERIMENTAL_NEWLIB_PATCHDIR" ]]; then
+    NEWLIB_PATCHDIR=$EXPERIMENTAL_NEWLIB_PATCHDIR
   fi
   # apply patches
   if [ -d $NEWLIB_PATCHDIR ]; then

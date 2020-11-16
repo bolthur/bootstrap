@@ -1,5 +1,5 @@
 diff --git config.sub config.sub
-index a318a46..b6a0532 100755
+index a318a468685..b6a05321538 100755
 --- config.sub
 +++ config.sub
 @@ -1366,7 +1366,7 @@ case $os in
@@ -12,7 +12,7 @@ index a318a46..b6a0532 100755
  		;;
  	qnx*)
 diff --git fixincludes/mkfixinc.sh fixincludes/mkfixinc.sh
-index df90720..f63b159 100755
+index df90720b716..f63b159e51b 100755
 --- fixincludes/mkfixinc.sh
 +++ fixincludes/mkfixinc.sh
 @@ -20,7 +20,8 @@ case $machine in
@@ -26,7 +26,7 @@ index df90720..f63b159 100755
  	#  THEN create a no-op fixer and exit
  	(echo "#! /bin/sh" ; echo "exit 0" ) > ${target}
 diff --git gcc/config.gcc gcc/config.gcc
-index 6a34996..33cda57 100644
+index 6a349965c0a..4e3a01932e7 100644
 --- gcc/config.gcc
 +++ gcc/config.gcc
 @@ -180,7 +180,7 @@
@@ -65,7 +65,7 @@ index 6a34996..33cda57 100644
  	  	tm_file="${tm_file} rtems.h aarch64/rtems.h"
  		;;
 +	aarch64-*-bolthur*)
-+	  	tm_file="${tm_file} bolthur.h"
++		tm_file="${tm_file} bolthur.h"
 +		;;
  	esac
  	case $target in
@@ -93,7 +93,7 @@ index 6a34996..33cda57 100644
  	  tmake_file="${tmake_file} arm/t-bpabi"
 diff --git gcc/config/bolthur.h gcc/config/bolthur.h
 new file mode 100644
-index 0000000..cc73513
+index 00000000000..cc735132e26
 --- /dev/null
 +++ gcc/config/bolthur.h
 @@ -0,0 +1,45 @@
@@ -143,7 +143,7 @@ index 0000000..cc73513
 +    builtin_assert ( "system=unix"); \
 +  } while(0);
 diff --git libgcc/config.host libgcc/config.host
-index c529cc4..2513ba7 100644
+index c529cc40f0c..2513ba7d0af 100644
 --- libgcc/config.host
 +++ libgcc/config.host
 @@ -103,7 +103,7 @@ arm*-*-*)
@@ -199,7 +199,7 @@ index c529cc4..2513ba7 100644
  	tmake_file="$tmake_file m32r/t-m32r t-fdpbit"
  	extra_parts="$extra_parts crtinit.o crtfini.o"
 diff --git libstdc++-v3/crossconfig.m4 libstdc++-v3/crossconfig.m4
-index fe18288..86ca0eb 100644
+index fe182883536..86ca0ebbe03 100644
 --- libstdc++-v3/crossconfig.m4
 +++ libstdc++-v3/crossconfig.m4
 @@ -86,7 +86,7 @@ case "${host}" in

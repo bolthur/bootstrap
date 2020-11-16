@@ -30,10 +30,9 @@ if [ -n "$MULTILIB_LIST" ]; then
 fi
 
 # Handle rebuild
-if [[ 1 == $REBUILD_GCC ]]; then
+if [[ -d "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET" ]] && [[ 1 == $REBUILD_GCC ]]; then
   rm -rf "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 fi
-
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
 
@@ -50,8 +49,14 @@ fi
 if [ ! -f "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/gcc-$PKG_GCC"
-  # set patchdir
+  # set patch directories
   GCC_PATCHDIR="$PATCHDIR/gcc/$PKG_GCC"
+  EXPERIMENTAL_GCC_PATCHDIR="$PATCHDIR/.experimental/gcc/$PKG_GCC"
+  # handle experimental / work in progress
+  if [[ 1 == $EXPERIMENTAL ]] && [[ -d "$EXPERIMENTAL_GCC_PATCHDIR" ]]; then
+    GCC_PATCHDIR=$EXPERIMENTAL_GCC_PATCHDIR
+  fi
+  # apply patches
   if [ -d $GCC_PATCHDIR ]; then
     # apply patch per patch
     for patch in $GCC_PATCHDIR/*; do

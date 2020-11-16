@@ -19,6 +19,10 @@ sh "$BASEDIR/autoconf.sh"
 
 
 
+# Handle rebuild
+if [[ -d "$TARGET_COMPILE/build/binutils-$TARGET" ]] && [[ 1 == $REBUILD_BINUTILS ]]; then
+  rm -rf "$TARGET_COMPILE/build/binutils-$TARGET"
+fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/binutils-$TARGET"
 
@@ -26,9 +30,14 @@ mkdir -p "$TARGET_COMPILE/build/binutils-$TARGET"
 if [ ! -f "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS"
-  # set patchdir
-  BINTUIL_PATCHDIR="$PATCHDIR/binutils/$PKG_BINUTILS"
-  # apply patch per patch
+  # set patch directories
+  BINUTIL_PATCHDIR="$PATCHDIR/binutils/$PKG_BINUTILS"
+  EXPERIMENTAL_BINUTIL_PATCHDIR="$PATCHDIR/.experimental/binutils/$PKG_BINUTILS"
+  # handle experimental / work in progress
+  if [[ 1 == $EXPERIMENTAL ]] && [[ -d "$EXPERIMENTAL_BINUTIL_PATCHDIR" ]]; then
+    BINUTIL_PATCHDIR=$EXPERIMENTAL_BINUTIL_PATCHDIR
+  fi
+  # apply patch
   if [ -d $BINTUIL_PATCHDIR ]; then
     for patch in $BINTUIL_PATCHDIR/*; do
       patch -d $TARGET_COMPILE/source/binutils-$PKG_BINUTILS -p0 < $patch

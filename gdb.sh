@@ -1,6 +1,10 @@
 #!/bin/bash
 set -ex
 
+# Handle rebuild
+if [[ -d "$TARGET_COMPILE/build/gdb-$TARGET" ]] && [[ 1 == $REBUILD_GDB ]]; then
+  rm -rf "$TARGET_COMPILE/build/gdb-$TARGET"
+fi
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/gdb-$TARGET"
 
@@ -8,8 +12,13 @@ mkdir -p "$TARGET_COMPILE/build/gdb-$TARGET"
 if [ ! -f "$TARGET_COMPILE/source/gdb-$PKG_GDB/gdb.patched" ]; then
   # switch to source directory
   cd "$TARGET_COMPILE/source/gdb-$PKG_GDB"
-  # set patchdir
+  # set patch directories
   GDB_PATCHDIR="$PATCHDIR/gdb/$PKG_GDB"
+  EXPERIMENTAL_GDB_PATCHDIR="$PATCHDIR/.experimental/gdb/$PKG_GDB"
+  # handle experimental / work in progress
+  if [[ 1 == $EXPERIMENTAL ]] && [[ -d "$EXPERIMENTAL_GDB_PATCHDIR" ]]; then
+    GDB_PATCHDIR=$EXPERIMENTAL_GDB_PATCHDIR
+  fi
   if [ -d $GDB_PATCHDIR ]; then
     # apply patch per patch
     for patch in $GDB_PATCHDIR/*; do
