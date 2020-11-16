@@ -80,10 +80,10 @@ index e1bad1710..00027a85f 100644
 +include $(srcdir)/../multi-build.in
 diff --git libgloss/arm/bolthur-crt0.c libgloss/arm/bolthur-crt0.c
 new file mode 100644
-index 000000000..7011d6cee
+index 000000000..53c292a65
 --- /dev/null
 +++ libgloss/arm/bolthur-crt0.c
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,52 @@
 +
 +/**
 + * Bolthur system startup for the ARM processor.
@@ -107,17 +107,12 @@ index 000000000..7011d6cee
 +extern char** environ;
 +
 +/**
-+ * @brief Start entry function
++ * @brief Function called before c main
 + */
-+__attribute__((naked))
-+void _start( void ) {
-+  // get stack pointer
-+  register int *sp __asm__( "sp" );
-+
-+  // call main
-+  _main( *sp, ( char** )( sp + 1 ) );
++noreturn static int _main( int argc, char* argv[] ) {
++  environ = argv + argc + 1;
++  exit( main( argc, argv, environ ) );
 +}
-+
 +
 +#if __thumb__ && !defined(PREFER_THUMB)
 +asm("\n"
@@ -138,16 +133,8 @@ index 000000000..7011d6cee
 +void _start(void)
 +#endif
 +{
-+	register int *sp asm("sp");
-+	_main(*sp, (char **)(sp + 1));
-+}
-+
-+/**
-+ * @brief Function called before c main
-+ */
-+noreturn static int _main( int argc, char* argv[] ) {
-+  environ = argv + argc + 1;
-+  exit( main( argc, argv, environ ) );
++  register int *sp asm("sp");
++  _main(*sp, (char **)(sp + 1));
 +}
 diff --git libgloss/arm/bolthur-syscall.h libgloss/arm/bolthur-syscall.h
 new file mode 100644
