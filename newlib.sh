@@ -41,7 +41,7 @@ if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.patched" ]; then
     NEWLIB_PATCHDIR=$EXPERIMENTAL_NEWLIB_PATCHDIR
   fi
   # apply patches
-  if [ -d $NEWLIB_PATCHDIR ]; then
+  if [[ -d "$NEWLIB_PATCHDIR" ]]; then
     # apply patch per patch
     for patch in $NEWLIB_PATCHDIR/*; do
       patch -d $TARGET_COMPILE/source/newlib-$PKG_NEWLIB -p0 < $patch

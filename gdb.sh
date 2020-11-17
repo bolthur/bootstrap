@@ -19,7 +19,7 @@ if [ ! -f "$TARGET_COMPILE/source/gdb-$PKG_GDB/gdb.patched" ]; then
   if [[ 1 == $EXPERIMENTAL ]] && [[ -d "$EXPERIMENTAL_GDB_PATCHDIR" ]]; then
     GDB_PATCHDIR=$EXPERIMENTAL_GDB_PATCHDIR
   fi
-  if [ -d $GDB_PATCHDIR ]; then
+  if [[ -d "$GDB_PATCHDIR" ]]; then
     # apply patch per patch
     for patch in $GDB_PATCHDIR/*; do
       patch -d $TARGET_COMPILE/source/gdb-$PKG_GDB -p0 < $patch

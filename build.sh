@@ -3,7 +3,7 @@ set -ex
 
 # Build and install binutils if not installed
 LD_VERSION=$( "$PREFIX/bin/$TARGET-ld" --version 2>&1 | head -n1 | cut -d" " -f8- )
-if [[ $LD_VERSION != $PKG_BINUTILS ]] || [[ 1 == $REBUILD_BINUTIL ]]; then
+if [[ $LD_VERSION != $PKG_BINUTILS ]] || [[ 1 == $REBUILD_BINUTILS ]]; then
   sh "$BASEDIR/binutils.sh"
 fi
 

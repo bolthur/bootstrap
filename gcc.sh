@@ -57,7 +57,7 @@ if [ ! -f "$TARGET_COMPILE/source/gcc-$PKG_GCC/gcc.patched" ]; then
     GCC_PATCHDIR=$EXPERIMENTAL_GCC_PATCHDIR
   fi
   # apply patches
-  if [ -d $GCC_PATCHDIR ]; then
+  if [[ -d "$GCC_PATCHDIR" ]]; then
     # apply patch per patch
     for patch in $GCC_PATCHDIR/*; do
       patch -d $TARGET_COMPILE/source/gcc-$PKG_GCC -p0 < $patch

@@ -420,7 +420,7 @@ index 000000000..712ed2b9f
 +AC_OUTPUT
 diff --git newlib/libc/sys/bolthur/highlevel.c newlib/libc/sys/bolthur/highlevel.c
 new file mode 100644
-index 000000000..2b460659f
+index 000000000..05cebff83
 --- /dev/null
 +++ newlib/libc/sys/bolthur/highlevel.c
 @@ -0,0 +1,123 @@
@@ -440,7 +440,7 @@ index 000000000..2b460659f
 +static int next_pool;
 +void* pool[ MAX_POOL_ENTRIES ];
 +
-+extern caddr_t _memory_acquire( int );
++extern caddr_t _memory_acquire( int, int );
 +extern void _memory_release( uintptr_t, int );
 +
 +/**
@@ -455,7 +455,7 @@ index 000000000..2b460659f
 +
 +  if ( incr > 0 ) {
 +    // allocate memory
-+    ptr = _memory_acquire( incr );
++    ptr = _memory_acquire( incr, 2 );
 +    // handle error
 +    if ( 0 == ptr ) {
 +      return ( caddr_t )-1;

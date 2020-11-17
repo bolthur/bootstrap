@@ -38,8 +38,8 @@ if [ ! -f "$TARGET_COMPILE/source/binutils-$PKG_BINUTILS/binutils.patched" ]; th
     BINUTIL_PATCHDIR=$EXPERIMENTAL_BINUTIL_PATCHDIR
   fi
   # apply patch
-  if [ -d $BINTUIL_PATCHDIR ]; then
-    for patch in $BINTUIL_PATCHDIR/*; do
+  if [[ -d "$BINUTIL_PATCHDIR" ]]; then
+    for patch in $BINUTIL_PATCHDIR/*; do
       patch -d $TARGET_COMPILE/source/binutils-$PKG_BINUTILS -p0 < $patch
     done;
     # mark as patched
