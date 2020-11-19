@@ -1,0 +1,241 @@
+diff --git compiler/extccomp.nim compiler/extccomp.nim
+index 405b1f2b6..7abfb3609 100644
+--- compiler/extccomp.nim
++++ compiler/extccomp.nim
+@@ -117,6 +117,33 @@ compiler nintendoSwitchGCC:
+     props: {hasSwitchRange, hasComputedGoto, hasCpp, hasGcGuard, hasGnuAsm,
+             hasAttribute})
+ 
++# GNU C and C++ Compiler
++compiler bolthurGCC:
++  result = (
++    name: "bolthur_gcc",
++    objExt: "o",
++    optSpeed: " -O3 ",
++    optSize: " -Os ",
++    compilerExe: "arm-unknown-bolthur-eabi-gcc",
++    cppCompiler: "arm-unknown-bolthur-eabi-g++",
++    compileTmpl: "-w -MMD -MP -MF $dfile -c $options $include -o $objfile $file",
++    buildGui: " -mwindows",
++    buildDll: " -shared",
++    buildLib: "arm-unknown-bolthur-eabi-ar rcs $libfile $objfiles",
++    linkerExe: "arm-unknown-bolthur-eabi-gcc",
++    linkTmpl: "$buildgui $builddll -Wl,-Map,$mapfile -o $exefile $objfiles $options",
++    includeCmd: " -I",
++    linkDirCmd: " -L",
++    linkLibCmd: " -l$1",
++    debug: "",
++    pic: "-fPIE",
++    asmStmtFrmt: "asm($1);$n",
++    structStmtFmt: "$1 $3 $2 ", # struct|union [packed] $name
++    produceAsm: gnuAsmListing,
++    cppXsupport: "-std=gnu++14 -funsigned-char",
++    props: {hasSwitchRange, hasComputedGoto, hasGcGuard, hasGnuAsm,
++            hasAttribute})
++
+ # LLVM Frontend for GCC/G++
+ compiler llvmGcc:
+   result = gcc() # Uses settings from GCC
+@@ -268,6 +295,7 @@ compiler envcc:
+ const
+   CC*: array[succ(low(TSystemCC))..high(TSystemCC), TInfoCC] = [
+     gcc(),
++    bolthurGCC(),
+     nintendoSwitchGCC(),
+     llvmGcc(),
+     clang(),
+diff --git compiler/installer.ini compiler/installer.ini
+index f0756ab3e..9fa9a4297 100644
+--- compiler/installer.ini
++++ compiler/installer.ini
+@@ -16,6 +16,7 @@ Platforms: """
+   haiku: i386;amd64
+   android: i386;arm;arm64
+   nintendoswitch: arm64
++  bolthur: arm
+ """
+ 
+ Authors: "Andreas Rumpf"
+diff --git compiler/options.nim compiler/options.nim
+index 3be7c5099..62ed6e637 100644
+--- compiler/options.nim
++++ compiler/options.nim
+@@ -181,7 +181,7 @@ type
+     disabledSf, writeOnlySf, readOnlySf, v2Sf
+ 
+   TSystemCC* = enum
+-    ccNone, ccGcc, ccNintendoSwitch, ccLLVM_Gcc, ccCLang, ccBcc, ccVcc,
++    ccNone, ccGcc, ccBolthur, ccNintendoSwitch, ccLLVM_Gcc, ccCLang, ccBcc, ccVcc,
+     ccTcc, ccEnv, ccIcl, ccIcc, ccClangCl
+ 
+   ExceptionSystem* = enum
+@@ -498,7 +498,7 @@ proc isDefined*(conf: ConfigRef; symbol: string): bool =
+                             osQnx, osAtari, osAix,
+                             osHaiku, osVxWorks, osSolaris, osNetbsd,
+                             osFreebsd, osOpenbsd, osDragonfly, osMacosx, osIos,
+-                            osAndroid, osNintendoSwitch, osFreeRTOS}
++                            osAndroid, osNintendoSwitch, osFreeRTOS, osBolthur}
+     of "linux":
+       result = conf.target.targetOS in {osLinux, osAndroid}
+     of "bsd":
+@@ -516,6 +516,8 @@ proc isDefined*(conf: ConfigRef; symbol: string): bool =
+       result = conf.target.targetOS == osNintendoSwitch
+     of "freertos":
+       result = conf.target.targetOS == osFreeRTOS
++    of "bolthur":
++      result = conf.target.targetOS == osBolthur
+     of "lwip":
+       result = conf.target.targetOS in {osFreeRTOS}
+     of "littleendian": result = CPU[conf.target.targetCPU].endian == platform.littleEndian
+diff --git compiler/platform.nim compiler/platform.nim
+index 78c523c1a..ec5905623 100644
+--- compiler/platform.nim
++++ compiler/platform.nim
+@@ -21,8 +21,8 @@ type
+                     # conditionals to condsyms (end of module).
+     osNone, osDos, osWindows, osOs2, osLinux, osMorphos, osSkyos, osSolaris,
+     osIrix, osNetbsd, osFreebsd, osOpenbsd, osDragonfly, osAix, osPalmos, osQnx,
+-    osAmiga, osAtari, osNetware, osMacos, osMacosx, osIos, osHaiku, osAndroid, osVxWorks
+-    osGenode, osJS, osNimVM, osStandalone, osNintendoSwitch, osFreeRTOS, osAny
++    osAmiga, osAtari, osNetware, osMacos, osMacosx, osIos, osHaiku, osAndroid, osVxWorks,
++    osGenode, osJS, osNimVM, osStandalone, osNintendoSwitch, osFreeRTOS, osBolthur, osAny
+ 
+ type
+   TInfoOSProp* = enum
+@@ -181,6 +181,10 @@ const
+       objExt: ".o", newLine: "\x0A", pathSep: ":", dirSep: "/",
+       scriptExt: ".sh", curDir: ".", exeExt: "", extSep: ".",
+       props: {ospPosix}),
++     (name: "Bolthur", parDir: "..", dllFrmt: "lib$1.so", altDirSep: "/",
++      objExt: ".o", newLine: "\x0A", pathSep: ":", dirSep: "/",
++      scriptExt: ".sh", curDir: ".", exeExt: ".elf", extSep: ".",
++      props: {ospPosix}),
+      (name: "Any", parDir: "..", dllFrmt: "lib$1.so", altDirSep: "/",
+       objExt: ".o", newLine: "\x0A", pathSep: ":", dirSep: "/",
+       scriptExt: ".sh", curDir: ".", exeExt: "", extSep: ".",
+diff --git config/nim.cfg config/nim.cfg
+index a33a2f0a9..026882e98 100644
+--- config/nim.cfg
++++ config/nim.cfg
+@@ -153,6 +153,14 @@ path="$lib/pure"
+   switch_gcc.cpp.options.always = "-g -Wall -O2 -ffunction-sections -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE -D__SWITCH__ -fno-rtti -fno-exceptions -std=gnu++11"
+ @end
+ 
++@if bolthur:
++  cc = "bolthur_gcc"
++  bolthur_gcc.options.linker = "-g -march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard"
++  bolthur_gcc.cpp.options.linker = "-g -march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard"
++  bolthur_gcc.options.always = "-g -Wall -O2 -ffunction-sections -march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard"
++  bolthur_gcc.cpp.options.always = "-g -Wall -O2 -ffunction-sections -march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard"
++@end
++
+ # Configuration for the Intel C/C++ compiler:
+ @if windows:
+   icl.options.speed = "/Ox /arch:SSE2"
+diff --git lib/pure/includes/osseps.nim lib/pure/includes/osseps.nim
+index bafef686d..cea3d0dcc 100644
+--- lib/pure/includes/osseps.nim
++++ lib/pure/includes/osseps.nim
+@@ -63,6 +63,7 @@ const
+     elif defined(netware): "nlm"
+     elif defined(vxworks): "vxe"
+     elif defined(nintendoswitch): "elf"
++    elif defined(bolthur): "elf"
+     else: ""
+     ## The file extension of native executables. For example:
+     ## `""` for POSIX, `"exe"` on Windows (without a dot).
+diff --git lib/pure/selectors.nim lib/pure/selectors.nim
+index 933b5491a..2a4b5b319 100644
+--- lib/pure/selectors.nim
++++ lib/pure/selectors.nim
+@@ -335,6 +335,8 @@ else:
+     include ioselects/ioselectors_select # TODO: use the native VFS layer
+   elif defined(nintendoswitch):
+     include ioselects/ioselectors_select
++  elif defined(bolthur):
++    include ioselects/ioselectors_select
+   elif defined(freertos) or defined(lwip):
+     include ioselects/ioselectors_select
+   else:
+diff --git lib/system/ansi_c.nim lib/system/ansi_c.nim
+index 0b4b25992..bf5e73c78 100644
+--- lib/system/ansi_c.nim
++++ lib/system/ansi_c.nim
+@@ -53,7 +53,7 @@ when defined(windows):
+ elif defined(macosx) or defined(linux) or defined(freebsd) or
+      defined(openbsd) or defined(netbsd) or defined(solaris) or
+      defined(dragonfly) or defined(nintendoswitch) or defined(genode) or
+-     defined(aix) or hostOS == "standalone":
++     defined(aix) or defined(bolthur) or hostOS == "standalone":
+   const
+     SIGABRT* = cint(6)
+     SIGFPE* = cint(8)
+diff --git lib/system/dyncalls.nim lib/system/dyncalls.nim
+index 1b0a3e64c..cf061f909 100644
+--- lib/system/dyncalls.nim
++++ lib/system/dyncalls.nim
+@@ -179,7 +179,7 @@ elif defined(genode):
+   proc nimGetProcAddr(lib: LibHandle, name: cstring): ProcAddr {.
+     error: "nimGetProcAddr not implemented".}
+ 
+-elif defined(nintendoswitch) or defined(freertos):
++elif defined(nintendoswitch) or defined(freertos) or defined(bolthur):
+   proc nimUnloadLibrary(lib: LibHandle) =
+     cstderr.rawWrite("nimUnLoadLibrary not implemented")
+     cstderr.rawWrite("\n")
+diff --git lib/system/io.nim lib/system/io.nim
+index c3b2976fb..ccd54c0b8 100644
+--- lib/system/io.nim
++++ lib/system/io.nim
+@@ -771,7 +771,7 @@ when declared(stdout):
+ 
+   const stdOutLock = not defined(windows) and not defined(android) and
+                      not defined(nintendoswitch) and not defined(freertos) and
+-                     hostOS != "any"
++                     not defined(bolthur) and hostOS != "any"
+ 
+   proc echoBinSafe(args: openArray[string]) {.compilerproc.} =
+     when defined(androidNDK):
+diff --git lib/system/osalloc.nim lib/system/osalloc.nim
+index 32d3b166d..c6084f8f0 100644
+--- lib/system/osalloc.nim
++++ lib/system/osalloc.nim
+@@ -201,7 +201,7 @@ elif defined(posix) and not defined(StandaloneHeapSize):
+       var MAP_STACK {.importc: "MAP_STACK", header: "<sys/mman.h>".}: cint
+   else:
+     const MAP_STACK = 0             # avoid sideeffects
+-    
++
+   when defined(macosx) or defined(freebsd):
+     const MAP_ANONYMOUS = 0x1000
+     const MAP_PRIVATE = 0x02        # Changes are private
+@@ -280,7 +280,7 @@ elif defined(windows) and not defined(StandaloneHeapSize):
+         quit 1
+     #VirtualFree(p, size, MEM_DECOMMIT)
+ 
+-elif hostOS == "standalone" or defined(StandaloneHeapSize):
++elif hostOS == "standalone"or defined(StandaloneHeapSize):
+   const StandaloneHeapSize {.intdefine.}: int = 1024 * PageSize
+   var
+     theHeap: array[StandaloneHeapSize div sizeof(float64), float64] # 'float64' for alignment
+diff --git lib/system/platforms.nim lib/system/platforms.nim
+index 6e39dc7f2..56b104250 100644
+--- lib/system/platforms.nim
++++ lib/system/platforms.nim
+@@ -40,7 +40,7 @@ type
+     none, dos, windows, os2, linux, morphos, skyos, solaris,
+     irix, netbsd, freebsd, openbsd, aix, palmos, qnx, amiga,
+     atari, netware, macos, macosx, haiku, android, js, nimVM,
+-    standalone, nintendoswitch
++    standalone, nintendoswitch, bolthur
+ 
+ const
+   targetOS* = when defined(windows): OsPlatform.windows
+@@ -68,6 +68,7 @@ const
+               elif defined(nimVM): OsPlatform.nimVM
+               elif defined(standalone): OsPlatform.standalone
+               elif defined(nintendoswitch): OsPlatform.nintendoswitch
++              elif defined(bolthur): OsPlatform.bolthur
+               else: OsPlatform.none
+     ## the OS this program will run on.
+ 
