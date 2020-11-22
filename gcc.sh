@@ -107,6 +107,7 @@ if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.configured" ]; the
     --enable-languages=c,c++ \
     --disable-shared \
     --disable-werror \
+    --disable-libssp \
     --with-newlib \
     --with-sysroot=$SYSROOT/$TARGET \
     --with-pkgversion="GCC; bolthur bootstrap cross" \

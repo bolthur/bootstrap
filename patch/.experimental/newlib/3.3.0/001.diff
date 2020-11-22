@@ -80,10 +80,10 @@ index e1bad1710..00027a85f 100644
 +include $(srcdir)/../multi-build.in
 diff --git libgloss/arm/bolthur-crt0.c libgloss/arm/bolthur-crt0.c
 new file mode 100644
-index 000000000..73d3dfb1a
+index 000000000..a3997531e
 --- /dev/null
 +++ libgloss/arm/bolthur-crt0.c
-@@ -0,0 +1,88 @@
+@@ -0,0 +1,89 @@
 +
 +/**
 + * Bolthur system startup for the ARM processor.
@@ -105,6 +105,7 @@ index 000000000..73d3dfb1a
 +/* forward declaration */
 +int main( int argc, char* argv[], char* env[] );
 +extern char** environ;
++// extern int _init_signal( void );
 +
 +/* bss start and end for cleanup */
 +extern unsigned int __bss_start__;
@@ -162,13 +163,13 @@ index 000000000..73d3dfb1a
 +  register int *sp asm( "sp" );
 +  // clear out bss
 +  clear_bss();
-+  // init / fini handling
++  // init handling
 +  #if defined( __USES_INITFINI__ )
 +    // call init if existing
 +    _init();
-+    // register exit handler
-+    atexit( _fini );
 +  #endif
++  // init signals
++  // _init_signal();
 +  // call early main
 +  _main( *sp, ( char** )( sp + 1 ) );
 +}
@@ -300,7 +301,7 @@ index 000000000..d2ad3e850
 +bolthur-crt0%O%s crti%O%s crtbegin%O%s
 +
 diff --git newlib/configure.host newlib/configure.host
-index a84c0c80a..b5cce828e 100644
+index a84c0c80a..e59419da6 100644
 --- newlib/configure.host
 +++ newlib/configure.host
 @@ -191,11 +191,11 @@ case "${host_cpu}" in
@@ -356,17 +357,19 @@ index a84c0c80a..b5cce828e 100644
  	gcc_dir=`gcc -print-search-dirs | awk '/^install:/{print $2}'`
  	default_newlib_io_c99_formats="yes"
  	default_newlib_io_long_double="yes"
-@@ -633,6 +638,9 @@ esac
+@@ -633,6 +638,11 @@ esac
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
 +	*-*-bolthur*)
-+	#newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED"
++	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED"
++	#newlib_cflags="${newlib_cflags} -Werror"
++	newlib_cflags="${newlib_cflags} -Wall"
 +	;;
    *-*-cygwin*)
  	test -z "$cygwin_srcdir" && cygwin_srcdir=`cd ${srcdir}/../winsup/cygwin; pwd`
  	export cygwin_srcdir
-@@ -662,7 +670,7 @@ case "${host}" in
+@@ -662,7 +672,7 @@ case "${host}" in
  	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections "
  	newlib_cflags="${newlib_cflags} -D_COMPILING_NEWLIB"
  newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVIDED -DSIGNAL_PROVIDED -DGETREENT_PROVIDED -DREENTRANT_SYSCALLS_PROVIDED -DHAVE_NANOSLEEP -DHAVE_BLKSIZE -DHAVE_FCNTL -DHAVE_ASSERT_FUNC"
@@ -375,7 +378,7 @@ index a84c0c80a..b5cce828e 100644
  	newlib_cflags="${newlib_cflags} -D_NO_GETLOGIN -D_NO_GETPWENT -D_NO_GETUT -D_NO_GETPASS -D_NO_SIGSET -D_NO_WORDEXP -D_NO_POPEN -D_NO_POSIX_SPAWN"
  	;;
  # VxWorks supplies its own version of malloc, and the newlib one
-@@ -749,17 +757,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -749,17 +759,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
          syscall_dir=syscalls
          ;;
    h8300*-*-*)
@@ -397,7 +400,7 @@ index a84c0c80a..b5cce828e 100644
    i[34567]86-*-sco*)
  	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DHAVE_FCNTL"
  	;;
-@@ -906,7 +914,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -906,7 +916,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
  	syscall_dir=
  	;;
    w65-*-*)
@@ -406,7 +409,7 @@ index a84c0c80a..b5cce828e 100644
  	newlib_cflags="${newlib_cflags} -DSMALL_DTOA -DSMALL_MEMORY"
  	;;
    xc16x-*)
-@@ -957,7 +965,7 @@ fi
+@@ -957,7 +967,7 @@ fi
  # Disable atexit dynamic allocation if requested.
  if [ "x${newlib_atexit_dynamic_alloc}" = "x" ]; then
  	if [ ${default_newlib_atexit_dynamic_alloc} = "yes" ]; then
