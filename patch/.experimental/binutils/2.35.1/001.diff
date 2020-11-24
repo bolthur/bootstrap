@@ -1,8 +1,8 @@
 diff --git bfd/config.bfd bfd/config.bfd
-index b96931f..93e8bb2 100644
+index 14523caf0c..bdfac234e3 100644
 --- bfd/config.bfd
 +++ bfd/config.bfd
-@@ -227,6 +227,11 @@ case "${targ}" in
+@@ -229,6 +229,11 @@ case "${targ}" in
      targ_archs="$targ_archs bfd_i386_arch bfd_powerpc_arch bfd_rs6000_arch"
      want64=true
      ;;
@@ -14,7 +14,7 @@ index b96931f..93e8bb2 100644
    aarch64-*-elf | aarch64-*-rtems*)
      targ_defvec=aarch64_elf64_le_vec
      targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec"
-@@ -384,6 +389,10 @@ case "${targ}" in
+@@ -382,6 +387,10 @@ case "${targ}" in
      targ_defvec=arm_elf32_le_vec
      targ_selvecs=arm_elf32_be_vec
      ;;
@@ -26,7 +26,7 @@ index b96931f..93e8bb2 100644
    arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \
    arm*-*-eabi* | arm-*-rtems* | arm*-*-uclinuxfdpiceabi)
 diff --git config.sub config.sub
-index f02d43a..6222c95 100755
+index f02d43ad50..6222c95489 100755
 --- config.sub
 +++ config.sub
 @@ -1366,7 +1366,7 @@ case $os in
@@ -39,24 +39,9 @@ index f02d43a..6222c95 100755
  		;;
  	qnx*)
 diff --git gas/configure.tgt gas/configure.tgt
-index 37224c5..98ce9fe 100644
+index 337249597c..5dd219f964 100644
 --- gas/configure.tgt
 +++ gas/configure.tgt
-@@ -6,12 +6,12 @@
- # it under the terms of the GNU General Public License as published by
- # the Free Software Foundation; either version 3 of the License, or
- # (at your option) any later version.
--# 
-+#
- # This program is distributed in the hope that it will be useful,
- # but WITHOUT ANY WARRANTY; without even the implied warranty of
- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- # GNU General Public License for more details.
--# 
-+#
- # You should have received a copy of the GNU General Public License
- # along with this program; see the file COPYING3.  If not see
- # <http://www.gnu.org/licenses/>.
 @@ -123,6 +123,7 @@ generic_target=${cpu_type}-$vendor-$os
  case ${generic_target} in
    aarch64*-*-elf*)			fmt=elf;;
@@ -73,41 +58,59 @@ index 37224c5..98ce9fe 100644
  
    avr-*-*)				fmt=elf bfd_gas=yes ;;
  
-@@ -326,7 +328,7 @@ case ${generic_target} in
-   moxie-*-uclinux)			fmt=elf em=linux ;;
-   moxie-*-moxiebox*)                    fmt=elf endian=little ;;
-   moxie-*-*)				fmt=elf ;;
--    
-+
-   mt-*-elf)				fmt=elf bfd_gas=yes ;;
- 
-   msp430-*-*)				fmt=elf ;;
-@@ -415,7 +417,7 @@ case ${generic_target} in
-   wasm32-*-*)                           fmt=elf ;;
- 
-   xstormy16-*-*)			fmt=elf ;;
--  
-+
-   xgate-*-*)    			fmt=elf ;;
- 
-   xtensa*-*-*)				fmt=elf ;;
+diff --git ld/Makefile.am ld/Makefile.am
+index 02c4fc1639..3e02b4f34a 100644
+--- ld/Makefile.am
++++ ld/Makefile.am
+@@ -165,6 +165,7 @@ ALL_EMULATION_SOURCES = \
+ 	earclinux_nps.c \
+ 	earm_wince_pe.c \
+ 	earmelf.c \
++	earmelf_bolthur.c \
+ 	earmelf_fbsd.c \
+ 	earmelf_fuchsia.c \
+ 	earmelf_linux.c \
+@@ -651,6 +652,7 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earclinux_nps.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earm_wince_pe.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf.Pc@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_bolthur.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_fbsd.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_fuchsia.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_linux.Pc@am__quote@
 diff --git ld/configure.tgt ld/configure.tgt
-index 23194e3..42030f6 100644
+index 87c7d9a4ca..c8f50de5e6 100644
 --- ld/configure.tgt
 +++ ld/configure.tgt
-@@ -59,6 +59,7 @@ aarch64-*-freebsd*)	targ_emul=aarch64fbsd
+@@ -59,6 +59,9 @@ aarch64-*-freebsd*)	targ_emul=aarch64fbsd
  aarch64-*-fuchsia*)	targ_emul=aarch64elf
  			targ_extra_emuls="aarch64elfb armelf armelfb"
  			;;
-+aarch64-*-bolthur*)	targ_emul=aarch64elf ;;
++aarch64-*-bolthur*)
++			targ_emul=aarch64elf
++			;;
  aarch64_be-*-linux-gnu_ilp32)
  			targ_emul=aarch64linux32b
  			targ_extra_libpath="aarch64linuxb aarch64linux aarch64linux32 armelfb_linux_eabi armelf_linux_eabi"
-@@ -204,6 +205,7 @@ arm*-*-conix*)		targ_emul=armelf
+@@ -200,6 +203,10 @@ arm*-*-conix*)		targ_emul=armelf
  arm*-*-fuchsia*)	targ_emul=armelf_fuchsia
  			targ_extra_emuls="armelfb_fuchsia armelf armelfb"
  			;;
-+arm*-*-bolthur*)	targ_emul=armelf ;;
++arm*-*-bolthur*)
++			targ_extra_emuls="armelf armelf_bolthur"
++			targ_extra_libpath="armelf_bolthur"
++			;;
  avr-*-*)		targ_emul=avr2
  			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega3 avrxmega4 avrxmega5 avrxmega6 avrxmega7 avrtiny"
  			;;
+diff --git ld/emulparams/armelf_bolthur.sh ld/emulparams/armelf_bolthur.sh
+new file mode 100644
+index 0000000000..1fd63a2a1a
+--- /dev/null
++++ ld/emulparams/armelf_bolthur.sh
+@@ -0,0 +1,5 @@
++
++. ${srcdir}/emulparams/armelf.sh
++
++GENERATE_SHLIB_SCRIPT=yes
++GENERATE_PIE_SCRIPT=yes

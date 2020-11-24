@@ -17,6 +17,13 @@ export PATH="$TOOL_PREFIX/bin:$PATH"
 sh "$BASEDIR/automake.sh"
 sh "$BASEDIR/autoconf.sh"
 
+
+
+export ADDITIONAL_FLAG="--disable-shared"
+if [[ 1 == $EXPERIMENTAL ]]; then
+  export ADDITIONAL_FLAG="--enable-shared"
+fi
+
 # create cc if not created for rebuild
 if [ ! -f "$PREFIX/bin/$TARGET-cc" ]; then
   ln $PREFIX/bin/$TARGET-gcc $PREFIX/bin/$TARGET-cc
@@ -54,6 +61,15 @@ fi
 
 # configure automake
 if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.generated" ]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib/libc/machine/arm"
+  # reconfigure
+  autoreconf
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
   # switch to source directory
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib/libc/sys"
   # reconfigure
@@ -99,7 +115,8 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.configured" ]
     --with-pkgversion="newlib 3.3.0; bolthur bootstrap" \
     --enable-newlib-elix-level=4 \
     --enable-newlib-register-fini \
-    --enable-newlib-mb
+    --enable-newlib-mb \
+    $ADDITIONAL_FLAG
   # check for error
   if [ $? -ne 0 ]; then
     exit 1

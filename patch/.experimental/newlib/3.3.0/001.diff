@@ -285,10 +285,10 @@ index 000000000..245803d4e
 +}
 diff --git libgloss/arm/elf-bolthur.specs libgloss/arm/elf-bolthur.specs
 new file mode 100644
-index 000000000..d2ad3e850
+index 000000000..d71a6ec89
 --- /dev/null
 +++ libgloss/arm/elf-bolthur.specs
-@@ -0,0 +1,11 @@
+@@ -0,0 +1,10 @@
 +%rename lib libc
 +
 +*libgloss:
@@ -299,9 +299,103 @@ index 000000000..d2ad3e850
 +
 +*startfile:
 +bolthur-crt0%O%s crti%O%s crtbegin%O%s
-+
+diff --git newlib/Makefile.am newlib/Makefile.am
+index 809d49238..0cbb9c82e 100644
+--- newlib/Makefile.am
++++ newlib/Makefile.am
+@@ -140,9 +140,8 @@ LIBM_OBJECTLISTS = \
+ 	libm/common/objectlist.awk.in \
+ 	$(LIBM_MACHINE_OBJECTLIST)
+ 
+-libm_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/linux/shared.ld -lgcc -objectlist libm-libtool-objectlist
+-
+-libc_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/linux/shared.ld -lgcc -objectlist libc-libtool-objectlist
++libm_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/$(sys_dir)/shared.ld -lgcc -objectlist libm-libtool-objectlist
++libc_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/$(sys_dir)/shared.ld -lgcc -objectlist libc-libtool-objectlist
+ 
+ if USE_LIBTOOL
+ libm_la_SOURCES =
+diff --git newlib/Makefile.in newlib/Makefile.in
+index c3ee2908f..aa70f7126 100644
+--- newlib/Makefile.in
++++ newlib/Makefile.in
+@@ -320,10 +320,10 @@ AUTOMAKE_OPTIONS = cygnus dejagnu
+ ACLOCAL_AMFLAGS = -I . -I ..
+ 
+ # Multilib support variables.
+-MULTISRCTOP = 
+-MULTIBUILDTOP = 
+-MULTIDIRS = 
+-MULTISUBDIR = 
++MULTISRCTOP =
++MULTIBUILDTOP =
++MULTIDIRS =
++MULTISUBDIR =
+ MULTIDO = true
+ MULTICLEAN = true
+ LIBTOOL_VERSION_INFO = 0:0:0
+@@ -374,7 +374,7 @@ AM_MAKEFLAGS = \
+ 	"DESTDIR=$(DESTDIR)"
+ 
+ FLAGS_TO_PASS = $(AM_MAKEFLAGS)
+-@HAVE_DOC_FALSE@DOCDIR = 
++@HAVE_DOC_FALSE@DOCDIR =
+ @HAVE_DOC_TRUE@DOCDIR = doc
+ SUBDIRS = libc libm \
+ 	$(DOCDIR) . $(EXTRA_DIRS)
+@@ -436,18 +436,18 @@ LIBM_OBJECTLISTS = \
+ 	libm/common/objectlist.awk.in \
+ 	$(LIBM_MACHINE_OBJECTLIST)
+ 
+-libm_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/linux/shared.ld -lgcc -objectlist libm-libtool-objectlist
+-libc_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/linux/shared.ld -lgcc -objectlist libc-libtool-objectlist
+-@USE_LIBTOOL_TRUE@libm_la_SOURCES = 
++libm_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/$(sys_dir)/shared.ld -lgcc -objectlist libm-libtool-objectlist
++libc_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/$(sys_dir)/shared.ld -lgcc -objectlist libc-libtool-objectlist
++@USE_LIBTOOL_TRUE@libm_la_SOURCES =
+ @USE_LIBTOOL_TRUE@libm_la_DEPENDENCIES = libm-libtool-objectlist
+-@USE_LIBTOOL_TRUE@libc_la_SOURCES = 
++@USE_LIBTOOL_TRUE@libc_la_SOURCES =
+ @USE_LIBTOOL_TRUE@libc_la_DEPENDENCIES = libc-libtool-objectlist
+ CLEANFILES = stmp-targ-include
+ CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
+-MAKEOVERRIDES = 
++MAKEOVERRIDES =
+ 
+ # dejagnu support
+-RUNTESTFLAGS = 
++RUNTESTFLAGS =
+ all: _newlib_version.h newlib.h
+ 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+ 
+@@ -541,11 +541,11 @@ uninstall-toollibLIBRARIES:
+ 
+ clean-toollibLIBRARIES:
+ 	-test -z "$(toollib_LIBRARIES)" || rm -f $(toollib_LIBRARIES)
+-@USE_LIBTOOL_TRUE@libc.a: $(libc_a_OBJECTS) $(libc_a_DEPENDENCIES) $(EXTRA_libc_a_DEPENDENCIES) 
++@USE_LIBTOOL_TRUE@libc.a: $(libc_a_OBJECTS) $(libc_a_DEPENDENCIES) $(EXTRA_libc_a_DEPENDENCIES)
+ @USE_LIBTOOL_TRUE@	-rm -f libc.a
+ @USE_LIBTOOL_TRUE@	$(libc_a_AR) libc.a $(libc_a_OBJECTS) $(libc_a_LIBADD)
+ @USE_LIBTOOL_TRUE@	$(RANLIB) libc.a
+-@USE_LIBTOOL_TRUE@libm.a: $(libm_a_OBJECTS) $(libm_a_DEPENDENCIES) $(EXTRA_libm_a_DEPENDENCIES) 
++@USE_LIBTOOL_TRUE@libm.a: $(libm_a_OBJECTS) $(libm_a_DEPENDENCIES) $(EXTRA_libm_a_DEPENDENCIES)
+ @USE_LIBTOOL_TRUE@	-rm -f libm.a
+ @USE_LIBTOOL_TRUE@	$(libm_a_AR) libm.a $(libm_a_OBJECTS) $(libm_a_LIBADD)
+ @USE_LIBTOOL_TRUE@	$(RANLIB) libm.a
+@@ -581,9 +581,9 @@ clean-toollibLTLIBRARIES:
+ 	  echo "rm -f \"$${dir}/so_locations\""; \
+ 	  rm -f "$${dir}/so_locations"; \
+ 	done
+-libc.la: $(libc_la_OBJECTS) $(libc_la_DEPENDENCIES) $(EXTRA_libc_la_DEPENDENCIES) 
++libc.la: $(libc_la_OBJECTS) $(libc_la_DEPENDENCIES) $(EXTRA_libc_la_DEPENDENCIES)
+ 	$(libc_la_LINK) $(am_libc_la_rpath) $(libc_la_OBJECTS) $(libc_la_LIBADD) $(LIBS)
+-libm.la: $(libm_la_OBJECTS) $(libm_la_DEPENDENCIES) $(EXTRA_libm_la_DEPENDENCIES) 
++libm.la: $(libm_la_OBJECTS) $(libm_la_DEPENDENCIES) $(EXTRA_libm_la_DEPENDENCIES)
+ 	$(libm_la_LINK) $(am_libm_la_rpath) $(libm_la_OBJECTS) $(libm_la_LIBADD) $(LIBS)
+ 
+ mostlyclean-compile:
 diff --git newlib/configure.host newlib/configure.host
-index a84c0c80a..e59419da6 100644
+index a84c0c80a..2fd815555 100644
 --- newlib/configure.host
 +++ newlib/configure.host
 @@ -191,11 +191,11 @@ case "${host_cpu}" in
@@ -336,7 +430,20 @@ index a84c0c80a..e59419da6 100644
    m68*)
  	machine_dir=m68k
  	newlib_cflags="${newlib_cflags} -DCOMPACT_CTYPE"
-@@ -429,6 +429,11 @@ esac
+@@ -419,6 +419,12 @@ case "${host}" in
+     oext=lo
+     lpfx=
+     aext=la ;;
++  *-*-bolthur*)
++    use_libtool=yes
++    have_sys_mach_dir=no
++    oext=lo
++    lpfx=
++    aext=la ;;
+   *) ;; #shared library not supported for ${host}
+ esac
+ 
+@@ -429,6 +435,13 @@ esac
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
@@ -344,11 +451,13 @@ index a84c0c80a..e59419da6 100644
 +  sys_dir=bolthur
 +  # crt0 is provided by libgloss.
 +  have_crt0="no"
++  # --- Required when building a shared library ------------------------
++  newlib_cflags="${newlib_cflags} -fPIC"
 +  ;;
    *-*-cygwin*)
  	posix_dir=posix
  	stdio64_dir=stdio64
-@@ -528,7 +533,7 @@ case "${host}" in
+@@ -528,7 +541,7 @@ case "${host}" in
  	unix_dir=unix
  	posix_dir=posix
  	crt1=crt1.o
@@ -357,7 +466,7 @@ index a84c0c80a..e59419da6 100644
  	gcc_dir=`gcc -print-search-dirs | awk '/^install:/{print $2}'`
  	default_newlib_io_c99_formats="yes"
  	default_newlib_io_long_double="yes"
-@@ -633,6 +638,11 @@ esac
+@@ -633,6 +646,11 @@ esac
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
@@ -369,7 +478,7 @@ index a84c0c80a..e59419da6 100644
    *-*-cygwin*)
  	test -z "$cygwin_srcdir" && cygwin_srcdir=`cd ${srcdir}/../winsup/cygwin; pwd`
  	export cygwin_srcdir
-@@ -662,7 +672,7 @@ case "${host}" in
+@@ -662,7 +680,7 @@ case "${host}" in
  	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections "
  	newlib_cflags="${newlib_cflags} -D_COMPILING_NEWLIB"
  newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVIDED -DSIGNAL_PROVIDED -DGETREENT_PROVIDED -DREENTRANT_SYSCALLS_PROVIDED -DHAVE_NANOSLEEP -DHAVE_BLKSIZE -DHAVE_FCNTL -DHAVE_ASSERT_FUNC"
@@ -378,7 +487,7 @@ index a84c0c80a..e59419da6 100644
  	newlib_cflags="${newlib_cflags} -D_NO_GETLOGIN -D_NO_GETPWENT -D_NO_GETUT -D_NO_GETPASS -D_NO_SIGSET -D_NO_WORDEXP -D_NO_POPEN -D_NO_POSIX_SPAWN"
  	;;
  # VxWorks supplies its own version of malloc, and the newlib one
-@@ -749,17 +759,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -749,17 +767,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
          syscall_dir=syscalls
          ;;
    h8300*-*-*)
@@ -400,7 +509,7 @@ index a84c0c80a..e59419da6 100644
    i[34567]86-*-sco*)
  	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DHAVE_FCNTL"
  	;;
-@@ -906,7 +916,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -906,7 +924,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
  	syscall_dir=
  	;;
    w65-*-*)
@@ -409,7 +518,7 @@ index a84c0c80a..e59419da6 100644
  	newlib_cflags="${newlib_cflags} -DSMALL_DTOA -DSMALL_MEMORY"
  	;;
    xc16x-*)
-@@ -957,7 +967,7 @@ fi
+@@ -957,7 +975,7 @@ fi
  # Disable atexit dynamic allocation if requested.
  if [ "x${newlib_atexit_dynamic_alloc}" = "x" ]; then
  	if [ ${default_newlib_atexit_dynamic_alloc} = "yes" ]; then
@@ -418,12 +527,124 @@ index a84c0c80a..e59419da6 100644
  	fi
  fi
  
+diff --git newlib/libc/machine/arm/Makefile.am newlib/libc/machine/arm/Makefile.am
+index 9bd35e733..3f67984e1 100644
+--- newlib/libc/machine/arm/Makefile.am
++++ newlib/libc/machine/arm/Makefile.am
+@@ -6,21 +6,29 @@ INCLUDES = $(NEWLIB_CFLAGS) $(CROSS_CFLAGS) $(TARGET_CFLAGS)
+ 
+ AM_CCASFLAGS = $(INCLUDES)
+ 
++LIB_SOURCES = \
++	setjmp.S strcmp.S strcpy.c \
++  aeabi_memcpy.c aeabi_memcpy-armv7a.S \
++  aeabi_memmove.c aeabi_memmove-soft.S \
++  aeabi_memset.c aeabi_memset-soft.S aeabi_memclr.c \
++  memchr-stub.c memchr.S memcpy-stub.c memcpy.S \
++  strlen-stub.c strlen.S
++
++libarm_la_LDFLAGS = -Xcompiler -nostdlib
++
++if USE_LIBTOOL
++noinst_LTLIBRARIES = libarm.la
++libarm_la_SOURCES = $(LIB_SOURCES)
++noinst_DATA = objectlist.awk.in
++else
+ noinst_LIBRARIES = lib.a
++lib_a_SOURCES = $(LIB_SOURCES)
++lib_a_CCASFLAGS = $(AM_CCASFLAGS)
++lib_a_CFLAGS=$(AM_CFLAGS)
++noinst_DATA =
++endif # USE_LIBTOOL
+ 
+-lib_a_SOURCES = setjmp.S strcmp.S strcpy.c \
+-		aeabi_memcpy.c aeabi_memcpy-armv7a.S \
+-		aeabi_memmove.c aeabi_memmove-soft.S \
+-		aeabi_memset.c aeabi_memset-soft.S aeabi_memclr.c
+-lib_a_SOURCES += memchr-stub.c
+-lib_a_SOURCES += memchr.S
+-lib_a_SOURCES += memcpy-stub.c
+-lib_a_SOURCES += memcpy.S
+-lib_a_SOURCES += strlen-stub.c
+-lib_a_SOURCES += strlen.S
+-
+-lib_a_CCASFLAGS=$(AM_CCASFLAGS)
+-lib_a_CFLAGS = $(AM_CFLAGS)
++include $(srcdir)/../../../Makefile.shared
+ 
+ ACLOCAL_AMFLAGS = -I ../../.. -I ../../../..
+ CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
+@@ -34,21 +42,22 @@ AEABI_MEMMOVE_DEP=aeabi_memmove-thumb.S aeabi_memmove-thumb2.S \
+ AEABI_MEMSET_DEP=aeabi_memset-thumb.S aeabi_memset-thumb2.S \
+ 	aeabi_memset-arm.S
+ 
+-$(lpfx)memchr.o: $(MEMCHR_DEP)
+-$(lpfx)memchr.obj: $(MEMCHR_DEP)
+-
+-$(lpfx)memcpy.o: $(MEMCPY_DEP)
++if USE_LIBTOOL
++  $(lpfx)memchr.lo: $(MEMCHR_DEP)
++  $(lpfx)memcpy.lo: $(MEMCPY_DEP)
++  $(lpfx)strcmp.lo: $(STRCMP_DEP)
++  $(lpfx)aeabi_memmove.lo: $(AEABI_MEMMOVE_DEP)
++  $(lpfx)aeabi_memset.lo: $(AEABI_MEMSET_DEP)
++else
++  $(lpfx)memchr.o: $(MEMCHR_DEP)
++  $(lpfx)memcpy.o: $(MEMCPY_DEP)
++  $(lpfx)strcmp.o: $(STRCMP_DEP)
++  $(lpfx)aeabi_memmove.o: $(AEABI_MEMMOVE_DEP)
++  $(lpfx)aeabi_memset.o: $(AEABI_MEMSET_DEP)
++endif # USE_LIBTOOL
+ 
++$(lpfx)memchr.obj: $(MEMCHR_DEP)
+ $(lpfx)memcpy.obj: $(MEMCPY_DEP)
+-
+-$(lpfx)strcmp.o: $(STRCMP_DEP)
+-
+ $(lpfx)strcmp.obj: $(STRCMP_DEP)
+-
+-$(lpfx)aeabi_memmove.o: $(AEABI_MEMMOVE_DEP)
+-
+ $(lpfx)aeabi_memmove.obj: $(AEABI_MEMMOVE_DEP)
+-
+-$(lpfx)aeabi_memset.o: $(AEABI_MEMSET_DEP)
+-
+ $(lpfx)aeabi_memset.obj: $(AEABI_MEMSET_DEP)
+diff --git newlib/libc/machine/arm/configure.in newlib/libc/machine/arm/configure.in
+index 833b197a5..3f6f62ad0 100644
+--- newlib/libc/machine/arm/configure.in
++++ newlib/libc/machine/arm/configure.in
+@@ -5,11 +5,22 @@ AC_PREREQ(2.59)
+ AC_INIT([newlib],[NEWLIB_VERSION])
+ AC_CONFIG_SRCDIR([Makefile.am])
+ 
+-dnl Can't be done in NEWLIB_CONFIGURE because that confuses automake. 
++dnl Can't be done in NEWLIB_CONFIGURE because that confuses automake.
+ AC_CONFIG_AUX_DIR(../../../..)
+ 
+ NEWLIB_CONFIGURE(../../..)
+ 
++dnl We have to add the following lines because automake detects the
++dnl references to libtool libraries from aclocal and tries to verify that
++dnl AM_PROG_LIBTOOL is being used.  This code must occur after
++dnl NEWLIB_CONFIGURE.
++_LT_DECL_SED
++_LT_PROG_ECHO_BACKSLASH
++if test "${use_libtool}" = "yes"; then
++AC_LIBTOOL_WIN32_DLL
++AM_PROG_LIBTOOL
++fi
++
+ AC_SUBST(CFLAGS)
+ 
+ AC_CONFIG_FILES([Makefile])
 diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
 new file mode 100644
-index 000000000..e97f5f24f
+index 000000000..80e60b8b3
 --- /dev/null
 +++ newlib/libc/sys/bolthur/Makefile.am
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,93 @@
++## Process this file with automake to generate Makefile.in
 +
 +AUTOMAKE_OPTIONS = cygnus
 +
@@ -431,20 +652,97 @@ index 000000000..e97f5f24f
 +
 +AM_CCASFLAGS = $(INCLUDES)
 +
-+noinst_LIBRARIES = lib.a
++if ELIX_LEVEL_1
++argp_dir=
++ARGP_LIB=
++else
++argp_dir=
++ARGP_LIB=
++#argp_dir=argp
++#ARGP_LIB=argp/libargp.la
++endif
 +
-+lib_a_SOURCES = highlevel.c
-+lib_a_CCASFLAGS = $(AM_CCASFLAGS)
++SUBDIRS = \
++	$(argp_dir) \
++	$(EXTRA_SUBDIRS) \
++	.
++SUBLIBS = \
++	$(ARGP_LIB) \
++	$(EXTRA_SUBLIBS)
++
++GENERAL_SOURCES = \
++	highlevel.c
++ELIX_2_SOURCES =
++ELIX_3_SOURCES =
++ELIX_4_SOURCES =
++
++if ELIX_LEVEL_1
++ELIX_SOURCES =
++else
++if ELIX_LEVEL_2
++ELIX_SOURCES = $(ELIX_2_SOURCES)
++else
++if ELIX_LEVEL_3
++ELIX_SOURCES = $(ELIX_2_SOURCES) $(ELIX_3_SOURCES)
++else
++ELIX_SOURCES = $(ELIX_2_SOURCES) $(ELIX_3_SOURCES) $(ELIX_4_SOURCES)
++endif
++endif
++endif
++
++libbolthur_la_LDFLAGS = -Xcompiler -nostdlib
++
++if USE_LIBTOOL
++noinst_LTLIBRARIES = libbolthur.la
++libbolthur_la_SOURCES = $(GENERAL_SOURCES) $(ELIX_SOURCES)
++libbolthur_la_LIBADD = $(ADD_OBJS)
++libbolthur_la_DEPENDENCIES = $(ADD_OBJS)
++LIBC_COMPILE = $(LTCOMPILE)
++noinst_DATA = objectlist.awk.in
++else
++noinst_LIBRARIES = lib.a
++lib_a_SOURCES = $(GENERAL_SOURCES) $(ELIX_SOURCES)
++lib_a_LIBADD = $(ADD_OBJS)
++lib_a_DEPENDENCIES = $(ADD_OBJS)
 +lib_a_CFLAGS = $(AM_CFLAGS)
++LIBC_COMPILE = $(COMPILE)
++noinst_DATA =
++
++lib.a: $(lib_a_OBJECTS)
++	rm -f $@
++	rm -rf tmp
++	mkdir tmp
++	cd tmp; \
++	for i in $(SUBLIBS); do \
++		$(AR) x ../$$i; \
++	done; \
++	$(AR) $(AR_FLAGS) ../$@ *.o
++	$(RANLIB) $@
++	rm -rf tmp
++endif # USE_LIBTOOL
++
++objectlist.awk.in: $(noinst_LTLIBRARIES) $(SUBLIBS)
++	-rm -f objectlist.awk.in
++	for i in `ls *.lo` ; \
++		do \
++			echo $$i `pwd`/$$i >> objectlist.awk.in ; \
++	done
++	for j in $(SUBLIBS) ; \
++		do \
++			export i=`echo $$j | sed -e 's,\(.*\)\/[^\/]*$$,\1,'`; \
++			if test $$i != "." && test -f $$i/objectlist.awk.in; then \
++				cat $$i/objectlist.awk.in >> objectlist.awk.in ; \
++			fi; \
++	done
 +
 +ACLOCAL_AMFLAGS = -I ../../.. -I ../../../..
 +CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
 diff --git newlib/libc/sys/bolthur/configure.in newlib/libc/sys/bolthur/configure.in
 new file mode 100644
-index 000000000..712ed2b9f
+index 000000000..f16f32903
 --- /dev/null
 +++ newlib/libc/sys/bolthur/configure.in
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,23 @@
 +
 +AC_PREREQ(2.59)
 +AC_INIT([newlib],[NEWLIB_VERSION])
@@ -454,6 +752,17 @@ index 000000000..712ed2b9f
 +AC_CONFIG_AUX_DIR(../../../..)
 +
 +NEWLIB_CONFIGURE(../../..)
++
++dnl We have to enable libtool after NEWLIB_CONFIGURE because if we try and
++dnl add it into NEWLIB_CONFIGURE, executable tests are made before the first
++dnl line of the macro which fail because appropriate LDFLAGS are not set.
++_LT_DECL_SED
++_LT_PROG_ECHO_BACKSLASH
++AC_PROG_AWK
++if test "${use_libtool}" = "yes"; then
++AC_LIBTOOL_WIN32_DLL
++AM_PROG_LIBTOOL
++fi
 +
 +AC_CONFIG_FILES([Makefile])
 +AC_OUTPUT
@@ -586,6 +895,83 @@ index 000000000..05cebff83
 +int _gettimeofday( struct timeval* p, struct timezone* z ) {
 +  return -1;
 +}
+diff --git newlib/libc/sys/bolthur/shared.ld newlib/libc/sys/bolthur/shared.ld
+new file mode 100644
+index 000000000..e7bc07b09
+--- /dev/null
++++ newlib/libc/sys/bolthur/shared.ld
+@@ -0,0 +1,71 @@
++VERS_1.10 {
++	global: *;
++};
++
++VERS_1.11 {
++	global: *;
++};
++
++VERS_1.12 {
++	global: *;
++};
++
++VERS_1.13 {
++	global: *;
++};
++
++VERS_1.14 {
++	global: *;
++};
++
++VERS_1.15 {
++	global: *;
++};
++
++VERS_1.16 {
++	global: *;
++};
++
++VERS_1.17 {
++	global: *;
++};
++
++VERS_1.18 {
++	global: *;
++};
++
++VERS_1.19 {
++	global: *;
++};
++
++VERS_1.20 {
++	global: *;
++};
++
++VERS_2.0 {
++	global: *;
++};
++
++VERS_2.1 {
++	global: *;
++};
++
++VERS_2.2 {
++	global: *;
++};
++
++VERS_3.0 {
++	global: *;
++};
++
++VERS_3.1 {
++	global: *;
++};
++
++VERS_3.2 {
++	global: *;
++};
++
++VERS_3.3 {
++	global: *;
++};
 diff --git newlib/libc/sys/configure.in newlib/libc/sys/configure.in
 index a65d1e71f..44a6528df 100644
 --- newlib/libc/sys/configure.in

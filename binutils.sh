@@ -19,6 +19,11 @@ sh "$BASEDIR/autoconf.sh"
 
 
 
+export ADDITIONAL_FLAG="--disable-shared"
+if [[ 1 == $EXPERIMENTAL ]]; then
+  export ADDITIONAL_FLAG="--enable-shared"
+fi
+
 # Handle rebuild
 if [[ -d "$TARGET_COMPILE/build/binutils-$TARGET" ]] && [[ 1 == $REBUILD_BINUTILS ]]; then
   rm -rf "$TARGET_COMPILE/build/binutils-$TARGET"
@@ -72,7 +77,8 @@ if [ ! -f "$TARGET_COMPILE/build/binutils-$TARGET/binutils.configured" ]; then
     --disable-werror \
     --disable-libssp \
     --with-sysroot=$SYSROOT/$TARGET \
-    --with-pkgversion="GNU Binutils; bolthur bootstrap cross"
+    --with-pkgversion="GNU Binutils; bolthur bootstrap cross" \
+    $ADDITIONAL_FLAG
 
   if [ $? -ne 0 ]; then
     exit 1

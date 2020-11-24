@@ -29,6 +29,11 @@ if [ -n "$MULTILIB_LIST" ]; then
   export MULTILIB="--with-multilib-list=$MULTILIB_LIST"
 fi
 
+export ADDITIONAL_FLAG="--disable-shared"
+if [[ 1 == $EXPERIMENTAL ]]; then
+  export ADDITIONAL_FLAG="--enable-shared"
+fi
+
 # Handle rebuild
 if [[ -d "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET" ]] && [[ 1 == $REBUILD_GCC ]]; then
   rm -rf "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET"
@@ -105,14 +110,14 @@ if [ ! -f "$TARGET_COMPILE/build/gcc.$BUILD_STAGE-$TARGET/gcc.configured" ]; the
     --prefix="$PREFIX" \
     --disable-nls \
     --enable-languages=c,c++ \
-    --disable-shared \
     --disable-werror \
     --disable-libssp \
     --with-newlib \
     --with-sysroot=$SYSROOT/$TARGET \
     --with-pkgversion="GCC; bolthur bootstrap cross" \
+    $ADDITIONAL_FLAG \
     $BUILD_OPTION \
-    $MULTILIB
+    $MULTILIB \
 
   if [ $? -ne 0 ]; then
     exit 1
