@@ -22,6 +22,7 @@ sh "$BASEDIR/autoconf.sh"
 # build type
 export BUILD_STAGE=$1
 export MULTILIB_LIST=$2
+export SHARED=$3
 
 # add multilib parameter if set
 export MULTILIB=""
@@ -30,7 +31,7 @@ if [ -n "$MULTILIB_LIST" ]; then
 fi
 
 export ADDITIONAL_FLAG="--disable-shared"
-if [[ 1 == $EXPERIMENTAL ]]; then
+if [[ 1 == $EXPERIMENTAL ]] && [[ "$SHARED" == "shared"* ]]; then
   export ADDITIONAL_FLAG="--enable-shared"
 fi
 

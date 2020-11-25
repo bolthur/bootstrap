@@ -19,8 +19,10 @@ sh "$BASEDIR/autoconf.sh"
 
 
 
+export SHARED=$1
+
 export ADDITIONAL_FLAG="--disable-shared"
-if [[ 1 == $EXPERIMENTAL ]]; then
+if [[ 1 == $EXPERIMENTAL ]] && [[ "$SHARED" == "shared"* ]]; then
   export ADDITIONAL_FLAG="--enable-shared"
 fi
 

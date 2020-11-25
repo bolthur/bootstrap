@@ -1,5 +1,5 @@
 diff --git config.sub config.sub
-index 75bb6a313..c7dd7440e 100755
+index 75bb6a3..c7dd744 100755
 --- config.sub
 +++ config.sub
 @@ -1363,7 +1363,8 @@ case $os in
@@ -13,7 +13,7 @@ index 75bb6a313..c7dd7440e 100755
  		;;
  	qnx*)
 diff --git libgloss/arm/Makefile.in libgloss/arm/Makefile.in
-index e1bad1710..00027a85f 100644
+index e1bad17..00027a8 100644
 --- libgloss/arm/Makefile.in
 +++ libgloss/arm/Makefile.in
 @@ -71,7 +71,13 @@ LINUX_OBJS    = linux-syscalls0.o linux-syscalls1.o
@@ -80,7 +80,7 @@ index e1bad1710..00027a85f 100644
 +include $(srcdir)/../multi-build.in
 diff --git libgloss/arm/bolthur-crt0.c libgloss/arm/bolthur-crt0.c
 new file mode 100644
-index 000000000..a3997531e
+index 0000000..a399753
 --- /dev/null
 +++ libgloss/arm/bolthur-crt0.c
 @@ -0,0 +1,89 @@
@@ -175,7 +175,7 @@ index 000000000..a3997531e
 +}
 diff --git libgloss/arm/bolthur-syscall.h libgloss/arm/bolthur-syscall.h
 new file mode 100644
-index 000000000..2a64c7d55
+index 0000000..2a64c7d
 --- /dev/null
 +++ libgloss/arm/bolthur-syscall.h
 @@ -0,0 +1,24 @@
@@ -205,7 +205,7 @@ index 000000000..2a64c7d55
 +#endif /* _LIBGLOSS_ARM_BOLTHUR_UNISTD_H */
 diff --git libgloss/arm/bolthur-syscalls0.S libgloss/arm/bolthur-syscalls0.S
 new file mode 100644
-index 000000000..6095182ba
+index 0000000..6095182
 --- /dev/null
 +++ libgloss/arm/bolthur-syscalls0.S
 @@ -0,0 +1,38 @@
@@ -249,7 +249,7 @@ index 000000000..6095182ba
 +SYSCALL( exit )
 diff --git libgloss/arm/bolthur-syscalls1.c libgloss/arm/bolthur-syscalls1.c
 new file mode 100644
-index 000000000..245803d4e
+index 0000000..245803d
 --- /dev/null
 +++ libgloss/arm/bolthur-syscalls1.c
 @@ -0,0 +1,30 @@
@@ -285,7 +285,7 @@ index 000000000..245803d4e
 +}
 diff --git libgloss/arm/elf-bolthur.specs libgloss/arm/elf-bolthur.specs
 new file mode 100644
-index 000000000..d71a6ec89
+index 0000000..d71a6ec
 --- /dev/null
 +++ libgloss/arm/elf-bolthur.specs
 @@ -0,0 +1,10 @@
@@ -300,7 +300,7 @@ index 000000000..d71a6ec89
 +*startfile:
 +bolthur-crt0%O%s crti%O%s crtbegin%O%s
 diff --git newlib/Makefile.am newlib/Makefile.am
-index 809d49238..0cbb9c82e 100644
+index 809d492..0cbb9c8 100644
 --- newlib/Makefile.am
 +++ newlib/Makefile.am
 @@ -140,9 +140,8 @@ LIBM_OBJECTLISTS = \
@@ -316,7 +316,7 @@ index 809d49238..0cbb9c82e 100644
  if USE_LIBTOOL
  libm_la_SOURCES =
 diff --git newlib/Makefile.in newlib/Makefile.in
-index c3ee2908f..aa70f7126 100644
+index c3ee290..aa70f71 100644
 --- newlib/Makefile.in
 +++ newlib/Makefile.in
 @@ -320,10 +320,10 @@ AUTOMAKE_OPTIONS = cygnus dejagnu
@@ -395,7 +395,7 @@ index c3ee2908f..aa70f7126 100644
  
  mostlyclean-compile:
 diff --git newlib/configure.host newlib/configure.host
-index a84c0c80a..2fd815555 100644
+index a84c0c8..6aa2706 100644
 --- newlib/configure.host
 +++ newlib/configure.host
 @@ -191,11 +191,11 @@ case "${host_cpu}" in
@@ -430,20 +430,26 @@ index a84c0c80a..2fd815555 100644
    m68*)
  	machine_dir=m68k
  	newlib_cflags="${newlib_cflags} -DCOMPACT_CTYPE"
-@@ -419,6 +419,12 @@ case "${host}" in
+@@ -418,7 +418,17 @@ case "${host}" in
+     stdio64_dir=stdio64
      oext=lo
      lpfx=
-     aext=la ;;
+-    aext=la ;;
++    aext=la
++    ;;
 +  *-*-bolthur*)
-+    use_libtool=yes
-+    have_sys_mach_dir=no
-+    oext=lo
-+    lpfx=
-+    aext=la ;;
++    if test "$enable_shared" = "yes"; then
++      use_libtool=yes
++      have_sys_mach_dir=no
++      oext=lo
++      lpfx=
++      aext=la
++    fi
++    ;;
    *) ;; #shared library not supported for ${host}
  esac
  
-@@ -429,6 +435,13 @@ esac
+@@ -429,6 +439,15 @@ esac
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
@@ -451,13 +457,15 @@ index a84c0c80a..2fd815555 100644
 +  sys_dir=bolthur
 +  # crt0 is provided by libgloss.
 +  have_crt0="no"
-+  # --- Required when building a shared library ------------------------
-+  newlib_cflags="${newlib_cflags} -fPIC"
++  #if test "$enable_shared" = "yes"; then
++    # --- Required when building a shared library ------------------------
++    newlib_cflags="${newlib_cflags} -fPIC"
++  #fi
 +  ;;
    *-*-cygwin*)
  	posix_dir=posix
  	stdio64_dir=stdio64
-@@ -528,7 +541,7 @@ case "${host}" in
+@@ -528,7 +547,7 @@ case "${host}" in
  	unix_dir=unix
  	posix_dir=posix
  	crt1=crt1.o
@@ -466,7 +474,7 @@ index a84c0c80a..2fd815555 100644
  	gcc_dir=`gcc -print-search-dirs | awk '/^install:/{print $2}'`
  	default_newlib_io_c99_formats="yes"
  	default_newlib_io_long_double="yes"
-@@ -633,6 +646,11 @@ esac
+@@ -633,6 +652,11 @@ esac
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
@@ -478,7 +486,7 @@ index a84c0c80a..2fd815555 100644
    *-*-cygwin*)
  	test -z "$cygwin_srcdir" && cygwin_srcdir=`cd ${srcdir}/../winsup/cygwin; pwd`
  	export cygwin_srcdir
-@@ -662,7 +680,7 @@ case "${host}" in
+@@ -662,7 +686,7 @@ case "${host}" in
  	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections "
  	newlib_cflags="${newlib_cflags} -D_COMPILING_NEWLIB"
  newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVIDED -DSIGNAL_PROVIDED -DGETREENT_PROVIDED -DREENTRANT_SYSCALLS_PROVIDED -DHAVE_NANOSLEEP -DHAVE_BLKSIZE -DHAVE_FCNTL -DHAVE_ASSERT_FUNC"
@@ -487,7 +495,7 @@ index a84c0c80a..2fd815555 100644
  	newlib_cflags="${newlib_cflags} -D_NO_GETLOGIN -D_NO_GETPWENT -D_NO_GETUT -D_NO_GETPASS -D_NO_SIGSET -D_NO_WORDEXP -D_NO_POPEN -D_NO_POSIX_SPAWN"
  	;;
  # VxWorks supplies its own version of malloc, and the newlib one
-@@ -749,17 +767,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -749,17 +773,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
          syscall_dir=syscalls
          ;;
    h8300*-*-*)
@@ -509,7 +517,7 @@ index a84c0c80a..2fd815555 100644
    i[34567]86-*-sco*)
  	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DHAVE_FCNTL"
  	;;
-@@ -906,7 +924,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -906,7 +930,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
  	syscall_dir=
  	;;
    w65-*-*)
@@ -518,7 +526,7 @@ index a84c0c80a..2fd815555 100644
  	newlib_cflags="${newlib_cflags} -DSMALL_DTOA -DSMALL_MEMORY"
  	;;
    xc16x-*)
-@@ -957,7 +975,7 @@ fi
+@@ -957,7 +981,7 @@ fi
  # Disable atexit dynamic allocation if requested.
  if [ "x${newlib_atexit_dynamic_alloc}" = "x" ]; then
  	if [ ${default_newlib_atexit_dynamic_alloc} = "yes" ]; then
@@ -528,7 +536,7 @@ index a84c0c80a..2fd815555 100644
  fi
  
 diff --git newlib/libc/machine/arm/Makefile.am newlib/libc/machine/arm/Makefile.am
-index 9bd35e733..3f67984e1 100644
+index 9bd35e7..3f67984 100644
 --- newlib/libc/machine/arm/Makefile.am
 +++ newlib/libc/machine/arm/Makefile.am
 @@ -6,21 +6,29 @@ INCLUDES = $(NEWLIB_CFLAGS) $(CROSS_CFLAGS) $(TARGET_CFLAGS)
@@ -611,7 +619,7 @@ index 9bd35e733..3f67984e1 100644
 -
  $(lpfx)aeabi_memset.obj: $(AEABI_MEMSET_DEP)
 diff --git newlib/libc/machine/arm/configure.in newlib/libc/machine/arm/configure.in
-index 833b197a5..3f6f62ad0 100644
+index 833b197..3f6f62a 100644
 --- newlib/libc/machine/arm/configure.in
 +++ newlib/libc/machine/arm/configure.in
 @@ -5,11 +5,22 @@ AC_PREREQ(2.59)
@@ -640,10 +648,10 @@ index 833b197a5..3f6f62ad0 100644
  AC_CONFIG_FILES([Makefile])
 diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
 new file mode 100644
-index 000000000..80e60b8b3
+index 0000000..dc6844d
 --- /dev/null
 +++ newlib/libc/sys/bolthur/Makefile.am
-@@ -0,0 +1,93 @@
+@@ -0,0 +1,95 @@
 +## Process this file with automake to generate Makefile.in
 +
 +AUTOMAKE_OPTIONS = cygnus
@@ -708,17 +716,19 @@ index 000000000..80e60b8b3
 +LIBC_COMPILE = $(COMPILE)
 +noinst_DATA =
 +
-+lib.a: $(lib_a_OBJECTS)
-+	rm -f $@
-+	rm -rf tmp
-+	mkdir tmp
-+	cd tmp; \
-+	for i in $(SUBLIBS); do \
-+		$(AR) x ../$$i; \
-+	done; \
-+	$(AR) $(AR_FLAGS) ../$@ *.o
-+	$(RANLIB) $@
-+	rm -rf tmp
++# FIXME: ADD AGAIN, WHEN SUBLIB OBJECTS ARE EXISTING
++# lib.a:  $(lib_a_OBJECTS)
++# 	rm -f $@
++# 	rm -rf tmp
++# 	mkdir tmp
++# 	cd tmp; \
++# 	for i in $(SUBLIBS); do \
++# 	  $(AR) x ../$$i; \
++# 	done; \
++# 	$(AR) $(AR_FLAGS) ../$@ *.o
++# 	$(RANLIB) $@
++# 	rm -rf tmp
++
 +endif # USE_LIBTOOL
 +
 +objectlist.awk.in: $(noinst_LTLIBRARIES) $(SUBLIBS)
@@ -739,10 +749,10 @@ index 000000000..80e60b8b3
 +CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
 diff --git newlib/libc/sys/bolthur/configure.in newlib/libc/sys/bolthur/configure.in
 new file mode 100644
-index 000000000..f16f32903
+index 0000000..d426238
 --- /dev/null
 +++ newlib/libc/sys/bolthur/configure.in
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,40 @@
 +
 +AC_PREREQ(2.59)
 +AC_INIT([newlib],[NEWLIB_VERSION])
@@ -764,11 +774,28 @@ index 000000000..f16f32903
 +AM_PROG_LIBTOOL
 +fi
 +
++# if test "${newlib_multithread}" = "yes"; then
++# AC_CONFIG_SUBDIRS(linuxthreads)
++# fi
++
++EXTRA_SUBDIRS=
++EXTRA_SUBLIBS=
++
++# if test "x${newlib_elix_level}" = "x1"; then
++# EXTRA_SUBDIRS=linuxthreads net
++# else
++# EXTRA_SUBDIRS="linuxthreads net intl iconv dl"
++# EXTRA_SUBLIBS="net/libnet.la intl/libintl.la iconv/libiconv.la dl/libdl.la"
++# fi
++
++AC_SUBST(EXTRA_SUBDIRS)
++AC_SUBST(EXTRA_SUBLIBS)
++
 +AC_CONFIG_FILES([Makefile])
 +AC_OUTPUT
 diff --git newlib/libc/sys/bolthur/highlevel.c newlib/libc/sys/bolthur/highlevel.c
 new file mode 100644
-index 000000000..05cebff83
+index 0000000..05cebff
 --- /dev/null
 +++ newlib/libc/sys/bolthur/highlevel.c
 @@ -0,0 +1,123 @@
@@ -897,7 +924,7 @@ index 000000000..05cebff83
 +}
 diff --git newlib/libc/sys/bolthur/shared.ld newlib/libc/sys/bolthur/shared.ld
 new file mode 100644
-index 000000000..e7bc07b09
+index 0000000..e7bc07b
 --- /dev/null
 +++ newlib/libc/sys/bolthur/shared.ld
 @@ -0,0 +1,71 @@
@@ -973,7 +1000,7 @@ index 000000000..e7bc07b09
 +	global: *;
 +};
 diff --git newlib/libc/sys/configure.in newlib/libc/sys/configure.in
-index a65d1e71f..44a6528df 100644
+index a65d1e7..44a6528 100644
 --- newlib/libc/sys/configure.in
 +++ newlib/libc/sys/configure.in
 @@ -5,7 +5,7 @@ AC_PREREQ(2.59)

@@ -19,8 +19,10 @@ sh "$BASEDIR/autoconf.sh"
 
 
 
+export BUILD_STAGE=$1
+
 export ADDITIONAL_FLAG="--disable-shared"
-if [[ 1 == $EXPERIMENTAL ]]; then
+if [[ 1 == $EXPERIMENTAL ]] && [[ "$BUILD_STAGE" == "shared"* ]]; then
   export ADDITIONAL_FLAG="--enable-shared"
 fi
 
@@ -30,11 +32,11 @@ if [ ! -f "$PREFIX/bin/$TARGET-cc" ]; then
 fi
 
 # Handle rebuild
-if [[ -d "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET" ]] && [[ 1 == $REBUILD_NEWLIB ]]; then
-  rm -rf "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
+if [[ -d "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE" ]] && [[ 1 == $REBUILD_NEWLIB ]]; then
+  rm -rf "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE"
 fi
 # Create build directory
-mkdir -p "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
+mkdir -p "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE"
 
 # apply necessary patches file by file
 if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.patched" ]; then
@@ -61,6 +63,15 @@ fi
 
 # configure automake
 if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.generated" ]; then
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib"
+  # reconfigure
+  autoconf
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
   # switch to source directory
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib/libc/machine/arm"
   # reconfigure
@@ -102,9 +113,9 @@ if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.generated" ]; then
 fi
 
 # configure newlib
-if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.configured" ]; then
+if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE/newlib.configured" ]; then
   # switch to build directory
-  cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
+  cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE"
   # configure
   ../../../source/newlib-$PKG_NEWLIB/configure \
     --prefix= \
@@ -122,13 +133,13 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.configured" ]
     exit 1
   fi
   # mark as configured
-  touch "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.configured"
+  touch "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE/newlib.configured"
 fi
 
 # build newlib
-if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.built" ]; then
+if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE/newlib.built" ]; then
   # switch to build directory
-  cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
+  cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE"
   # build it
   make all -j${CPU_COUNT}
   # check for error
@@ -136,13 +147,13 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.built" ]; the
     exit 1
   fi
   # mark as built
-  touch "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.built"
+  touch "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE/newlib.built"
 fi
 
 # install binutils for build target
-if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.installed" ]; then
+if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE/newlib.installed" ]; then
   # switch into build directory
-  cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET"
+  cd "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE"
   # install
   make DESTDIR=${SYSROOT} install
   # check for error
@@ -166,5 +177,5 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.installed" ];
     exit 1
   fi
   # mark as installed
-  touch "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET/newlib.installed"
+  touch "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE/newlib.installed"
 fi
