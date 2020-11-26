@@ -19,4 +19,8 @@ touch /opt/bolthur/foo/include/gnu/stubs.h
 
 
 
+--enable-shared
+
+../configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib 3.3.0; bolthur bootstrap" --enable-newlib-elix-level=4  --enable-newlib-register-fini --enable-newlib-mb  --disable-multilib  --with-cpu=armv7-a --with-mode=thumb --with-float=hard
+
 ```

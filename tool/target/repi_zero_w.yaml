@@ -1,0 +1,7 @@
+
+arm:
+  - name: RPI Zero W
+    arch: armv6zk
+    tune: arm1176jzf-s
+    fpu: vfpv2
+    float_abi: hard

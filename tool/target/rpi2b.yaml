@@ -1,0 +1,17 @@
+
+arm:
+  - name: RPI 2B Revision 1
+    arch: armv7-a
+    tune: cortex-a7
+    fpu: neon-vfpv4
+    float_abi: hard
+  - name: RPI 2B Revision 2
+    arch: armv8-a
+    tune: cortex-a53
+    fpu: neon-vfpv4
+    float_abi: hard
+
+aarch64:
+  - name: RPI 2B Revision 2
+    arch: armv8-a
+    tune: cortex-a53

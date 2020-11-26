@@ -1,5 +1,18 @@
+diff --git .gitignore .gitignore
+index 13a554aa0..e83b89f63 100644
+--- .gitignore
++++ .gitignore
+@@ -3,6 +3,8 @@
+ *.orig
+ *.rej
+ 
++/build
++
+ *~
+ .#*
+ *#
 diff --git config.sub config.sub
-index 75bb6a3..c7dd744 100755
+index 75bb6a313..c7dd7440e 100755
 --- config.sub
 +++ config.sub
 @@ -1363,7 +1363,8 @@ case $os in
@@ -13,7 +26,7 @@ index 75bb6a3..c7dd744 100755
  		;;
  	qnx*)
 diff --git libgloss/arm/Makefile.in libgloss/arm/Makefile.in
-index e1bad17..00027a8 100644
+index e1bad1710..00027a85f 100644
 --- libgloss/arm/Makefile.in
 +++ libgloss/arm/Makefile.in
 @@ -71,7 +71,13 @@ LINUX_OBJS    = linux-syscalls0.o linux-syscalls1.o
@@ -80,7 +93,7 @@ index e1bad17..00027a8 100644
 +include $(srcdir)/../multi-build.in
 diff --git libgloss/arm/bolthur-crt0.c libgloss/arm/bolthur-crt0.c
 new file mode 100644
-index 0000000..a399753
+index 000000000..a3997531e
 --- /dev/null
 +++ libgloss/arm/bolthur-crt0.c
 @@ -0,0 +1,89 @@
@@ -175,7 +188,7 @@ index 0000000..a399753
 +}
 diff --git libgloss/arm/bolthur-syscall.h libgloss/arm/bolthur-syscall.h
 new file mode 100644
-index 0000000..2a64c7d
+index 000000000..2a64c7d55
 --- /dev/null
 +++ libgloss/arm/bolthur-syscall.h
 @@ -0,0 +1,24 @@
@@ -205,7 +218,7 @@ index 0000000..2a64c7d
 +#endif /* _LIBGLOSS_ARM_BOLTHUR_UNISTD_H */
 diff --git libgloss/arm/bolthur-syscalls0.S libgloss/arm/bolthur-syscalls0.S
 new file mode 100644
-index 0000000..6095182
+index 000000000..6095182ba
 --- /dev/null
 +++ libgloss/arm/bolthur-syscalls0.S
 @@ -0,0 +1,38 @@
@@ -249,7 +262,7 @@ index 0000000..6095182
 +SYSCALL( exit )
 diff --git libgloss/arm/bolthur-syscalls1.c libgloss/arm/bolthur-syscalls1.c
 new file mode 100644
-index 0000000..245803d
+index 000000000..245803d4e
 --- /dev/null
 +++ libgloss/arm/bolthur-syscalls1.c
 @@ -0,0 +1,30 @@
@@ -285,7 +298,7 @@ index 0000000..245803d
 +}
 diff --git libgloss/arm/elf-bolthur.specs libgloss/arm/elf-bolthur.specs
 new file mode 100644
-index 0000000..d71a6ec
+index 000000000..d71a6ec89
 --- /dev/null
 +++ libgloss/arm/elf-bolthur.specs
 @@ -0,0 +1,10 @@
@@ -300,7 +313,7 @@ index 0000000..d71a6ec
 +*startfile:
 +bolthur-crt0%O%s crti%O%s crtbegin%O%s
 diff --git newlib/Makefile.am newlib/Makefile.am
-index 809d492..0cbb9c8 100644
+index 809d49238..0cbb9c82e 100644
 --- newlib/Makefile.am
 +++ newlib/Makefile.am
 @@ -140,9 +140,8 @@ LIBM_OBJECTLISTS = \
@@ -315,87 +328,8 @@ index 809d492..0cbb9c8 100644
  
  if USE_LIBTOOL
  libm_la_SOURCES =
-diff --git newlib/Makefile.in newlib/Makefile.in
-index c3ee290..aa70f71 100644
---- newlib/Makefile.in
-+++ newlib/Makefile.in
-@@ -320,10 +320,10 @@ AUTOMAKE_OPTIONS = cygnus dejagnu
- ACLOCAL_AMFLAGS = -I . -I ..
- 
- # Multilib support variables.
--MULTISRCTOP = 
--MULTIBUILDTOP = 
--MULTIDIRS = 
--MULTISUBDIR = 
-+MULTISRCTOP =
-+MULTIBUILDTOP =
-+MULTIDIRS =
-+MULTISUBDIR =
- MULTIDO = true
- MULTICLEAN = true
- LIBTOOL_VERSION_INFO = 0:0:0
-@@ -374,7 +374,7 @@ AM_MAKEFLAGS = \
- 	"DESTDIR=$(DESTDIR)"
- 
- FLAGS_TO_PASS = $(AM_MAKEFLAGS)
--@HAVE_DOC_FALSE@DOCDIR = 
-+@HAVE_DOC_FALSE@DOCDIR =
- @HAVE_DOC_TRUE@DOCDIR = doc
- SUBDIRS = libc libm \
- 	$(DOCDIR) . $(EXTRA_DIRS)
-@@ -436,18 +436,18 @@ LIBM_OBJECTLISTS = \
- 	libm/common/objectlist.awk.in \
- 	$(LIBM_MACHINE_OBJECTLIST)
- 
--libm_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/linux/shared.ld -lgcc -objectlist libm-libtool-objectlist
--libc_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/linux/shared.ld -lgcc -objectlist libc-libtool-objectlist
--@USE_LIBTOOL_TRUE@libm_la_SOURCES = 
-+libm_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/$(sys_dir)/shared.ld -lgcc -objectlist libm-libtool-objectlist
-+libc_la_LDFLAGS = -version-info $(LIBTOOL_VERSION_INFO) -release newlib -no-undefined -Xcompiler -nostdlib -Xlinker --version-script=$(srcdir)/libc/sys/$(sys_dir)/shared.ld -lgcc -objectlist libc-libtool-objectlist
-+@USE_LIBTOOL_TRUE@libm_la_SOURCES =
- @USE_LIBTOOL_TRUE@libm_la_DEPENDENCIES = libm-libtool-objectlist
--@USE_LIBTOOL_TRUE@libc_la_SOURCES = 
-+@USE_LIBTOOL_TRUE@libc_la_SOURCES =
- @USE_LIBTOOL_TRUE@libc_la_DEPENDENCIES = libc-libtool-objectlist
- CLEANFILES = stmp-targ-include
- CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
--MAKEOVERRIDES = 
-+MAKEOVERRIDES =
- 
- # dejagnu support
--RUNTESTFLAGS = 
-+RUNTESTFLAGS =
- all: _newlib_version.h newlib.h
- 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
- 
-@@ -541,11 +541,11 @@ uninstall-toollibLIBRARIES:
- 
- clean-toollibLIBRARIES:
- 	-test -z "$(toollib_LIBRARIES)" || rm -f $(toollib_LIBRARIES)
--@USE_LIBTOOL_TRUE@libc.a: $(libc_a_OBJECTS) $(libc_a_DEPENDENCIES) $(EXTRA_libc_a_DEPENDENCIES) 
-+@USE_LIBTOOL_TRUE@libc.a: $(libc_a_OBJECTS) $(libc_a_DEPENDENCIES) $(EXTRA_libc_a_DEPENDENCIES)
- @USE_LIBTOOL_TRUE@	-rm -f libc.a
- @USE_LIBTOOL_TRUE@	$(libc_a_AR) libc.a $(libc_a_OBJECTS) $(libc_a_LIBADD)
- @USE_LIBTOOL_TRUE@	$(RANLIB) libc.a
--@USE_LIBTOOL_TRUE@libm.a: $(libm_a_OBJECTS) $(libm_a_DEPENDENCIES) $(EXTRA_libm_a_DEPENDENCIES) 
-+@USE_LIBTOOL_TRUE@libm.a: $(libm_a_OBJECTS) $(libm_a_DEPENDENCIES) $(EXTRA_libm_a_DEPENDENCIES)
- @USE_LIBTOOL_TRUE@	-rm -f libm.a
- @USE_LIBTOOL_TRUE@	$(libm_a_AR) libm.a $(libm_a_OBJECTS) $(libm_a_LIBADD)
- @USE_LIBTOOL_TRUE@	$(RANLIB) libm.a
-@@ -581,9 +581,9 @@ clean-toollibLTLIBRARIES:
- 	  echo "rm -f \"$${dir}/so_locations\""; \
- 	  rm -f "$${dir}/so_locations"; \
- 	done
--libc.la: $(libc_la_OBJECTS) $(libc_la_DEPENDENCIES) $(EXTRA_libc_la_DEPENDENCIES) 
-+libc.la: $(libc_la_OBJECTS) $(libc_la_DEPENDENCIES) $(EXTRA_libc_la_DEPENDENCIES)
- 	$(libc_la_LINK) $(am_libc_la_rpath) $(libc_la_OBJECTS) $(libc_la_LIBADD) $(LIBS)
--libm.la: $(libm_la_OBJECTS) $(libm_la_DEPENDENCIES) $(EXTRA_libm_la_DEPENDENCIES) 
-+libm.la: $(libm_la_OBJECTS) $(libm_la_DEPENDENCIES) $(EXTRA_libm_la_DEPENDENCIES)
- 	$(libm_la_LINK) $(am_libm_la_rpath) $(libm_la_OBJECTS) $(libm_la_LIBADD) $(LIBS)
- 
- mostlyclean-compile:
 diff --git newlib/configure.host newlib/configure.host
-index a84c0c8..6aa2706 100644
+index a84c0c80a..71a2e5d0b 100644
 --- newlib/configure.host
 +++ newlib/configure.host
 @@ -191,11 +191,11 @@ case "${host_cpu}" in
@@ -449,12 +383,14 @@ index a84c0c8..6aa2706 100644
    *) ;; #shared library not supported for ${host}
  esac
  
-@@ -429,6 +439,15 @@ esac
+@@ -429,6 +439,17 @@ esac
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
 +  *-*-bolthur*)
 +  sys_dir=bolthur
++  posix_dir=posix
++  unix_dir=unix
 +  # crt0 is provided by libgloss.
 +  have_crt0="no"
 +  #if test "$enable_shared" = "yes"; then
@@ -465,7 +401,7 @@ index a84c0c8..6aa2706 100644
    *-*-cygwin*)
  	posix_dir=posix
  	stdio64_dir=stdio64
-@@ -528,7 +547,7 @@ case "${host}" in
+@@ -528,7 +549,7 @@ case "${host}" in
  	unix_dir=unix
  	posix_dir=posix
  	crt1=crt1.o
@@ -474,19 +410,19 @@ index a84c0c8..6aa2706 100644
  	gcc_dir=`gcc -print-search-dirs | awk '/^install:/{print $2}'`
  	default_newlib_io_c99_formats="yes"
  	default_newlib_io_long_double="yes"
-@@ -633,6 +652,11 @@ esac
+@@ -633,6 +654,11 @@ esac
  # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
  
  case "${host}" in
 +	*-*-bolthur*)
 +	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED"
-+	#newlib_cflags="${newlib_cflags} -Werror"
++	newlib_cflags="${newlib_cflags} -Werror"
 +	newlib_cflags="${newlib_cflags} -Wall"
 +	;;
    *-*-cygwin*)
  	test -z "$cygwin_srcdir" && cygwin_srcdir=`cd ${srcdir}/../winsup/cygwin; pwd`
  	export cygwin_srcdir
-@@ -662,7 +686,7 @@ case "${host}" in
+@@ -662,7 +688,7 @@ case "${host}" in
  	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections "
  	newlib_cflags="${newlib_cflags} -D_COMPILING_NEWLIB"
  newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVIDED -DSIGNAL_PROVIDED -DGETREENT_PROVIDED -DREENTRANT_SYSCALLS_PROVIDED -DHAVE_NANOSLEEP -DHAVE_BLKSIZE -DHAVE_FCNTL -DHAVE_ASSERT_FUNC"
@@ -495,7 +431,7 @@ index a84c0c8..6aa2706 100644
  	newlib_cflags="${newlib_cflags} -D_NO_GETLOGIN -D_NO_GETPWENT -D_NO_GETUT -D_NO_GETPASS -D_NO_SIGSET -D_NO_WORDEXP -D_NO_POPEN -D_NO_POSIX_SPAWN"
  	;;
  # VxWorks supplies its own version of malloc, and the newlib one
-@@ -749,17 +773,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -749,17 +775,17 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
          syscall_dir=syscalls
          ;;
    h8300*-*-*)
@@ -517,7 +453,7 @@ index a84c0c8..6aa2706 100644
    i[34567]86-*-sco*)
  	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DHAVE_FCNTL"
  	;;
-@@ -906,7 +930,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
+@@ -906,7 +932,7 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
  	syscall_dir=
  	;;
    w65-*-*)
@@ -526,7 +462,7 @@ index a84c0c8..6aa2706 100644
  	newlib_cflags="${newlib_cflags} -DSMALL_DTOA -DSMALL_MEMORY"
  	;;
    xc16x-*)
-@@ -957,7 +981,7 @@ fi
+@@ -957,7 +983,7 @@ fi
  # Disable atexit dynamic allocation if requested.
  if [ "x${newlib_atexit_dynamic_alloc}" = "x" ]; then
  	if [ ${default_newlib_atexit_dynamic_alloc} = "yes" ]; then
@@ -536,7 +472,7 @@ index a84c0c8..6aa2706 100644
  fi
  
 diff --git newlib/libc/machine/arm/Makefile.am newlib/libc/machine/arm/Makefile.am
-index 9bd35e7..3f67984 100644
+index 9bd35e733..3f67984e1 100644
 --- newlib/libc/machine/arm/Makefile.am
 +++ newlib/libc/machine/arm/Makefile.am
 @@ -6,21 +6,29 @@ INCLUDES = $(NEWLIB_CFLAGS) $(CROSS_CFLAGS) $(TARGET_CFLAGS)
@@ -619,7 +555,7 @@ index 9bd35e7..3f67984 100644
 -
  $(lpfx)aeabi_memset.obj: $(AEABI_MEMSET_DEP)
 diff --git newlib/libc/machine/arm/configure.in newlib/libc/machine/arm/configure.in
-index 833b197..3f6f62a 100644
+index 833b197a5..3f6f62ad0 100644
 --- newlib/libc/machine/arm/configure.in
 +++ newlib/libc/machine/arm/configure.in
 @@ -5,11 +5,22 @@ AC_PREREQ(2.59)
@@ -648,7 +584,7 @@ index 833b197..3f6f62a 100644
  AC_CONFIG_FILES([Makefile])
 diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
 new file mode 100644
-index 0000000..dc6844d
+index 000000000..dc6844df8
 --- /dev/null
 +++ newlib/libc/sys/bolthur/Makefile.am
 @@ -0,0 +1,95 @@
@@ -749,7 +685,7 @@ index 0000000..dc6844d
 +CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host
 diff --git newlib/libc/sys/bolthur/configure.in newlib/libc/sys/bolthur/configure.in
 new file mode 100644
-index 0000000..d426238
+index 000000000..d42623872
 --- /dev/null
 +++ newlib/libc/sys/bolthur/configure.in
 @@ -0,0 +1,40 @@
@@ -795,7 +731,7 @@ index 0000000..d426238
 +AC_OUTPUT
 diff --git newlib/libc/sys/bolthur/highlevel.c newlib/libc/sys/bolthur/highlevel.c
 new file mode 100644
-index 0000000..05cebff
+index 000000000..05cebff83
 --- /dev/null
 +++ newlib/libc/sys/bolthur/highlevel.c
 @@ -0,0 +1,123 @@
@@ -924,7 +860,7 @@ index 0000000..05cebff
 +}
 diff --git newlib/libc/sys/bolthur/shared.ld newlib/libc/sys/bolthur/shared.ld
 new file mode 100644
-index 0000000..e7bc07b
+index 000000000..e7bc07b09
 --- /dev/null
 +++ newlib/libc/sys/bolthur/shared.ld
 @@ -0,0 +1,71 @@
@@ -999,8 +935,141 @@ index 0000000..e7bc07b
 +VERS_3.3 {
 +	global: *;
 +};
+diff --git newlib/libc/sys/bolthur/sys/dirent.h newlib/libc/sys/bolthur/sys/dirent.h
+new file mode 100644
+index 000000000..d2b455d31
+--- /dev/null
++++ newlib/libc/sys/bolthur/sys/dirent.h
+@@ -0,0 +1,13 @@
++
++/**
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 (c) Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#ifndef _SYS_DIRENT_H
++#define _SYS_DIRENT_H
++
++#endif
+diff --git newlib/libc/sys/bolthur/sys/fcntl.h newlib/libc/sys/bolthur/sys/fcntl.h
+new file mode 100644
+index 000000000..ed6d7163a
+--- /dev/null
++++ newlib/libc/sys/bolthur/sys/fcntl.h
+@@ -0,0 +1,13 @@
++
++/**
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 (c) Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#ifndef _SYS_FCNTL_H
++#define _SYS_FCNTL_H
++
++#endif
+diff --git newlib/libc/sys/bolthur/sys/signal.h newlib/libc/sys/bolthur/sys/signal.h
+new file mode 100644
+index 000000000..c9e2db19a
+--- /dev/null
++++ newlib/libc/sys/bolthur/sys/signal.h
+@@ -0,0 +1,13 @@
++
++/**
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 (c) Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#ifndef _SYS_SIGNAL_H
++#define _SYS_SIGNAL_H
++
++#endif
+diff --git newlib/libc/sys/bolthur/sys/stat.h newlib/libc/sys/bolthur/sys/stat.h
+new file mode 100644
+index 000000000..6660ecc99
+--- /dev/null
++++ newlib/libc/sys/bolthur/sys/stat.h
+@@ -0,0 +1,13 @@
++
++/**
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 (c) Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#ifndef _SYS_STAT_H
++#define _SYS_STAT_H
++
++#endif
+diff --git newlib/libc/sys/bolthur/sys/termios.h newlib/libc/sys/bolthur/sys/termios.h
+new file mode 100644
+index 000000000..78df43371
+--- /dev/null
++++ newlib/libc/sys/bolthur/sys/termios.h
+@@ -0,0 +1,13 @@
++
++/**
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 (c) Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#ifndef _SYS_TERMIOS_H_
++#define _SYS_TERMIOS_H_
++
++#endif
+diff --git newlib/libc/sys/bolthur/sys/unistd.h newlib/libc/sys/bolthur/sys/unistd.h
+new file mode 100644
+index 000000000..09fd8d62c
+--- /dev/null
++++ newlib/libc/sys/bolthur/sys/unistd.h
+@@ -0,0 +1,13 @@
++
++/**
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 (c) Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#ifndef _SYS_UNISTD_H
++#define _SYS_UNISTD_H
++
++#endif
+diff --git newlib/libc/sys/bolthur/sys/utmp.h newlib/libc/sys/bolthur/sys/utmp.h
+new file mode 100644
+index 000000000..60803d903
+--- /dev/null
++++ newlib/libc/sys/bolthur/sys/utmp.h
+@@ -0,0 +1,13 @@
++
++/**
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 (c) Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#ifndef _SYS_UTMP_H
++#define _SYS_UTMP_H
++
++#endif
 diff --git newlib/libc/sys/configure.in newlib/libc/sys/configure.in
-index a65d1e7..44a6528 100644
+index a65d1e71f..44a6528df 100644
 --- newlib/libc/sys/configure.in
 +++ newlib/libc/sys/configure.in
 @@ -5,7 +5,7 @@ AC_PREREQ(2.59)
