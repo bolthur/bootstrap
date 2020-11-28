@@ -19,6 +19,34 @@ if [ $? -ne 0 ]; then
 fi
 
 # switch to source directory
+cd "$DIR/libgloss"
+echo "$DIR/libgloss"
+# reconfigure
+autoconf
+# check for error
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+
+# switch to source directory
+cd "$DIR/newlib/libm"
+# reconfigure
+autoreconf
+# check for error
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+
+# switch to source directory
+cd "$DIR/newlib/libm/machine/arm"
+# reconfigure
+autoreconf
+# check for error
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+
+# switch to source directory
 cd "$DIR/newlib/libc/machine/arm"
 # reconfigure
 autoreconf

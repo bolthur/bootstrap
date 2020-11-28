@@ -32,11 +32,11 @@ type TArchitecture = object
   aarch64 {.defaultVal: @[].}: seq[TDevice]
 
 proc main() =
-  for file in walkDirRec "target":
+  for file in walkDirRec( "target" ):
     let s: FileStream = newFileStream( file )
 
     var arch: TArchitecture
-    load(s, arch);
+    s.load( arch );
     echo arch
     s.close();
 

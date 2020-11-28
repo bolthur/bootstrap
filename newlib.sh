@@ -6,7 +6,7 @@ set -ex
 # internal dependencies
 export PKG_AUTOMAKE="1.11.6"
 export PKG_AUTOMAKE_INSTALL="1.11"
-export PKG_AUTOCONF="2.64"
+export PKG_AUTOCONF="2.68"
 # download
 sh "$BASEDIR/download-internal.sh"
 # tool prefix
@@ -67,6 +67,24 @@ if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.generated" ]; then
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib"
   # reconfigure
   autoconf
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib/libm/machine/arm"
+  # reconfigure
+  autoreconf
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
+  # switch to source directory
+  cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib/libm"
+  # reconfigure
+  autoreconf
   # check for error
   if [ $? -ne 0 ]; then
     exit 1

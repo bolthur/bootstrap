@@ -1,0 +1,47 @@
+
+name: host-libc
+source: https://www.sourceware.org/pub/newlib/newlib-4.0.0.tar.gz
+version: 4.0.0
+tool_dependency:
+  - host-automake-1.11.6
+  - host-autoconf-2.68
+regenerate:
+  - args: [ 'autoconf' ]
+    cwd: '@SOURCE_DIR@/newlib'
+  - args: [ 'autoreconf' ]
+    cwd: '@SOURCE_DIR@/newlib/libm'
+  - args: [ 'autoreconf' ]
+    cwd: '@SOURCE_DIR@/newlib/libm/machine/arm'
+  - args: [ 'autoreconf' ]
+    cwd: '@SOURCE_DIR@/newlib/libc/machine/arm'
+  - args: [ 'autoreconf' ]
+    cwd: '@SOURCE_DIR@/newlib/libc/sys'
+  - args: [ 'autoreconf' ]
+    cwd: '@SOURCE_DIR@/newlib/libc/sys/bolthur'
+  - args: [ 'autoreconf' ]
+    cwd: '@SOURCE_DIR@/newlib/libgloss/arm'
+configure:
+  - args:
+    - '@SOURCE_DIR@/configure'
+    - '--prefix='
+    - '--target=@TARGET@'
+    - '--disable-newlib-supplied-syscalls'
+    - '--enable-newlib-io-long-long'
+    - '--enable-newlib-io-long-double'
+    - '--enable-newlib-elix-level=4'
+    - '--enable-newlib-register-fini'
+    - '--enable-newlib-mb'
+compile:
+  - args:
+    - 'make'
+    - '-j@PARALLELISM@'
+install:
+  - args:
+    - 'make'
+    - 'install'
+  - args:
+    - 'rsync -av'
+    - '--exclude usr'
+    - '@SYSROOT@/$TARGET/*'
+    - '@SYSROOT@/$TARGET/usr'
+    - '--remove-source-files'

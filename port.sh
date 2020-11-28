@@ -64,11 +64,11 @@ cd "$TARGET_COMPILE/build/port/libtar-$TARGET"
   --host=$TARGET \
   --prefix=$SYSROOT/$TARGET \
   --disable-shared
-exit 1
 # check for error
 if [ $? -ne 0 ]; then
   exit 1
 fi
+exit 1
 # build and install library
 make install
 # check for error
