@@ -218,10 +218,10 @@ index 000000000..4c7b2f2e2
 +#endif /* _LIBGLOSS_ARM_BOLTHUR_UNISTD_H */
 diff --git libgloss/arm/bolthur-syscalls0.S libgloss/arm/bolthur-syscalls0.S
 new file mode 100644
-index 000000000..3d0d38579
+index 000000000..695859744
 --- /dev/null
 +++ libgloss/arm/bolthur-syscalls0.S
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,48 @@
 +
 +/**
 + * Bolthur system call numbers for the ARM processor.
@@ -245,14 +245,24 @@ index 000000000..3d0d38579
 +#define GLOBAL(name) .global name; FUNC(name)
 +#define SIZE(name) .size name, .-name
 +
-+# define SYSCALL(name) \
++#define SYSCALL(name) \
 +	GLOBAL(_ ## name); \
 +	svc #SYSCALL_ ## name; \
 +	b _set_errno; \
 +	SIZE(_ ## name)
 +
++#define SYSCALL6(name) \
++	GLOBAL(_ ## name); \
++	push { r4 - r5 }; \
++	ldr r4, [ sp, #8 ]; \
++	ldr r5, [ sp, #12 ]; \
++	svc #SYSCALL_ ## name; \
++	pop { r4 - r5 }; \
++	b _set_errno; \
++	SIZE(_ ## name)
++
 +# normal system calls
-+SYSCALL( mman_mmap )
++SYSCALL6( mman_mmap )
 +SYSCALL( mman_munmap )
 +SYSCALL( process_id )
 +SYSCALL( process_exit )
@@ -805,10 +815,10 @@ index 000000000..808f3ce8f
 +AC_OUTPUT
 diff --git newlib/libc/sys/bolthur/dlmalloc.c newlib/libc/sys/bolthur/dlmalloc.c
 new file mode 100644
-index 000000000..a52049390
+index 000000000..936ed641c
 --- /dev/null
 +++ newlib/libc/sys/bolthur/dlmalloc.c
-@@ -0,0 +1,6297 @@
+@@ -0,0 +1,6295 @@
 +
 +/*
 +  This is a version (aka dlmalloc) of malloc/free/realloc written by
@@ -1396,8 +1406,6 @@ index 000000000..a52049390
 +#undef HAVE_MMAP
 +#define HAVE_MMAP 1
 +// FIXME: REMOVE WHEN TIME IS IMPLEMENTED
-+#undef MAP_ANONYMOUS
-+#define MAP_ANONYMOUS 1
 +#undef LACKS_TIME_H
 +#define LACKS_TIME_H 1
 +// FIXME: REMOVE WHEN SYSCONF IS IMPLEMENTED
@@ -7296,10 +7304,10 @@ index 000000000..9cba8b049
 +#endif
 diff --git newlib/libc/sys/bolthur/include/sys/mman.h newlib/libc/sys/bolthur/include/sys/mman.h
 new file mode 100644
-index 000000000..205fac6a3
+index 000000000..df1dac0e2
 --- /dev/null
 +++ newlib/libc/sys/bolthur/include/sys/mman.h
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,67 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -7322,8 +7330,9 @@ index 000000000..205fac6a3
 +#define MAP_SHARED 0x0001 // share changes
 +#define MAP_PRIVATE 0x0002 // changes are private
 +#define MAP_FIXED 0x0010 // changes are fixed
++#define MAP_ANONYMOUS 0x20 // not in posix standard: map anonymous
 +
-+#define	MS_SYNC 0x0000 // msync synchronously
++#define MS_SYNC 0x0000 // msync synchronously
 +#define MS_ASYNC 0x0001 // return immediately
 +#define MS_INVALIDATE 0x0002 // invalidate all cached data
 +

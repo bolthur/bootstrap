@@ -1,5 +1,5 @@
 diff --git compiler/extccomp.nim compiler/extccomp.nim
-index 405b1f2b6..7abfb3609 100644
+index 405b1f2..7abfb36 100644
 --- compiler/extccomp.nim
 +++ compiler/extccomp.nim
 @@ -117,6 +117,33 @@ compiler nintendoSwitchGCC:
@@ -45,7 +45,7 @@ index 405b1f2b6..7abfb3609 100644
      llvmGcc(),
      clang(),
 diff --git compiler/installer.ini compiler/installer.ini
-index f0756ab3e..9fa9a4297 100644
+index f0756ab..9fa9a42 100644
 --- compiler/installer.ini
 +++ compiler/installer.ini
 @@ -16,6 +16,7 @@ Platforms: """
@@ -57,7 +57,7 @@ index f0756ab3e..9fa9a4297 100644
  
  Authors: "Andreas Rumpf"
 diff --git compiler/options.nim compiler/options.nim
-index 3be7c5099..62ed6e637 100644
+index 3be7c50..62ed6e6 100644
 --- compiler/options.nim
 +++ compiler/options.nim
 @@ -181,7 +181,7 @@ type
@@ -88,7 +88,7 @@ index 3be7c5099..62ed6e637 100644
        result = conf.target.targetOS in {osFreeRTOS}
      of "littleendian": result = CPU[conf.target.targetCPU].endian == platform.littleEndian
 diff --git compiler/platform.nim compiler/platform.nim
-index 78c523c1a..ec5905623 100644
+index 78c523c..ec59056 100644
 --- compiler/platform.nim
 +++ compiler/platform.nim
 @@ -21,8 +21,8 @@ type
@@ -114,7 +114,7 @@ index 78c523c1a..ec5905623 100644
        objExt: ".o", newLine: "\x0A", pathSep: ":", dirSep: "/",
        scriptExt: ".sh", curDir: ".", exeExt: "", extSep: ".",
 diff --git config/nim.cfg config/nim.cfg
-index a33a2f0a9..026882e98 100644
+index a33a2f0..026882e 100644
 --- config/nim.cfg
 +++ config/nim.cfg
 @@ -153,6 +153,14 @@ path="$lib/pure"
@@ -133,7 +133,7 @@ index a33a2f0a9..026882e98 100644
  @if windows:
    icl.options.speed = "/Ox /arch:SSE2"
 diff --git lib/pure/includes/osseps.nim lib/pure/includes/osseps.nim
-index bafef686d..cea3d0dcc 100644
+index bafef68..cea3d0d 100644
 --- lib/pure/includes/osseps.nim
 +++ lib/pure/includes/osseps.nim
 @@ -63,6 +63,7 @@ const
@@ -145,7 +145,7 @@ index bafef686d..cea3d0dcc 100644
      ## The file extension of native executables. For example:
      ## `""` for POSIX, `"exe"` on Windows (without a dot).
 diff --git lib/pure/selectors.nim lib/pure/selectors.nim
-index 933b5491a..2a4b5b319 100644
+index 933b549..2a4b5b3 100644
 --- lib/pure/selectors.nim
 +++ lib/pure/selectors.nim
 @@ -335,6 +335,8 @@ else:
@@ -158,7 +158,7 @@ index 933b5491a..2a4b5b319 100644
      include ioselects/ioselectors_select
    else:
 diff --git lib/system/ansi_c.nim lib/system/ansi_c.nim
-index 0b4b25992..bf5e73c78 100644
+index 0b4b259..bf5e73c 100644
 --- lib/system/ansi_c.nim
 +++ lib/system/ansi_c.nim
 @@ -53,7 +53,7 @@ when defined(windows):
@@ -171,7 +171,7 @@ index 0b4b25992..bf5e73c78 100644
      SIGABRT* = cint(6)
      SIGFPE* = cint(8)
 diff --git lib/system/dyncalls.nim lib/system/dyncalls.nim
-index 1b0a3e64c..cf061f909 100644
+index 1b0a3e6..cf061f9 100644
 --- lib/system/dyncalls.nim
 +++ lib/system/dyncalls.nim
 @@ -179,7 +179,7 @@ elif defined(genode):
@@ -184,7 +184,7 @@ index 1b0a3e64c..cf061f909 100644
      cstderr.rawWrite("nimUnLoadLibrary not implemented")
      cstderr.rawWrite("\n")
 diff --git lib/system/io.nim lib/system/io.nim
-index c3b2976fb..ccd54c0b8 100644
+index c3b2976..ccd54c0 100644
 --- lib/system/io.nim
 +++ lib/system/io.nim
 @@ -771,7 +771,7 @@ when declared(stdout):
@@ -196,30 +196,8 @@ index c3b2976fb..ccd54c0b8 100644
  
    proc echoBinSafe(args: openArray[string]) {.compilerproc.} =
      when defined(androidNDK):
-diff --git lib/system/osalloc.nim lib/system/osalloc.nim
-index 32d3b166d..c6084f8f0 100644
---- lib/system/osalloc.nim
-+++ lib/system/osalloc.nim
-@@ -201,7 +201,7 @@ elif defined(posix) and not defined(StandaloneHeapSize):
-       var MAP_STACK {.importc: "MAP_STACK", header: "<sys/mman.h>".}: cint
-   else:
-     const MAP_STACK = 0             # avoid sideeffects
--    
-+
-   when defined(macosx) or defined(freebsd):
-     const MAP_ANONYMOUS = 0x1000
-     const MAP_PRIVATE = 0x02        # Changes are private
-@@ -280,7 +280,7 @@ elif defined(windows) and not defined(StandaloneHeapSize):
-         quit 1
-     #VirtualFree(p, size, MEM_DECOMMIT)
- 
--elif hostOS == "standalone" or defined(StandaloneHeapSize):
-+elif hostOS == "standalone"or defined(StandaloneHeapSize):
-   const StandaloneHeapSize {.intdefine.}: int = 1024 * PageSize
-   var
-     theHeap: array[StandaloneHeapSize div sizeof(float64), float64] # 'float64' for alignment
 diff --git lib/system/platforms.nim lib/system/platforms.nim
-index 6e39dc7f2..56b104250 100644
+index 6e39dc7..56b1042 100644
 --- lib/system/platforms.nim
 +++ lib/system/platforms.nim
 @@ -40,7 +40,7 @@ type
