@@ -1,18 +1,18 @@
 
-name: host-automake
-source: https://ftp.gnu.org/gnu/automake/automake-1.11.6.tar.gz
-version: 1.11.6
-tool_dependency: []
-regenerate: []
-configure:
-  - args:
-    - '@SOURCE_DIR@/configure'
-    - '--prefix=@PREFIX@'
-compile:
-  - args:
-    - 'make'
-    - '-j@PARALLELISM@'
-install:
-  - args:
-    - 'make'
-    - 'install'
+- name: host-automake
+  source: https://ftp.gnu.org/gnu/automake/automake-1.11.6.tar.gz
+  version: 1.11.6
+  tool_dependency: []
+  regenerate: []
+  configure:
+    - args:
+      - '@SOURCE_DIR@/configure'
+      - '--prefix=@PREFIX@'
+  compile:
+    - args:
+      - 'make'
+      - '-j@PARALLELISM@'
+  install:
+    - args:
+      - 'make'
+      - 'install'

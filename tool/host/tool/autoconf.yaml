@@ -1,18 +1,18 @@
 
-name: host-autoconf
-source: https://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.gz
-version: 2.68
-tool_dependency: []
-regenerate: []
-configure:
-  - args:
-    - '@SOURCE_DIR@/configure'
-    - '--prefix=@PREFIX@'
-compile:
-  - args:
-    - 'make'
-    - '-j@PARALLELISM@'
-install:
-  - args:
-    - 'make'
-    - 'install'
+- name: host-autoconf
+  source: https://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.gz
+  version: 2.68
+  tool_dependency: []
+  regenerate: []
+  configure:
+    - args:
+      - '@SOURCE_DIR@/configure'
+      - '--prefix=@PREFIX@'
+  compile:
+    - args:
+      - 'make'
+      - '-j@PARALLELISM@'
+  install:
+    - args:
+      - 'make'
+      - 'install'

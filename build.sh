@@ -45,3 +45,6 @@ GDB_VERSION=$( "$PREFIX/bin/$TARGET-gdb" --version 2>&1 | head -n1 | cut -d" " -
 if [[ $GDB_VERSION != $PKG_GDB ]] || [[ 1 == $REBUILD_GDB ]]; then
   sh "$BASEDIR/gdb.sh"
 fi
+
+# Build and install ported libraries
+sh "$BASEDIR/port.sh"
