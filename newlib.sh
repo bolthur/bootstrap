@@ -141,7 +141,7 @@ if [ ! -f "$TARGET_COMPILE/build/newlib-$PKG_NEWLIB/$TARGET-$BUILD_STAGE/newlib.
     --disable-newlib-supplied-syscalls \
     --enable-newlib-io-long-long \
     --enable-newlib-io-long-double \
-    --with-pkgversion="newlib 3.3.0; bolthur bootstrap" \
+    --with-pkgversion="newlib $PKG_NEWLIB; bolthur bootstrap" \
     --enable-newlib-elix-level=4 \
     --enable-newlib-register-fini \
     --enable-newlib-mb \
