@@ -38,6 +38,15 @@ if [ $? -ne 0 ]; then
 fi
 
 # switch to source directory
+cd "$DIR/newlib/libc"
+# reconfigure
+autoreconf
+# check for error
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+
+# switch to source directory
 cd "$DIR/newlib/libm/machine/arm"
 # reconfigure
 autoreconf

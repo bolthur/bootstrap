@@ -73,6 +73,15 @@ if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.generated" ]; then
   fi
 
   # switch to source directory
+  cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib/libm"
+  # reconfigure
+  autoreconf
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+
+  # switch to source directory
   cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib/libm/machine/arm"
   # reconfigure
   autoreconf
@@ -82,7 +91,7 @@ if [ ! -f "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib.generated" ]; then
   fi
 
   # switch to source directory
-  cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib/libm"
+  cd "$TARGET_COMPILE/source/newlib-$PKG_NEWLIB/newlib/libc"
   # reconfigure
   autoreconf
   # check for error

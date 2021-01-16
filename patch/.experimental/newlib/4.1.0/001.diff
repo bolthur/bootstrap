@@ -26,7 +26,7 @@ index 75bb6a313..c7dd7440e 100755
  		;;
  	qnx*)
 diff --git libgloss/arm/Makefile.in libgloss/arm/Makefile.in
-index e1bad1710..00027a85f 100644
+index e1bad1710..ec96c92eb 100644
 --- libgloss/arm/Makefile.in
 +++ libgloss/arm/Makefile.in
 @@ -71,7 +71,13 @@ LINUX_OBJS    = linux-syscalls0.o linux-syscalls1.o
@@ -36,7 +36,7 @@ index e1bad1710..00027a85f 100644
 -REDBOOT_CRT0	= redboot-crt0.o 
 +BOLTHUR_CRT0    = bolthur-crt0.o
 +BOLTHUR_BSP     = libgloss-bolthur.a
-+BOLTHUR_OBJS    = bolthur-syscalls0.o bolthur-syscalls1.o
++BOLTHUR_OBJS    = bolthur-system-call0.o bolthur-system-call1.o
 +BOLTHUR_SCRIPTS = bolthur.specs
 +BOLTHUR_INSTALL = install-bolthur
 +
@@ -186,12 +186,12 @@ index 000000000..a3997531e
 +  // call early main
 +  _main( *sp, ( char** )( sp + 1 ) );
 +}
-diff --git libgloss/arm/bolthur-syscall.h libgloss/arm/bolthur-syscall.h
+diff --git libgloss/arm/bolthur-system-call.h libgloss/arm/bolthur-system-call.h
 new file mode 100644
-index 000000000..97c293a8c
+index 000000000..c4200139c
 --- /dev/null
-+++ libgloss/arm/bolthur-syscall.h
-@@ -0,0 +1,22 @@
++++ libgloss/arm/bolthur-system-call.h
+@@ -0,0 +1,46 @@
 +
 +/**
 + * Bolthur system call numbers for the ARM processor.
@@ -202,24 +202,48 @@ index 000000000..97c293a8c
 + * is freely granted, provided that this notice is preserved.
 + */
 +
-+#ifndef _LIBGLOSS_ARM_BOLTHUR_UNISTD_H
-+#define _LIBGLOSS_ARM_BOLTHUR_UNISTD_H
++#ifndef _LIBGLOSS_ARM_BOLTHUR_SYSTEM_CALL_H
++#define _LIBGLOSS_ARM_BOLTHUR_SYSTEM_CALL_H
 +
-+#define SYSCALL_process_exit 2
-+#define SYSCALL_process_id 3
++#define SYSTEM_CALL_process_create 1
++#define SYSTEM_CALL_process_exit 2
++#define SYSTEM_CALL_process_id 3
 +
-+#define SYSCALL_mman_mmap 21
-+#define SYSCALL_mman_munmap 22
++#define SYSTEM_CALL_thread_create 1
++#define SYSTEM_CALL_thread_exit 2
++#define SYSTEM_CALL_thread_id 3
 +
-+#define SYSCALL_dummy_write 102
++#define SYSTEM_CALL_memory_acquire 21
++#define SYSTEM_CALL_memory_release 22
++#define SYSTEM_CALL_memory_shared_acquire 23
++#define SYSTEM_CALL_memory_shared_release 24
 +
-+#endif /* _LIBGLOSS_ARM_BOLTHUR_UNISTD_H */
-diff --git libgloss/arm/bolthur-syscalls0.S libgloss/arm/bolthur-syscalls0.S
++#define SYSTEM_CALL_message_acquire 31
++#define SYSTEM_CALL_message_release 32
++#define SYSTEM_CALL_message_send 33
++#define SYSTEM_CALL_message_receive 34
++
++#define SYSTEM_CALL_rpc_acquire 41
++#define SYSTEM_CALL_rpc_release 42
++
++#define SYSTEM_CALL_io_acquire 51
++#define SYSTEM_CALL_io_release 52
++#define SYSTEM_CALL_io_check 53
++#define SYSTEM_CALL_io_raise 54
++
++#define SYSTEM_CALL_interrupt_acquire 61
++#define SYSTEM_CALL_interrupt_release 62
++
++#define SYSTEM_CALL_dummy_putc 101
++#define SYSTEM_CALL_dummy_puts 102
++
++#endif /* _LIBGLOSS_ARM_BOLTHUR_SYSTEM_CALL_H */
+diff --git libgloss/arm/bolthur-system-call0.S libgloss/arm/bolthur-system-call0.S
 new file mode 100644
-index 000000000..d86e1e0cf
+index 000000000..6f98e6a7b
 --- /dev/null
-+++ libgloss/arm/bolthur-syscalls0.S
-@@ -0,0 +1,47 @@
++++ libgloss/arm/bolthur-system-call0.S
+@@ -0,0 +1,70 @@
 +
 +/**
 + * Bolthur system call numbers for the ARM processor.
@@ -230,7 +254,7 @@ index 000000000..d86e1e0cf
 + * is freely granted, provided that this notice is preserved.
 + */
 +
-+#include "bolthur-syscall.h"
++#include "bolthur-system-call.h"
 +
 +#if __thumb__
 +# define FUNC(name) .type name, %function; .thumb_func; name:
@@ -243,36 +267,59 @@ index 000000000..d86e1e0cf
 +#define GLOBAL(name) .global name; FUNC(name)
 +#define SIZE(name) .size name, .-name
 +
-+#define SYSCALL(name) \
++#define SYSTEM_CALL(name) \
 +	GLOBAL(_ ## name); \
-+	svc #SYSCALL_ ## name; \
++	svc #SYSTEM_CALL_ ## name; \
 +	b _set_errno; \
 +	SIZE(_ ## name)
 +
-+#define SYSCALL6(name) \
++#define SYSTEM_CALL6(name) \
 +	GLOBAL(_ ## name); \
 +	push { r4 - r5 }; \
 +	ldr r4, [ sp, #8 ]; \
 +	ldr r5, [ sp, #12 ]; \
-+	svc #SYSCALL_ ## name; \
++	svc #SYSTEM_CALL_ ## name; \
 +	pop { r4 - r5 }; \
 +	b _set_errno; \
 +	SIZE(_ ## name)
 +
 +# system calls
-+SYSCALL6( mman_mmap )
-+SYSCALL( mman_munmap )
-+SYSCALL( process_id )
-+SYSCALL( process_exit )
++SYSTEM_CALL( process_id )
++SYSTEM_CALL( process_exit )
++
++SYSTEM_CALL( thread_id )
++SYSTEM_CALL( thread_exit )
++
++SYSTEM_CALL6( memory_acquire )
++SYSTEM_CALL( memory_release )
++SYSTEM_CALL( memory_shared_acquire )
++SYSTEM_CALL( memory_shared_release )
++
++//SYSTEM_CALL( message_acquire )
++//SYSTEM_CALL( message_release )
++//SYSTEM_CALL( message_send )
++//SYSTEM_CALL( message_receive )
++
++//SYSTEM_CALL( rpc_acquire )
++//SYSTEM_CALL( rpc_release )
++
++//SYSTEM_CALL( io_acquire )
++//SYSTEM_CALL( io_release )
++//SYSTEM_CALL( io_check )
++//SYSTEM_CALL( io_raise )
++
++//SYSTEM_CALL( interrupt_acquire )
++//SYSTEM_CALL( interrupt_release )
 +
 +# FIXME: remove later
-+SYSCALL( dummy_write )
-diff --git libgloss/arm/bolthur-syscalls1.c libgloss/arm/bolthur-syscalls1.c
++SYSTEM_CALL( dummy_putc )
++SYSTEM_CALL( dummy_puts )
+diff --git libgloss/arm/bolthur-system-call1.c libgloss/arm/bolthur-system-call1.c
 new file mode 100644
-index 000000000..245803d4e
+index 000000000..fac560bf5
 --- /dev/null
-+++ libgloss/arm/bolthur-syscalls1.c
-@@ -0,0 +1,30 @@
++++ libgloss/arm/bolthur-system-call1.c
+@@ -0,0 +1,36 @@
 +
 +/**
 + * Bolthur system call numbers for the ARM processor.
@@ -296,6 +343,12 @@ index 000000000..245803d4e
 +#undef errno
 +extern int errno;
 +
++/**
++ * @brief Set errno if set from system call
++ *
++ * @param n
++ * @return int
++ */
 +int _set_errno( int n ) {
 +  if ( n < 0 ) {
 +    errno = -n;
@@ -623,6 +676,39 @@ index 833b197a5..3f6f62ad0 100644
  AC_SUBST(CFLAGS)
  
  AC_CONFIG_FILES([Makefile])
+diff --git newlib/libc/ssp/Makefile.am newlib/libc/ssp/Makefile.am
+index 23754baf5..b7ecad801 100644
+--- newlib/libc/ssp/Makefile.am
++++ newlib/libc/ssp/Makefile.am
+@@ -27,28 +27,11 @@ STDIO_SOURCES = \
+   vsnprintf_chk.c \
+   vsprintf_chk.c
+ 
+-## None of these functions are specified by EL/IX
+-if ELIX_LEVEL_1
+-ELIX_SOURCES =
+-else
+-if ELIX_LEVEL_2
+-ELIX_SOURCES =
+-else
+-if ELIX_LEVEL_3
+-ELIX_SOURCES =
+-else
+-if ELIX_LEVEL_4
+-ELIX_SOURCES =
+-else
+ if HAVE_STDIO_DIR
+ ELIX_SOURCES = $(GENERAL_SOURCES) $(STRING_SOURCES) $(STDIO_SOURCES)
+ else
+ ELIX_SOURCES = $(GENERAL_SOURCES) $(STRING_SOURCES)
+ endif
+-endif
+-endif
+-endif
+-endif
+ 
+ libssp_la_LDFLAGS = -Xcompiler -nostdlib
+ 
 diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
 new file mode 100644
 index 000000000..2aa383349
@@ -7209,10 +7295,10 @@ index 000000000..923a1bfc9
 +}
 diff --git newlib/libc/sys/bolthur/include/bolthur/syscall.h newlib/libc/sys/bolthur/include/bolthur/syscall.h
 new file mode 100644
-index 000000000..e23508e95
+index 000000000..2aa985efa
 --- /dev/null
 +++ newlib/libc/sys/bolthur/include/bolthur/syscall.h
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,44 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -7228,15 +7314,31 @@ index 000000000..e23508e95
 +#ifndef _BOLTHUR_SYSCALL_H
 +#define _BOLTHUR_SYSCALL_H
 +
++#define MEMORY_ACQUIRE_PROTECTION_NONE 0x0
++#define MEMORY_ACQUIRE_PROTECTION_READ 0x1
++#define MEMORY_ACQUIRE_PROTECTION_WRITE 0x2
++#define MEMORY_ACQUIRE_PROTECTION_EXECUTABLE 0x4
++
++#define MEMORY_ACQUIRE_MAP_SHARED 0x1
++#define MEMORY_ACQUIRE_MAP_PRIVATE 0x2
++#define MEMORY_ACQUIRE_MAP_FIXED 0x3
++#define MEMORY_ACQUIRE_MAP_ANONYMOUS 0x4
++
 +__BEGIN_DECLS
 +
 +extern pid_t _process_id( void );
 +extern pid_t __attribute__((__noreturn__)) _process_exit( int );
 +
-+extern void* _mman_mmap( void*, size_t, int, int, int, off_t );
-+extern int _mman_munmap( void*, size_t );
++extern pid_t _thread_id( void );
++extern pid_t __attribute__((__noreturn__)) _thread_exit( int );
 +
-+extern int _dummy_write( int, char*, int );
++extern void* _memory_acquire( void*, size_t, int, int );
++extern int _memory_release( void*, size_t );
++extern void* _memory_shared_acquire( char*, int, mode_t );
++extern int _memory_shared_release( char* );
++
++extern int _dummy_puts( int, char*, int );
++extern int _dummy_putc( int, char*, int );
 +
 +__END_DECLS
 +
@@ -7336,7 +7438,7 @@ index 000000000..4238e98af
 +#endif
 diff --git newlib/libc/sys/bolthur/include/sys/mman.h newlib/libc/sys/bolthur/include/sys/mman.h
 new file mode 100644
-index 000000000..df1dac0e2
+index 000000000..c16f481ad
 --- /dev/null
 +++ newlib/libc/sys/bolthur/include/sys/mman.h
 @@ -0,0 +1,67 @@
@@ -7354,22 +7456,22 @@ index 000000000..df1dac0e2
 +#ifndef _SYS_MMAN_H
 +#define _SYS_MMAN_H
 +
-+#define PROT_NONE 0x00 // no permissions
-+#define PROT_READ 0x01 // pages can be read
-+#define PROT_WRITE 0x02 // pages can be written
-+#define PROT_EXEC 0x04 // pages can be executed
++#define PROT_NONE 0x0 // no permissions
++#define PROT_READ 0x1 // pages can be read
++#define PROT_WRITE 0x2 // pages can be written
++#define PROT_EXEC 0x4 // pages can be executed
 +
-+#define MAP_SHARED 0x0001 // share changes
-+#define MAP_PRIVATE 0x0002 // changes are private
-+#define MAP_FIXED 0x0010 // changes are fixed
++#define MAP_SHARED 0x01 // share changes
++#define MAP_PRIVATE 0x02 // changes are private
++#define MAP_FIXED 0x10 // changes are fixed
 +#define MAP_ANONYMOUS 0x20 // not in posix standard: map anonymous
 +
-+#define MS_SYNC 0x0000 // msync synchronously
-+#define MS_ASYNC 0x0001 // return immediately
-+#define MS_INVALIDATE 0x0002 // invalidate all cached data
++#define MS_SYNC 0x0 // msync synchronously
++#define MS_ASYNC 0x1 // return immediately
++#define MS_INVALIDATE 0x2 // invalidate all cached data
 +
-+#define MCL_CURRENT 0x0001 // lock only current memory
-+#define MCL_FUTURE 0x0002 // lock all future memory as well
++#define MCL_CURRENT 0x1 // lock only current memory
++#define MCL_FUTURE 0x2 // lock all future memory as well
 +
 +#define MAP_FAILED ( ( void* )-1 ) // map failure return
 +
@@ -7409,7 +7511,7 @@ index 000000000..df1dac0e2
 +#endif
 diff --git newlib/libc/sys/bolthur/io.c newlib/libc/sys/bolthur/io.c
 new file mode 100644
-index 000000000..5fa46b52a
+index 000000000..e7b9db204
 --- /dev/null
 +++ newlib/libc/sys/bolthur/io.c
 @@ -0,0 +1,40 @@
@@ -7451,7 +7553,7 @@ index 000000000..5fa46b52a
 + * @todo remove dummy implementation later
 + */
 +int _write( int file, char* ptr, int len ) {
-+  return _dummy_write( file, ptr, len );
++  return _dummy_puts( file, ptr, len );
 +}
 diff --git newlib/libc/sys/bolthur/malloc.c newlib/libc/sys/bolthur/malloc.c
 new file mode 100644
@@ -7549,10 +7651,10 @@ index 000000000..11ba26f77
 +}
 diff --git newlib/libc/sys/bolthur/mman/map.c newlib/libc/sys/bolthur/mman/map.c
 new file mode 100644
-index 000000000..24fdaccc9
+index 000000000..d5a58d49a
 --- /dev/null
 +++ newlib/libc/sys/bolthur/mman/map.c
-@@ -0,0 +1,106 @@
+@@ -0,0 +1,140 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -7562,6 +7664,7 @@ index 000000000..24fdaccc9
 + * is freely granted, provided that this notice is preserved.
 + */
 +
++#include <string.h>
 +#include <sys/mman.h>
 +#include <errno.h>
 +#include <bolthur/syscall.h>
@@ -7576,6 +7679,10 @@ index 000000000..24fdaccc9
 + * @param filedes file descriptor
 + * @param off offset for file descriptor
 + * @return void* mapped address or -1 on error
++ *
++ * @todo Check handling of MAP_SHARED
++ * @todo Check handling of MAP_FIXED
++ * @todo Add support for file descriptor
 + */
 +void* mmap(
 +  void* addr,
@@ -7596,31 +7703,54 @@ index 000000000..24fdaccc9
 +    )
 +  ) {
 +    errno = EINVAL;
-+    return -1;
++    return MAP_FAILED;
 +  }
 +
-+  // FIXME: allocate memory
-+
-+  // map shared
++  // system call protection parameter
++  int sys_prot = MEMORY_ACQUIRE_PROTECTION_NONE;
++  if ( prot & PROT_READ ) {
++    sys_prot |= MEMORY_ACQUIRE_PROTECTION_READ;
++  }
++  if ( prot & PROT_WRITE ) {
++    sys_prot |= MEMORY_ACQUIRE_PROTECTION_WRITE;
++  }
++  if ( prot & PROT_EXEC ) {
++    sys_prot |= MEMORY_ACQUIRE_PROTECTION_EXECUTABLE;
++  }
++  // system call flag parameter
++  int sys_flag = 0;
 +  if ( flags & MAP_SHARED ) {
-+    // FIXME: ADD SUPPORT FOR MAP SHARED
-+    errno = EINVAL;
-+    return -1;
++    sys_flag |= MEMORY_ACQUIRE_MAP_SHARED;
 +  }
-+  // map fixed
++  if ( flags & MAP_PRIVATE ) {
++    sys_flag |= MEMORY_ACQUIRE_MAP_PRIVATE;
++  }
 +  if ( flags & MAP_FIXED ) {
-+    // FIXME: ADD SUPPORT FOR MAP FIXED
-+    errno = EINVAL;
-+    return -1;
++    sys_flag |= MEMORY_ACQUIRE_MAP_FIXED;
 +  }
++  if ( flags & MAP_ANONYMOUS ) {
++    sys_flag |= MEMORY_ACQUIRE_MAP_ANONYMOUS;
++  }
++  // allocate memory
++  void* ret_addr = _memory_acquire( addr, len, sys_prot, sys_flag );
++  // handle system call error
++  if ( ( void* )-1 == ret_addr ) {
++    errno = ENOMEM;
++    return MAP_FAILED;
++  }
++
 +  // handle file descriptor
 +  if ( -1 != filedes ) {
 +    // FIXME: CONTACT VFS WITH MESSAGES
++    // FIXME: CONSIDER OFFSET!
 +    errno = EINVAL;
-+    return -1;
++    return MAP_FAILED;
 +  }
-+  // FIXME: REPLACE MMAP WITH USER SPACE LOGIC above
-+  return _mman_mmap( addr, len, prot, flags, filedes, off );
++
++  // clear acquired memory
++  memset( ret_addr, 0, len );
++  // return allocated memory
++  return ret_addr;
 +}
 +
 +/**
@@ -7631,7 +7761,13 @@ index 000000000..24fdaccc9
 + * @return int result
 + */
 +int munmap( void* addr, size_t len ) {
-+  return _mman_munmap( addr, len );
++  // handle invalid length
++  if ( 0 == len ) {
++    errno = EINVAL;
++    return -1;
++  }
++  // request release and return response
++  return _memory_release( addr, len );
 +}
 +
 +/**
