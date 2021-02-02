@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -x
 
 # Create build directory
 mkdir -p "$TARGET_COMPILE/build/dtc"

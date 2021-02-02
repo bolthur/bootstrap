@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -x
 
 # Package Verions
 export PKG_BINUTILS="2.35.1"
@@ -95,15 +95,26 @@ if [[ $CPPCHECK_VERSION != $PKG_CPPCHECK ]]; then
   sh "$BASEDIR/cppcheck.sh"
 fi
 
+# Build and install ported libraries
+sh "$BASEDIR/autotools.sh"
+
 # handle specific build
 if [[ ! -z $BUILD_TARGET && -f "$BASEDIR/target/$BUILD_TARGET.sh" ]]; then
   # build wanted target
   . $BASEDIR/target/$BUILD_TARGET.sh
   sh "$BASEDIR/build.sh"
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
 else
   # build arm toolchain
   . $BASEDIR/target/arm.sh
   sh "$BASEDIR/build.sh"
+  # check for error
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
   ## build aarch64 toolchain
   #. $BASEDIR/target/aarch64.sh
   #sh "$BASEDIR/build.sh"

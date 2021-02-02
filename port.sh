@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -x
 
 # Create directory for source files
 mkdir -p "$TARGET_COMPILE/source/port"

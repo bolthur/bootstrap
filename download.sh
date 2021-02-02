@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -x
 
 # Create directory for source files
 mkdir -p "$TARGET_COMPILE/source"
@@ -39,9 +39,10 @@ fi
 if [[ ! -f glibc-$PKG_GLIBC.tar.gz ]]; then
   wget "https://ftp.gnu.org/gnu/libc/glibc-${PKG_GLIBC}.tar.gz"
 fi
-if [[ -d "glibc-${PKG_GLIBC}" ]]; then
-  rm -rf "glibc-${PKG_GLIBC}"
-fi
+# FIXME: ADD AGAIN WITH PROPER GLIBC PATCH AND REBUILD SUPPORT
+# if [[ -d "glibc-${PKG_GLIBC}" ]]; then
+#   rm -rf "glibc-${PKG_GLIBC}"
+# fi
 if [[ ! -d "glibc-${PKG_GLIBC}" ]]; then
   tar -xzf glibc-${PKG_GLIBC}.tar.gz
 fi
@@ -59,9 +60,10 @@ fi
 if [[ ! -f cppcheck-${PKG_CPPCHECK}.tar.gz ]]; then
   wget -O "cppcheck-${PKG_CPPCHECK}.tar.gz" "https://github.com/danmar/cppcheck/archive/${PKG_CPPCHECK}.tar.gz"
 fi
-if [[ -d "cppcheck-${PKG_CPPCHECK}" ]]; then
-  rm -rf "cppcheck-${PKG_CPPCHECK}"
-fi
+# FIXME: ADD AGAIN WITH PROPER REBUILD SUPPORT
+# if [[ -d "cppcheck-${PKG_CPPCHECK}" ]]; then
+#   rm -rf "cppcheck-${PKG_CPPCHECK}"
+# fi
 if [[ ! -d "cppcheck-${PKG_CPPCHECK}" ]]; then
   tar -xzf cppcheck-${PKG_CPPCHECK}.tar.gz
 fi

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -x
 
 # target to build
 export TARGET="aarch64-unknown-bolthur-eabi"

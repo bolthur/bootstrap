@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -x
 
 
 
@@ -7,16 +7,35 @@ set -ex
 export PKG_AUTOMAKE="1.15.1"
 export PKG_AUTOMAKE_INSTALL="1.15"
 export PKG_AUTOCONF="2.69"
+export PKG_LIBTOOL="2.4.6"
+export PKG_M4="1.4.18"
 # download
 sh "$BASEDIR/download-internal.sh"
 # tool prefix
 export TOOL_PREFIX="/opt/bolthur/tool/binutils-$TARGET"
+# automake and autoconf
+sh "$BASEDIR/autotools/m4.sh"
+# check for error
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+sh "$BASEDIR/autotools/autoconf.sh"
+# check for error
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+sh "$BASEDIR/autotools/automake.sh"
+# check for error
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+sh "$BASEDIR/autotools/libtool.sh"
+# check for error
+if [ $? -ne 0 ]; then
+  exit 1
+fi
 # Extend path for sub script calls
 export PATH="$TOOL_PREFIX/bin:$PATH"
-# automake and autoconf
-sh "$BASEDIR/automake.sh"
-sh "$BASEDIR/autoconf.sh"
-
 
 
 export SHARED=$1

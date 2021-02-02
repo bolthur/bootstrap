@@ -1,14 +1,13 @@
-diff --git lib/config.sub lib/config.sub
-index c894da455..21849760f 100755
---- lib/config.sub
-+++ lib/config.sub
-@@ -1362,7 +1362,8 @@ case $os in
- 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
- 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
- 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
--	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
-+	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
-+	      | -bolthur* )
- 	# Remember, each alternative MUST END IN *, to match a version number.
- 		;;
- 	-qnx*)
+diff --git automake.in automake.in
+index 921a6ae09..a9145268d 100644
+--- automake.in
++++ automake.in
+@@ -4156,7 +4156,7 @@ sub substitute_ac_subst_variables_worker($)
+ sub substitute_ac_subst_variables ($)
+ {
+   my ($text) = @_;
+-  $text =~ s/\${([^ \t=:+{}]+)}/&substitute_ac_subst_variables_worker ($1)/ge;
++  $text =~ s/\$[{]([^ \t=:+{}]+)}/substitute_ac_subst_variables_worker ($1)/ge;
+   return $text;
+ }
+ 

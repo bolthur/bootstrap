@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -x
 
 # Handle rebuild
 if [[ -d "$TARGET_COMPILE/build/gdb-$TARGET" ]] && [[ 1 == $REBUILD_GDB ]]; then
