@@ -1,0 +1,8 @@
+
+name: autoconf
+allowed_version:
+  - '1.11.6'
+  - '1.15.1'
+  - '1.16.3'
+url: 'https://ftp.gnu.org/gnu/automake/automake-{VERSION}.tar.gz'
+extract_name: 'automake-{VERSION}'

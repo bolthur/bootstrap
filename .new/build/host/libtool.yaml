@@ -1,0 +1,13 @@
+
+name: host-libtool
+source: libtool@2.4.6
+dependency:
+  - host-patch
+  - host-m4
+  - host-autoconf
+  - host-automake
+build:
+  - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  - 'make all -j{CPU_COUNT}'
+install:
+  - 'make install -j{CPU_COUNT}'

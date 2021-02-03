@@ -95,9 +95,6 @@ if [[ $CPPCHECK_VERSION != $PKG_CPPCHECK ]]; then
   sh "$BASEDIR/cppcheck.sh"
 fi
 
-# Build and install ported libraries
-sh "$BASEDIR/autotools.sh"
-
 # handle specific build
 if [[ ! -z $BUILD_TARGET && -f "$BASEDIR/target/$BUILD_TARGET.sh" ]]; then
   # build wanted target

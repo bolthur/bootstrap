@@ -1,0 +1,6 @@
+
+name: m4
+allowed_version:
+  - '1.4.18'
+url: 'https://ftp.gnu.org/gnu/m4/m4-{VERSION}.tar.gz'
+extract_name: 'm4-{VERSION}'

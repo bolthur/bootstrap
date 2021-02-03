@@ -1,0 +1,11 @@
+
+name: host-autoconf
+source: autoconf@2.71
+dependency:
+  - host-patch
+  - host-m4
+build:
+  - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  - 'make all -j{CPU_COUNT}'
+install:
+  - 'make install -j{CPU_COUNT}'

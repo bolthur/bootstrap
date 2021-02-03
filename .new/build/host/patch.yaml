@@ -1,0 +1,8 @@
+
+name: host-patch
+source: patch@2.7.6
+build:
+  - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  - 'make all -j{CPU_COUNT}'
+install:
+  - 'make install -j{CPU_COUNT}'

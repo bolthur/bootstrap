@@ -1,0 +1,6 @@
+
+name: host-dtc
+source: dtc@1.6.0
+build: []
+install:
+  - 'make install MATCHCOMPILER=yes SETUP_PREFIX="{PREFIX}" PREFIX="{PREFIX}" NO_PYTHON=1 -C "{SOURCE_DIR}"'

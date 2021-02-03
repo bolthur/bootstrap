@@ -1,0 +1,6 @@
+
+name: patch
+allowed_version:
+  - '2.7.6'
+url: 'https://ftp.gnu.org/gnu/patch/patch-{VERSION}.tar.gz'
+extract_name: 'patch-{VERSION}'

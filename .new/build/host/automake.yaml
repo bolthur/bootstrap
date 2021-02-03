@@ -1,0 +1,12 @@
+
+name: host-automake
+source: automake@1.16.3
+dependency:
+  - host-patch
+  - host-m4
+  - host-autoconf
+build:
+  - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  - 'make all -j{CPU_COUNT}'
+install:
+  - 'make install -j{CPU_COUNT}'

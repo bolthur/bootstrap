@@ -1,0 +1,7 @@
+
+name: dtc
+allowed_version:
+  - '1.6.0'
+url: 'https://github.com/dgibson/dtc/archive/v{VERSION}.tar.gz'
+url_file_overwrite: 'dtc-{VERSION}.tar.gz'
+extract_name: 'dtc-{VERSION}'

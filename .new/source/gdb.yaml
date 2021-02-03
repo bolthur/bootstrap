@@ -1,0 +1,6 @@
+
+name: gdb
+allowed_version:
+  - '10.1'
+url: 'https://ftp.gnu.org/gnu/gdb/gdb-{VERSION}.tar.gz'
+extract_name: 'gdb-{VERSION}'

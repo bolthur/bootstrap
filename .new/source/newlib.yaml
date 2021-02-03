@@ -1,0 +1,6 @@
+
+name: newlib
+allowed_version:
+  - '4.1.0'
+url: 'https://www.sourceware.org/pub/newlib/newlib-{VERSION}.tar.gz'
+extract_name: 'newlib-{VERSION}'

@@ -1,0 +1,15 @@
+
+name: tmp-automake-binutils-1.15.1
+source: automake@1.15.1
+dependency:
+  - host-patch
+  - host-m4
+  - host-autoconf
+  - host-automake
+  - host-libtool
+prefix_suffix: ../build/tmp/binutils-build
+build:
+  - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  - 'make all -j{CPU_COUNT}'
+install:
+  - 'make install -j{CPU_COUNT}'
