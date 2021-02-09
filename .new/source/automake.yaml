@@ -1,5 +1,5 @@
 
-name: autoconf
+name: automake
 allowed_version:
   - '1.11.6'
   - '1.15.1'

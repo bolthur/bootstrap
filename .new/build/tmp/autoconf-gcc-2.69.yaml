@@ -1,11 +1,13 @@
 
-name: host-libtool
-source: libtool@2.4.6
+name: tmp-autoconf-gcc-2.69
+source: autoconf@2.69
 dependency:
   - host-patch
   - host-m4
   - host-autoconf
   - host-automake
+  - host-libtool
+prefix_suffix: ../build/tmp/gcc-build
 prepare:
   - '{SOURCE_DIR}/configure --prefix={PREFIX}'
 build:

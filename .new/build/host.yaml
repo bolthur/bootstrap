@@ -1,3 +1,4 @@
 
-prefix: 'out'
+#prefix: 'out'
+prefix: '/opt/bolthur'
 experimental: true

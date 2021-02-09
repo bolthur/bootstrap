@@ -10,8 +10,9 @@ path:
 configure:
   - folder: '{SOURCE_DIR}/ld'
     command: automake
-build:
+prepare:
   - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX} --disable-nls --disable-werror --disable-libssp --with-sysroot={SYSROOT}/arm-unknown-bolthur-eabi --with-pkgversion="GNU Binutils; bolthur bootstrap cross" --disable-shared'
+build:
   - 'make -j{CPU_COUNT}'
 install:
   - 'make install-strip'

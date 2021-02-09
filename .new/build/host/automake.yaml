@@ -5,8 +5,9 @@ dependency:
   - host-patch
   - host-m4
   - host-autoconf
-build:
+prepare:
   - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+build:
   - 'make all -j{CPU_COUNT}'
 install:
   - 'make install -j{CPU_COUNT}'

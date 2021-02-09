@@ -71,7 +71,7 @@ def lookup_package( package_list, **kw ):
   return filter( lambda i: all(( i[ k ] == v for ( k, v ) in kw.items() ) ), package_list )
 
 # function to parse yaml and push to packages with recursive dependency handling
-def prepare_package_order( package_list, path, base ):
+def prepare_package_order( package_list, path, base, build="" ):
   # skip non yaml files
   if not path.endswith( '.yaml' ):
     return
@@ -93,10 +93,21 @@ def prepare_package_order( package_list, path, base ):
       # skip already handled stuff
       if list( lookup_package( package_list, name=dependency ) ):
         continue
+      # split for path
+      splitted = ( dependency + '.yaml' ).split( '-', 1 )
+      tmp_build_param = ''
+      # handle temporary dependencies
+      if 'tmp' == splitted[ 0 ]:
+        tmp_build_param = data[ 'name' ]
       # prepare path list for join
-      path_list = [ base ] + ( dependency + '.yaml' ).split( '-', 1 )
+      path_list = [ base ] + splitted
       # recursive call
-      prepare_package_order( package_list, os.path.join( *path_list ), base )
+      prepare_package_order(
+        package_list,
+        os.path.join( *path_list ),
+        base,
+        tmp_build_param
+      )
     # iterate again over dependencies to get max insert index
     for dependency in data[ 'dependency' ]:
       current = next( ( index for ( index, d ) in enumerate( package_list ) if d[ 'name' ] == dependency ), None )
@@ -109,8 +120,13 @@ def prepare_package_order( package_list, path, base ):
   except KeyError:
     pass
 
+  # Add suffix to package name if set differently
+  name = data[ 'name' ]
+  if '' != build:
+    name = build + '-' + data[ 'name' ]
+
   # skip already handled stuff
-  if list( lookup_package( package_list, name=data[ 'name' ] ) ):
+  if list( lookup_package( package_list, name=name ) ):
     return
   # push back tool
   if idx is None:
@@ -137,7 +153,7 @@ def prepare_package( package_list, base ):
         print( exception )
         quit()
 
-    # matching = [ s for s in some_list if 'abc' in s]
+    # check for allowed version
     if not version in data[ 'allowed_version' ]:
       print( 'used version is not allowed!' )
       quit()
@@ -261,8 +277,9 @@ def patch_package( package_list, source_directory, patch_directory ):
     # mark as patched
     pathlib.Path( extract_name ).touch()
 
-def prepare_command( command, version, out_prefix, source_directory ):
+def prepare_command( command, version, out_prefix, source_directory, install_version ):
   to_execute = command.replace( '{VERSION}', version )
+  to_execute = to_execute.replace( '{INSTALL_VERSION}', str( install_version ) )
   to_execute = to_execute.replace( '{PREFIX}', os.path.abspath( out_prefix ) )
   to_execute = to_execute.replace( '{CPU_COUNT}', str( multiprocessing.cpu_count() ) )
   to_execute = to_execute.replace( '{SOURCE_DIR}', os.path.abspath( source_directory ) )
@@ -273,10 +290,11 @@ def prepare_command( command, version, out_prefix, source_directory ):
 def build_install_package( package_list, out_prefix, build_directory, source_directory ):
   for package in package_list:
     # get extract name
-    build_folder = os.path.join( build_directory, package[ 'source' ][ 'extract_name' ] )
-    build_file = os.path.join( build_folder, '.build.applied' )
-    install_file = os.path.join( build_folder, '.install.applied' )
-    configure_file = os.path.join( build_folder, '.configure.applied' )
+    build_folder = os.path.join( build_directory, package[ 'name' ] + '.' + package[ 'source' ][ 'extract_name' ] )
+    build_file = os.path.join( build_folder, '.' + package[ 'name' ] + '.build.applied' )
+    install_file = os.path.join( build_folder, '.' + package[ 'name' ] + '.install.applied' )
+    configure_file = os.path.join( build_folder, '.' + package[ 'name' ] + '.configure.applied' )
+    prepare_file = os.path.join( build_folder, '.' + package[ 'name' ] + '.prepare.applied' )
 
     # create build folder if not existing
     if not os.path.exists( build_folder ):
@@ -286,6 +304,13 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
     prefix_suffix = None
     try:
       prefix_suffix = package[ 'prefix_suffix' ]
+    except KeyError:
+      pass
+
+    # possible set install version
+    install_version = ''
+    try:
+      install_version = package[ 'install_version' ]
     except KeyError:
       pass
 
@@ -304,6 +329,8 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
     # execute configure steps if not done
     if not os.path.exists( configure_file ):
       try:
+        # execute configure commands
+        print( '-> configuring ' + package[ 'name' ] )
         for command in package[ 'configure' ]:
           # default source path
           source_path = os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] )
@@ -313,9 +340,6 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
             to_execute = command[ 'command' ]
           else:
             to_execute = command
-          # path extension
-          # if not env_path is None:
-
           # execute command
           if 0 != subprocess.call( to_execute, cwd=os.path.abspath( source_path ), shell=True, env=env ):
             print( 'Error on configure ' + package[ 'source' ][ 'extract_name' ] )
@@ -325,10 +349,34 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
       # create file
       pathlib.Path( configure_file ).touch()
 
+    # execute prepare steps if not done
+    if not os.path.exists( prepare_file ):
+      try:
+        # execute prepare commands
+        print( '-> preparing ' + package[ 'name' ] )
+        # execute command by command
+        for command in package[ 'prepare' ]:
+          # prepare command
+          to_execute = prepare_command(
+            command,
+            package[ 'source' ][ 'version' ],
+            used_prefix,
+            os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
+            install_version
+          )
+          # execute command
+          if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
+            print( 'Error on prepare ' + package[ 'source' ][ 'extract_name' ] )
+            quit()
+      except KeyError:
+        pass
+      # create file
+      pathlib.Path( prepare_file ).touch()
+
     # execute build steps if not done
     if not os.path.exists( build_file ):
       # execute build commands
-      print( '-> building ' + package[ 'source' ][ 'extract_name' ] )
+      print( '-> building ' + package[ 'name' ] )
       # execute command by command
       for command in package[ 'build' ]:
         # prepare command to execute
@@ -336,7 +384,8 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
           command,
           package[ 'source' ][ 'version' ],
           used_prefix,
-          os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] )
+          os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
+          install_version
         )
         # execute command in folder
         if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
@@ -356,7 +405,8 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
           command,
           package[ 'source' ][ 'version' ],
           used_prefix,
-          os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] )
+          os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
+          install_version
         )
         # execute command in folder
         if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
@@ -372,6 +422,9 @@ for subdir, dirs, files in os.walk( tool_directory ):
     prepare_package_order( package_list, os.path.join( subdir, filename ), base_directory )
 # prepare package source data
 prepare_package( package_list, source_directory )
+# for package in package_list:
+#   print( package[ 'name' ] )
+# quit( 1 )
 # download sources
 download_package( package_list, env_source_directory )
 # apply package patches if set
