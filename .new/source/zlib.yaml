@@ -1,0 +1,7 @@
+
+name: zlib
+allowed_version:
+  - '1.2.11'
+url: 'https://github.com/madler/zlib/archive/v{VERSION}.tar.gz'
+url_file_overwrite: 'zlib-{VERSION}.tar.gz'
+extract_name: 'zlib-{VERSION}'

@@ -1,6 +1,6 @@
 
 name: host-binutils-arm
-source: binutils@2.35.1
+source: binutils@2.36.1
 dependency:
   - tmp-autoconf-binutils-2.69
   - tmp-automake-binutils-1.15.1

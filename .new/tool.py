@@ -13,6 +13,7 @@ import subprocess
 parser = argparse.ArgumentParser()
 # add supported arguments
 parser.add_argument( '--host', help='build host toolchain', action='store_true' )
+parser.add_argument( '--rebuild', help='rebuild package by name', type=str, default=None)
 # parse arguments
 args = parser.parse_args()
 
@@ -21,6 +22,7 @@ args = parser.parse_args()
 # base dir
 base_directory = 'build'
 source_directory = 'source'
+rebuild_package = args.rebuild
 # handle host build
 if args.host:
   tool_directory = os.path.join( 'build', 'host' )
@@ -188,6 +190,13 @@ def download_package( package_list, base ):
     # get target file
     target_file = os.path.join( base, filename )
 
+    # delete on rebuild
+    if package[ 'name' ] == rebuild_package:
+      if os.path.exists( target_file ):
+        os.remove( target_file )
+      if os.path.exists( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) ):
+        os.rmdir( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) )
+
     # skip if already loaded
     if not os.path.exists( target_file ):
       print( '-> loading ' + target_file )
@@ -213,8 +222,7 @@ def patch_package( package_list, source_directory, patch_directory ):
     extract_name = os.path.join(
       source_directory,
       package[ 'source' ][ 'extract_name' ],
-      '.patch.applied'
-    )
+      '.patch.applied' )
     # skip if already patched
     if os.path.exists( extract_name ):
       continue
@@ -230,8 +238,7 @@ def patch_package( package_list, source_directory, patch_directory ):
         patch_directory,
         '.experimental',
         package[ 'source' ][ 'name' ],
-        package[ 'source' ][ 'version' ]
-      )
+        package[ 'source' ][ 'version' ] )
       # remove if not set
       if not os.path.exists( package_patch_folder ):
         package_patch_folder = None
@@ -242,8 +249,7 @@ def patch_package( package_list, source_directory, patch_directory ):
       package_patch_folder = os.path.join(
         patch_directory,
         package[ 'source' ][ 'name' ],
-        package[ 'source' ][ 'version' ]
-      )
+        package[ 'source' ][ 'version' ] )
       # check if folder exists
       if not os.path.exists( package_patch_folder ):
         package_patch_folder = None
@@ -268,7 +274,6 @@ def patch_package( package_list, source_directory, patch_directory ):
         # build command to execute
         to_execute = patch_command.replace( '{SOURCE}', source_folder )
         to_execute = to_execute.replace( '{PATCH}', patch_file )
-        print( to_execute )
         ## apply patch
         if 0 != subprocess.call( to_execute, cwd=source_folder, shell=True ):
           print( 'Error on patching ' + package[ 'source' ][ 'extract_name' ] )
@@ -277,143 +282,203 @@ def patch_package( package_list, source_directory, patch_directory ):
     # mark as patched
     pathlib.Path( extract_name ).touch()
 
-def prepare_command( command, version, out_prefix, source_directory, install_version ):
+# prepare command for execution
+def prepare_command( command, version, out_prefix, source_directory, install_version, emulated_target, build_flag ):
   to_execute = command.replace( '{VERSION}', version )
   to_execute = to_execute.replace( '{INSTALL_VERSION}', str( install_version ) )
   to_execute = to_execute.replace( '{PREFIX}', os.path.abspath( out_prefix ) )
   to_execute = to_execute.replace( '{CPU_COUNT}', str( multiprocessing.cpu_count() ) )
   to_execute = to_execute.replace( '{SOURCE_DIR}', os.path.abspath( source_directory ) )
   to_execute = to_execute.replace( '{SYSROOT}', os.path.abspath( os.path.join( out_prefix, '..', 'sysroot' ) ) )
+  to_execute = to_execute.replace( '{EMULATED_TARGET}', emulated_target )
+  to_execute = to_execute.replace( '{BUILD_FLAG}', build_flag )
   return to_execute
+
+# build and install single package
+def build_install_single_package( package, out_prefix, build_folder, build_file, install_file, configure_file, prepare_file, source_directory, emulated_target = '', build_flag = '' ):
+  # delete on rebuild
+  if package[ 'name' ] == rebuild_package: os.rmdir( build_folder )
+
+  # create build folder if not existing
+  if not os.path.exists( build_folder ):
+    os.makedirs( build_folder )
+
+  # possible prefix suffix
+  prefix_suffix = None
+  try:
+    prefix_suffix = package[ 'prefix_suffix' ]
+  except KeyError:
+    pass
+
+  # possible set install version
+  install_version = ''
+  try:
+    install_version = package[ 'install_version' ]
+  except KeyError:
+    pass
+
+  used_prefix = out_prefix
+  if not prefix_suffix is None:
+    used_prefix = os.path.join( out_prefix, prefix_suffix )
+
+  env = dict( **os.environ )
+  try:
+    for ext in package[ 'path' ]:
+      env_str = os.path.abspath( ext.replace( '{PREFIX}', used_prefix ) )
+      env[ 'PATH' ] = env_str + os.pathsep + env[ 'PATH' ]
+  except KeyError:
+    pass
+
+  # execute configure steps if not done
+  if not os.path.exists( configure_file ):
+    try:
+      # execute configure commands
+      print( '-> configuring ' + package[ 'name' ] )
+      for command in package[ 'configure' ]:
+        # default source path
+        source_path = os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] )
+        # handle possible differences
+        to_execute = command
+        if not isinstance( command, str ):
+          source_path = command[ 'folder' ].replace( '{SOURCE_DIR}', source_path )
+          to_execute = command[ 'command' ]
+        # execute command
+        if 0 != subprocess.call( to_execute, cwd=os.path.abspath( source_path ), shell=True, env=env ):
+          print( 'Error on configure ' + package[ 'source' ][ 'extract_name' ] )
+          quit()
+    except KeyError:
+      pass
+    # create file
+    pathlib.Path( configure_file ).touch()
+
+  # execute prepare steps if not done
+  if not os.path.exists( prepare_file ):
+    try:
+      # execute prepare commands
+      print( '-> preparing ' + package[ 'name' ] )
+      # execute command by command
+      for command in package[ 'prepare' ]:
+        # prepare command
+        to_execute = prepare_command(
+          command,
+          package[ 'source' ][ 'version' ],
+          used_prefix,
+          os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
+          install_version,
+          emulated_target,
+          build_flag )
+        # execute command
+        if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
+          print( 'Error on prepare ' + package[ 'source' ][ 'extract_name' ] )
+          quit()
+    except KeyError:
+      pass
+    # create file
+    pathlib.Path( prepare_file ).touch()
+
+  # execute build steps if not done
+  if not os.path.exists( build_file ):
+    # execute build commands
+    print( '-> building ' + package[ 'name' ] )
+    # execute command by command
+    for command in package[ 'build' ]:
+      # prepare command to execute
+      to_execute = prepare_command(
+        command,
+        package[ 'source' ][ 'version' ],
+        used_prefix,
+        os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
+        install_version,
+        emulated_target,
+        build_flag )
+      # execute command in folder
+      if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
+        print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
+        quit()
+    # create file
+    pathlib.Path( build_file ).touch()
+
+  # execute install commands if not done
+  if not os.path.exists( install_file ):
+    # execute commands
+    print( '-> installing ' + package[ 'source' ][ 'extract_name' ] )
+    # command by command
+    for command in package[ 'install' ]:
+      # prepare command to execute
+      to_execute = prepare_command(
+        command,
+        package[ 'source' ][ 'version' ],
+        used_prefix,
+        os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
+        install_version,
+        emulated_target,
+        build_flag )
+      # execute command in folder
+      if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
+        print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
+        quit()
+    # create file
+    pathlib.Path( install_file ).touch()
 
 # build and install packages
 def build_install_package( package_list, out_prefix, build_directory, source_directory ):
   for package in package_list:
-    # get extract name
-    build_folder = os.path.join( build_directory, package[ 'name' ] + '.' + package[ 'source' ][ 'extract_name' ] )
-    build_file = os.path.join( build_folder, '.' + package[ 'name' ] + '.build.applied' )
-    install_file = os.path.join( build_folder, '.' + package[ 'name' ] + '.install.applied' )
-    configure_file = os.path.join( build_folder, '.' + package[ 'name' ] + '.configure.applied' )
-    prepare_file = os.path.join( build_folder, '.' + package[ 'name' ] + '.prepare.applied' )
-
-    # create build folder if not existing
-    if not os.path.exists( build_folder ):
-      os.makedirs( build_folder )
-
-    # possible prefix suffix
-    prefix_suffix = None
+    # try to get possible multilib emulation
+    emulate_multilib = None
     try:
-      prefix_suffix = package[ 'prefix_suffix' ]
+      emulate_multilib = package[ 'emulate_multilib' ]
     except KeyError:
       pass
 
-    # possible set install version
-    install_version = ''
-    try:
-      install_version = package[ 'install_version' ]
-    except KeyError:
-      pass
+    # handle normal emulation
+    if emulate_multilib is None:
+      # base build folder
+      build_folder = os.path.join( build_directory, package[ 'name' ] + '.' + package[ 'source' ][ 'extract_name' ] )
+      # just execute build and install once
+      build_install_single_package(
+        package,
+        out_prefix,
+        build_folder,
+        os.path.join( build_folder, '.' + package[ 'name' ] + '.build.applied' ),
+        os.path.join( build_folder, '.' + package[ 'name' ] + '.install.applied' ),
+        os.path.join( build_folder, '.' + package[ 'name' ] + '.configure.applied' ),
+        os.path.join( build_folder, '.' + package[ 'name' ] + '.prepare.applied' ),
+        source_directory )
+      # skip rest
+      continue
 
-    used_prefix = out_prefix
-    if not prefix_suffix is None:
-      used_prefix = os.path.join( out_prefix, prefix_suffix )
+    # get result from emulate command
+    result = subprocess.run(emulate_multilib.split( ' ' ), stdout=subprocess.PIPE)
+    # one configuration per line
+    configuration_list = result.stdout.decode( 'utf-8' ).split( '\n' )
+    # loop configurations
+    for configuration in configuration_list:
+      # split by separator
+      splitted = configuration.split( ';' )
+      # skip invalid
+      if 2 != len(splitted): continue
+      # compile options
+      option = splitted[ 1 ].replace( '@', ' -' )
+      # folder in sysroot
+      folder = splitted[ 0 ]
+      # determine build folder
+      build_folder = os.path.join(
+        build_directory,
+        package[ 'name' ] + '.' + package[ 'source' ][ 'extract_name' ],
+        folder )
+      # just execute build and install
+      build_install_single_package(
+        package,
+        out_prefix,
+        build_folder,
+        os.path.join( build_folder, '.' + package[ 'name' ] + '.build.applied' ),
+        os.path.join( build_folder, '.' + package[ 'name' ] + '.install.applied' ),
+        os.path.join( build_folder, '.' + package[ 'name' ] + '.configure.applied' ),
+        os.path.join( build_folder, '.' + package[ 'name' ] + '.prepare.applied' ),
+        source_directory,
+        folder,
+        option )
 
-    env = dict( **os.environ )
-    try:
-      for ext in package[ 'path' ]:
-        env_str = os.path.abspath( ext.replace( '{PREFIX}', used_prefix ) )
-        env[ 'PATH' ] = env_str + os.pathsep + env[ 'PATH' ]
-    except KeyError:
-      pass
-
-    # execute configure steps if not done
-    if not os.path.exists( configure_file ):
-      try:
-        # execute configure commands
-        print( '-> configuring ' + package[ 'name' ] )
-        for command in package[ 'configure' ]:
-          # default source path
-          source_path = os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] )
-          # handle possible differences
-          if not isinstance( command, str ):
-            source_path = command[ 'folder' ].replace( '{SOURCE_DIR}', source_path )
-            to_execute = command[ 'command' ]
-          else:
-            to_execute = command
-          # execute command
-          if 0 != subprocess.call( to_execute, cwd=os.path.abspath( source_path ), shell=True, env=env ):
-            print( 'Error on configure ' + package[ 'source' ][ 'extract_name' ] )
-            quit()
-      except KeyError:
-        pass
-      # create file
-      pathlib.Path( configure_file ).touch()
-
-    # execute prepare steps if not done
-    if not os.path.exists( prepare_file ):
-      try:
-        # execute prepare commands
-        print( '-> preparing ' + package[ 'name' ] )
-        # execute command by command
-        for command in package[ 'prepare' ]:
-          # prepare command
-          to_execute = prepare_command(
-            command,
-            package[ 'source' ][ 'version' ],
-            used_prefix,
-            os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
-            install_version
-          )
-          # execute command
-          if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
-            print( 'Error on prepare ' + package[ 'source' ][ 'extract_name' ] )
-            quit()
-      except KeyError:
-        pass
-      # create file
-      pathlib.Path( prepare_file ).touch()
-
-    # execute build steps if not done
-    if not os.path.exists( build_file ):
-      # execute build commands
-      print( '-> building ' + package[ 'name' ] )
-      # execute command by command
-      for command in package[ 'build' ]:
-        # prepare command to execute
-        to_execute = prepare_command(
-          command,
-          package[ 'source' ][ 'version' ],
-          used_prefix,
-          os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
-          install_version
-        )
-        # execute command in folder
-        if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
-          print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
-          quit()
-      # create file
-      pathlib.Path( build_file ).touch()
-
-    # execute install commands if not done
-    if not os.path.exists( install_file ):
-      # execute commands
-      print( '-> installing ' + package[ 'source' ][ 'extract_name' ] )
-      # command by command
-      for command in package[ 'install' ]:
-        # prepare command to execute
-        to_execute = prepare_command(
-          command,
-          package[ 'source' ][ 'version' ],
-          used_prefix,
-          os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
-          install_version
-        )
-        # execute command in folder
-        if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
-          print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
-          quit()
-      # create file
-      pathlib.Path( install_file ).touch()
 
 
 # iterate through files and populate packages
@@ -422,9 +487,6 @@ for subdir, dirs, files in os.walk( tool_directory ):
     prepare_package_order( package_list, os.path.join( subdir, filename ), base_directory )
 # prepare package source data
 prepare_package( package_list, source_directory )
-# for package in package_list:
-#   print( package[ 'name' ] )
-# quit( 1 )
 # download sources
 download_package( package_list, env_source_directory )
 # apply package patches if set

@@ -1,6 +1,6 @@
 
 name: binutils
 allowed_version:
-  - '2.35.1'
+  - '2.36.1'
 url: 'https://ftp.gnu.org/gnu/binutils/binutils-{VERSION}.tar.gz'
 extract_name: 'binutils-{VERSION}'
