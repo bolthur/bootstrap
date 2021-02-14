@@ -72,21 +72,8 @@ package_list = []
 def lookup_package( package_list, **kw ):
   return filter( lambda i: all(( i[ k ] == v for ( k, v ) in kw.items() ) ), package_list )
 
-# function to parse yaml and push to packages with recursive dependency handling
-def prepare_package_order( package_list, path, base, build="" ):
-  # skip non yaml files
-  if not path.endswith( '.yaml' ):
-    return
-
-  # load and parse file
-  with open( path, 'r' ) as stream:
-    # parse yaml file
-    try:
-      data = yaml.load( stream, Loader=yaml.FullLoader )
-    except yaml.YAMLError as exception:
-      print( exception )
-      quit()
-
+# parse package file data and populate to package list
+def parse_package_file_data( package_list, data, base, build='' ):
   idx = None
   # handle possible dependencies
   try:
@@ -103,6 +90,25 @@ def prepare_package_order( package_list, path, base, build="" ):
         tmp_build_param = data[ 'name' ]
       # prepare path list for join
       path_list = [ base ] + splitted
+
+      # loop until nothing remains
+      while not os.path.exists( os.path.join( *path_list ) ):
+        # split again and remove first element
+        splitted = ( dependency ).split( '-' )[:-1]
+        # exit point ( no further elements )
+        if ( 0 >= len( splitted ) ):
+          break
+        # add file ending
+        last = splitted.pop() + '.yaml'
+        # append again
+        splitted.append( last )
+        # join to new filename
+        dependency = '-'.join( splitted )
+        # split out host / tmp
+        splitted = dependency.split( '-', 1 )
+        # update path list
+        path_list = [ base ] + splitted
+
       # recursive call
       prepare_package_order(
         package_list,
@@ -135,6 +141,27 @@ def prepare_package_order( package_list, path, base, build="" ):
     package_list.append( data )
   else:
     package_list.insert( idx + 1, data )
+
+# function to parse yaml and push to packages with recursive dependency handling
+def prepare_package_order( package_list, path, base, build="" ):
+  # skip non yaml files
+  if not path.endswith( '.yaml' ): return
+
+  # load and parse file
+  with open( path, 'r' ) as stream:
+    # parse yaml file
+    try:
+      data = yaml.load( stream, Loader=yaml.FullLoader )
+    except yaml.YAMLError as exception:
+      print( exception )
+      quit()
+
+  # handle multiple packages in one file
+  if isinstance( data, list ):
+    for item in data: parse_package_file_data( package_list, item, base, build )
+  # handle single package only
+  else:
+    parse_package_file_data( package_list, data, base, build )
 
 # prepare package source
 def prepare_package( package_list, base ):
@@ -195,7 +222,7 @@ def download_package( package_list, base ):
       if os.path.exists( target_file ):
         os.remove( target_file )
       if os.path.exists( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) ):
-        os.rmdir( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) )
+        shutil.rmtree( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) )
 
     # skip if already loaded
     if not os.path.exists( target_file ):
@@ -297,7 +324,8 @@ def prepare_command( command, version, out_prefix, source_directory, install_ver
 # build and install single package
 def build_install_single_package( package, out_prefix, build_folder, build_file, install_file, configure_file, prepare_file, source_directory, emulated_target = '', build_flag = '' ):
   # delete on rebuild
-  if package[ 'name' ] == rebuild_package: os.rmdir( build_folder )
+  if package[ 'name' ] == rebuild_package and os.path.exists( build_folder ):
+    shutil.rmtree( build_folder )
 
   # create build folder if not existing
   if not os.path.exists( build_folder ):
@@ -378,45 +406,51 @@ def build_install_single_package( package, out_prefix, build_folder, build_file,
 
   # execute build steps if not done
   if not os.path.exists( build_file ):
-    # execute build commands
-    print( '-> building ' + package[ 'name' ] )
-    # execute command by command
-    for command in package[ 'build' ]:
-      # prepare command to execute
-      to_execute = prepare_command(
-        command,
-        package[ 'source' ][ 'version' ],
-        used_prefix,
-        os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
-        install_version,
-        emulated_target,
-        build_flag )
-      # execute command in folder
-      if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
-        print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
-        quit()
+    try:
+      # execute build commands
+      print( '-> building ' + package[ 'name' ] )
+      # execute command by command
+      for command in package[ 'build' ]:
+        # prepare command to execute
+        to_execute = prepare_command(
+          command,
+          package[ 'source' ][ 'version' ],
+          used_prefix,
+          os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
+          install_version,
+          emulated_target,
+          build_flag )
+        # execute command in folder
+        if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
+          print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
+          quit()
+    except KeyError:
+      pass
     # create file
     pathlib.Path( build_file ).touch()
 
   # execute install commands if not done
   if not os.path.exists( install_file ):
-    # execute commands
-    print( '-> installing ' + package[ 'source' ][ 'extract_name' ] )
-    # command by command
-    for command in package[ 'install' ]:
-      # prepare command to execute
-      to_execute = prepare_command(
-        command,
-        package[ 'source' ][ 'version' ],
-        used_prefix,
-        os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
-        install_version,
-        emulated_target,
-        build_flag )
-      # execute command in folder
-      if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
-        print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
-        quit()
+    try:
+      # execute commands
+      print( '-> installing ' + package[ 'source' ][ 'extract_name' ] )
+      # command by command
+      for command in package[ 'install' ]:
+        # prepare command to execute
+        to_execute = prepare_command(
+          command,
+          package[ 'source' ][ 'version' ],
+          used_prefix,
+          os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
+          install_version,
+          emulated_target,
+          build_flag )
+        # execute command in folder
+        if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
+          print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
+          quit()
+    except KeyError:
+      pass
     # create file
     pathlib.Path( install_file ).touch()
 
@@ -485,6 +519,9 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
 for subdir, dirs, files in os.walk( tool_directory ):
   for filename in files:
     prepare_package_order( package_list, os.path.join( subdir, filename ), base_directory )
+#for package in package_list:
+#  print( package[ 'name' ] )
+#quit( 1 )
 # prepare package source data
 prepare_package( package_list, source_directory )
 # download sources

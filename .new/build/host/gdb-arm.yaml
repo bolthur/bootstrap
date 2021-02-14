@@ -1,9 +1,0 @@
-
-name: host-gdb-arm
-source: gdb@10.1
-prepare:
-  - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX}'
-build:
-  - 'make all -j{CPU_COUNT}'
-install:
-  - 'make install'

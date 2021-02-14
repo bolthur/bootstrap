@@ -1,0 +1,18 @@
+
+- name: host-binutils-arm
+  source: binutils@2.36.1
+  dependency:
+    - tmp-autoconf-binutils-2.69
+    - tmp-automake-binutils-1.15.1
+  path:
+    - '{PREFIX}/bin'
+    - '{PREFIX}/../build/tmp/binutils-build/bin'
+  configure:
+    - folder: '{SOURCE_DIR}/ld'
+      command: automake
+  prepare:
+    - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX} --disable-nls --disable-werror --disable-libssp --with-sysroot={SYSROOT}/arm-unknown-bolthur-eabi --with-pkgversion="GNU Binutils; bolthur bootstrap cross" --disable-shared'
+  build:
+    - 'make -j{CPU_COUNT}'
+  install:
+    - 'make install-strip'

@@ -1,0 +1,61 @@
+
+- name: tmp-autoconf-binutils-2.69
+  source: autoconf@2.69
+  dependency:
+    - host-patch
+    - host-m4
+    - host-autoconf
+    - host-automake
+    - host-libtool
+  prefix_suffix: ../build/tmp/binutils-build
+  prepare:
+    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install -j{CPU_COUNT}'
+- name: tmp-autoconf-gcc-2.69
+  source: autoconf@2.69
+  dependency:
+    - host-patch
+    - host-m4
+    - host-autoconf
+    - host-automake
+    - host-libtool
+  prefix_suffix: ../build/tmp/gcc-build
+  prepare:
+    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install -j{CPU_COUNT}'
+- name: tmp-autoconf-gdb-2.69
+  source: autoconf@2.69
+  dependency:
+    - host-patch
+    - host-m4
+    - host-autoconf
+    - host-automake
+    - host-libtool
+  prefix_suffix: ../build/tmp/gdb-build
+  prepare:
+    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install -j{CPU_COUNT}'
+- name: tmp-autoconf-newlib-2.68
+  source: autoconf@2.68
+  dependency:
+    - host-patch
+    - host-m4
+    - host-autoconf
+    - host-automake
+    - host-libtool
+  prefix_suffix: ../build/tmp/newlib-build
+  prepare:
+    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install -j{CPU_COUNT}'

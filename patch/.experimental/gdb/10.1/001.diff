@@ -1,0 +1,75 @@
+diff --git bfd/config.bfd bfd/config.bfd
+index 6c2919e..7f32970 100644
+--- bfd/config.bfd
++++ bfd/config.bfd
+@@ -231,6 +231,11 @@ case "${targ}" in
+     targ_archs="$targ_archs bfd_i386_arch bfd_powerpc_arch bfd_rs6000_arch"
+     want64=true
+     ;;
++  aarch64*-*-bolthur*)
++    targ_defvec=aarch64_elf64_le_vec
++    targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec"
++    want64=true
++    ;;
+   aarch64-*-elf | aarch64-*-rtems*)
+     targ_defvec=aarch64_elf64_le_vec
+     targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec"
+@@ -384,6 +389,10 @@ case "${targ}" in
+     targ_defvec=arm_elf32_le_vec
+     targ_selvecs=arm_elf32_be_vec
+     ;;
++  arm*-*-bolthur*)
++    targ_defvec=arm_elf32_le_vec
++    targ_selvecs="arm_elf32_fdpic_le_vec arm_elf32_be_vec arm_elf32_fdpic_be_vec"
++    ;;
+   arm-*-elf | arm*-*-freebsd* | arm*-*-linux-* | arm*-*-conix* | \
+   arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \
+   arm*-*-eabi* | arm-*-rtems* | arm*-*-uclinuxfdpiceabi)
+diff --git config.sub config.sub
+index f02d43a..6222c95 100755
+--- config.sub
++++ config.sub
+@@ -1366,7 +1366,7 @@ case $os in
+ 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+-	     | nsk* | powerunix)
++	     | nsk* | powerunix | bolthur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	qnx*)
+diff --git gdb/acinclude.m4 gdb/acinclude.m4
+index 6fbc88b..9b26046 100644
+--- gdb/acinclude.m4
++++ gdb/acinclude.m4
+@@ -186,7 +186,7 @@ case "x$am_cv_prog_cc_stdc" in
+ esac
+ ])
+ 
+-dnl written by Guido Draheim <guidod@gmx.de>, original by Alexandre Oliva 
++dnl written by Guido Draheim <guidod@gmx.de>, original by Alexandre Oliva
+ dnl Version 1.3 (2001/03/02)
+ dnl source http://www.gnu.org/software/ac-archive/Miscellaneous/ac_define_dir.html
+ 
+@@ -362,6 +362,7 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
+   AC_CACHE_CHECK([$1], [$2],
+   [AC_TRY_LINK(
+   [#include <stdlib.h>
++  #include <string.h>
+   #include "bfd.h"
+   #include "$4"
+   ],
+diff --git readline/readline/support/config.sub readline/readline/support/config.sub
+index 22d774e..df87d2e 100755
+--- readline/readline/support/config.sub
++++ readline/readline/support/config.sub
+@@ -1368,7 +1368,8 @@ case $os in
+ 	     | powermax* | dnix* | nx6 | nx7 | sei* | dragonfly* \
+ 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+-	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi*)
++	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
++	     | bolthur*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	qnx*)
