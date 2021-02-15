@@ -9,66 +9,6 @@ import pathlib
 import multiprocessing
 import subprocess
 
-
-# generate argument parser
-parser = argparse.ArgumentParser()
-# add supported arguments
-parser.add_argument( '--host', help='build host toolchain', action='store_true' )
-parser.add_argument( '--rebuild', help='rebuild package by name', type=str, default=None)
-# parse arguments
-args = parser.parse_args()
-
-
-
-# base dir
-base_directory = 'build'
-source_directory = 'source'
-rebuild_package = args.rebuild
-# handle host build
-if args.host:
-  tool_directory = os.path.join( 'build', 'host' )
-  tool_information_file = os.path.join( 'build', 'host.yaml' )
-
-
-
-# check for set tool directory
-try:
-  tool_directory
-except NameError:
-  print( 'No tool directory set to be built' )
-  quit()
-# check for set tool information
-try:
-  tool_information_file
-except NameError:
-  print( 'No tool information file set' )
-  quit()
-
-
-
-# parse tool file
-with open( tool_information_file, 'r' ) as stream:
-  # parse yaml file
-  try:
-    tool_information = yaml.load( stream, Loader=yaml.FullLoader )
-  except yaml.YAMLError as exception:
-    print( exception )
-    quit()
-
-
-
-env_cross_prefix = os.path.join( tool_information[ 'prefix' ], 'cross' )
-env_source_directory = os.path.join( tool_information[ 'prefix' ], 'source' )
-env_build_directory = os.path.join( tool_information[ 'prefix' ], 'build' )
-env_experimental = tool_information[ 'experimental' ]
-
-
-
-# packages array
-package_list = []
-
-
-
 # search helper for check if exists
 def lookup_package( package_list, **kw ):
   return filter( lambda i: all(( i[ k ] == v for ( k, v ) in kw.items() ) ), package_list )
@@ -515,19 +455,67 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
         option )
 
 
+if __name__ == '__main__':
+  # generate argument parser
+  parser = argparse.ArgumentParser()
+  # add supported arguments
+  parser.add_argument( '--host', help='build host toolchain', action='store_true' )
+  parser.add_argument( '--rebuild', help='rebuild package by name', type=str, default=None)
+  # parse arguments
+  args = parser.parse_args()
 
-# iterate through files and populate packages
-for subdir, dirs, files in os.walk( tool_directory ):
-  for filename in files:
-    prepare_package_order( package_list, os.path.join( subdir, filename ), base_directory )
-#for package in package_list:
-#  print( package[ 'name' ] )
-#quit( 1 )
-# prepare package source data
-prepare_package( package_list, source_directory )
-# download sources
-download_package( package_list, env_source_directory )
-# apply package patches if set
-patch_package( package_list, env_source_directory, 'patch' )
-# build and install packages
-build_install_package( package_list, env_cross_prefix, env_build_directory, env_source_directory )
+  # base dir
+  base_directory = 'build'
+  source_directory = 'source'
+  rebuild_package = args.rebuild
+  # handle host build
+  if args.host:
+    tool_directory = os.path.join( 'build', 'host' )
+    tool_information_file = os.path.join( 'build', 'host.yaml' )
+
+  # check for set tool directory
+  try:
+    tool_directory
+  except NameError:
+    print( 'No tool directory set to be built' )
+    quit()
+  # check for set tool information
+  try:
+    tool_information_file
+  except NameError:
+    print( 'No tool information file set' )
+    quit()
+
+  # parse tool file
+  with open( tool_information_file, 'r' ) as stream:
+    # parse yaml file
+    try:
+      tool_information = yaml.load( stream, Loader=yaml.FullLoader )
+    except yaml.YAMLError as exception:
+      print( exception )
+      quit()
+
+  # prefixes
+  env_cross_prefix = os.path.join( tool_information[ 'prefix' ], 'cross' )
+  env_source_directory = os.path.join( tool_information[ 'prefix' ], 'source' )
+  env_build_directory = os.path.join( tool_information[ 'prefix' ], 'build' )
+  env_experimental = tool_information[ 'experimental' ]
+
+  # packages array
+  package_list = []
+
+  # iterate through files and populate packages
+  for subdir, dirs, files in os.walk( tool_directory ):
+    for filename in files:
+      prepare_package_order( package_list, os.path.join( subdir, filename ), base_directory )
+  #for package in package_list:
+  #  print( package[ 'name' ] )
+  #quit( 1 )
+  # prepare package source data
+  prepare_package( package_list, source_directory )
+  # download sources
+  download_package( package_list, env_source_directory )
+  # apply package patches if set
+  patch_package( package_list, env_source_directory, 'patch' )
+  # build and install packages
+  build_install_package( package_list, env_cross_prefix, env_build_directory, env_source_directory )
