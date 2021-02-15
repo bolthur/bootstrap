@@ -1,4 +1,3 @@
 
-/tool/tool
-/source
-/.new/out
+/.tool.old/tool
+/code
