@@ -188,10 +188,10 @@ index 000000000..a3997531e
 +}
 diff --git libgloss/arm/bolthur-system-call.h libgloss/arm/bolthur-system-call.h
 new file mode 100644
-index 000000000..c4200139c
+index 000000000..e7879531d
 --- /dev/null
 +++ libgloss/arm/bolthur-system-call.h
-@@ -0,0 +1,46 @@
+@@ -0,0 +1,41 @@
 +
 +/**
 + * Bolthur system call numbers for the ARM processor.
@@ -215,24 +215,19 @@ index 000000000..c4200139c
 +
 +#define SYSTEM_CALL_memory_acquire 21
 +#define SYSTEM_CALL_memory_release 22
-+#define SYSTEM_CALL_memory_shared_acquire 23
-+#define SYSTEM_CALL_memory_shared_release 24
 +
 +#define SYSTEM_CALL_message_acquire 31
 +#define SYSTEM_CALL_message_release 32
 +#define SYSTEM_CALL_message_send 33
 +#define SYSTEM_CALL_message_receive 34
 +
-+#define SYSTEM_CALL_rpc_acquire 41
-+#define SYSTEM_CALL_rpc_release 42
++#define SYSTEM_CALL_io_acquire 41
++#define SYSTEM_CALL_io_release 42
++#define SYSTEM_CALL_io_check 43
++#define SYSTEM_CALL_io_raise 44
 +
-+#define SYSTEM_CALL_io_acquire 51
-+#define SYSTEM_CALL_io_release 52
-+#define SYSTEM_CALL_io_check 53
-+#define SYSTEM_CALL_io_raise 54
-+
-+#define SYSTEM_CALL_interrupt_acquire 61
-+#define SYSTEM_CALL_interrupt_release 62
++#define SYSTEM_CALL_interrupt_acquire 51
++#define SYSTEM_CALL_interrupt_release 52
 +
 +#define SYSTEM_CALL_dummy_putc 101
 +#define SYSTEM_CALL_dummy_puts 102
@@ -240,10 +235,10 @@ index 000000000..c4200139c
 +#endif /* _LIBGLOSS_ARM_BOLTHUR_SYSTEM_CALL_H */
 diff --git libgloss/arm/bolthur-system-call0.S libgloss/arm/bolthur-system-call0.S
 new file mode 100644
-index 000000000..6f98e6a7b
+index 000000000..4642ca021
 --- /dev/null
 +++ libgloss/arm/bolthur-system-call0.S
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,68 @@
 +
 +/**
 + * Bolthur system call numbers for the ARM processor.
@@ -283,25 +278,23 @@ index 000000000..6f98e6a7b
 +	b _set_errno; \
 +	SIZE(_ ## name)
 +
-+# system calls
-+SYSTEM_CALL( process_id )
++// system calls
++SYSTEM_CALL( process_create )
 +SYSTEM_CALL( process_exit )
++SYSTEM_CALL( process_id )
 +
-+SYSTEM_CALL( thread_id )
-+SYSTEM_CALL( thread_exit )
++// FIXME: ADD AGAIN, WHEN WORKING ON USER THREADS
++//SYSTEM_CALL( thread_create )
++//SYSTEM_CALL( thread_exit )
++//SYSTEM_CALL( thread_id )
 +
 +SYSTEM_CALL6( memory_acquire )
 +SYSTEM_CALL( memory_release )
-+SYSTEM_CALL( memory_shared_acquire )
-+SYSTEM_CALL( memory_shared_release )
 +
 +//SYSTEM_CALL( message_acquire )
 +//SYSTEM_CALL( message_release )
 +//SYSTEM_CALL( message_send )
 +//SYSTEM_CALL( message_receive )
-+
-+//SYSTEM_CALL( rpc_acquire )
-+//SYSTEM_CALL( rpc_release )
 +
 +//SYSTEM_CALL( io_acquire )
 +//SYSTEM_CALL( io_release )
@@ -311,7 +304,7 @@ index 000000000..6f98e6a7b
 +//SYSTEM_CALL( interrupt_acquire )
 +//SYSTEM_CALL( interrupt_release )
 +
-+# FIXME: remove later
++// FIXME: remove finally, when system is usable
 +SYSTEM_CALL( dummy_putc )
 +SYSTEM_CALL( dummy_puts )
 diff --git libgloss/arm/bolthur-system-call1.c libgloss/arm/bolthur-system-call1.c
@@ -14139,7 +14132,7 @@ index 000000000..552e81b04
 +}
 diff --git newlib/libc/sys/bolthur/exit.c newlib/libc/sys/bolthur/exit.c
 new file mode 100644
-index 000000000..cdb19671b
+index 000000000..f1afb69dc
 --- /dev/null
 +++ newlib/libc/sys/bolthur/exit.c
 @@ -0,0 +1,19 @@
@@ -14153,7 +14146,7 @@ index 000000000..cdb19671b
 + */
 +
 +#include <unistd.h>
-+#include <bolthur/syscall.h>
++#include <sys/bolthur.h>
 +
 +void  __attribute__((__noreturn__)) exit( int status ) {
 +  _process_exit( status );
@@ -14209,56 +14202,6 @@ index 000000000..923a1bfc9
 +  errno = ENOENT;
 +  return -1;
 +}
-diff --git newlib/libc/sys/bolthur/include/bolthur/syscall.h newlib/libc/sys/bolthur/include/bolthur/syscall.h
-new file mode 100644
-index 000000000..2aa985efa
---- /dev/null
-+++ newlib/libc/sys/bolthur/include/bolthur/syscall.h
-@@ -0,0 +1,44 @@
-+
-+/**
-+ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
-+ * Copyright 2020 (c) Christian Freitag
-+ *
-+ * Permission to use, copy, modify, and distribute this software
-+ * is freely granted, provided that this notice is preserved.
-+ */
-+
-+#include <sys/types.h>
-+#include <stdint.h>
-+
-+#ifndef _BOLTHUR_SYSCALL_H
-+#define _BOLTHUR_SYSCALL_H
-+
-+#define MEMORY_ACQUIRE_PROTECTION_NONE 0x0
-+#define MEMORY_ACQUIRE_PROTECTION_READ 0x1
-+#define MEMORY_ACQUIRE_PROTECTION_WRITE 0x2
-+#define MEMORY_ACQUIRE_PROTECTION_EXECUTABLE 0x4
-+
-+#define MEMORY_ACQUIRE_MAP_SHARED 0x1
-+#define MEMORY_ACQUIRE_MAP_PRIVATE 0x2
-+#define MEMORY_ACQUIRE_MAP_FIXED 0x3
-+#define MEMORY_ACQUIRE_MAP_ANONYMOUS 0x4
-+
-+__BEGIN_DECLS
-+
-+extern pid_t _process_id( void );
-+extern pid_t __attribute__((__noreturn__)) _process_exit( int );
-+
-+extern pid_t _thread_id( void );
-+extern pid_t __attribute__((__noreturn__)) _thread_exit( int );
-+
-+extern void* _memory_acquire( void*, size_t, int, int );
-+extern int _memory_release( void*, size_t );
-+extern void* _memory_shared_acquire( char*, int, mode_t );
-+extern int _memory_shared_release( char* );
-+
-+extern int _dummy_puts( int, char*, int );
-+extern int _dummy_putc( int, char*, int );
-+
-+__END_DECLS
-+
-+#endif
 diff --git newlib/libc/sys/bolthur/include/mqueue.h newlib/libc/sys/bolthur/include/mqueue.h
 new file mode 100644
 index 000000000..62e5b381c
@@ -14304,6 +14247,58 @@ index 000000000..62e5b381c
 +ssize_t mq_timedreceive( mqd_t, char* __restrict, size_t, unsigned* __restrict, const struct timespec* __restrict );
 +int mq_timedsend( mqd_t, const char*, size_t, unsigned, const struct timespec* );
 +int mq_unlink( const char* );
++
++__END_DECLS
++
++#endif
+diff --git newlib/libc/sys/bolthur/include/sys/bolthur.h newlib/libc/sys/bolthur/include/sys/bolthur.h
+new file mode 100644
+index 000000000..fbd646446
+--- /dev/null
++++ newlib/libc/sys/bolthur/include/sys/bolthur.h
+@@ -0,0 +1,46 @@
++
++/**
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 (c) Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#include <sys/types.h>
++#include <stdint.h>
++
++#ifndef _SYS_BOLTHUR_H
++#define _SYS_BOLTHUR_H
++
++#define MEMORY_ACQUIRE_PROTECTION_NONE 0x0
++#define MEMORY_ACQUIRE_PROTECTION_READ 0x1
++#define MEMORY_ACQUIRE_PROTECTION_WRITE 0x2
++#define MEMORY_ACQUIRE_PROTECTION_EXECUTABLE 0x4
++
++#define MEMORY_ACQUIRE_MAP_SHARED 0x1
++#define MEMORY_ACQUIRE_MAP_PRIVATE 0x2
++#define MEMORY_ACQUIRE_MAP_FIXED 0x4
++#define MEMORY_ACQUIRE_MAP_ANONYMOUS 0x8
++
++__BEGIN_DECLS
++
++extern pid_t _process_create( void* );
++extern void __attribute__((__noreturn__)) _process_exit( int );
++extern pid_t _process_id( void );
++
++// FIXME: ADD AGAIN, WHEN WORKING ON USER THREADS
++// extern pid_t _thread_create( void* );
++// extern void __attribute__((__noreturn__)) _thread_exit( int );
++// extern pid_t _thread_id( void );
++
++extern void* _memory_acquire( void*, size_t, int, int, const char* );
++extern int _memory_release( void*, size_t );
++
++// FIXME: remove finally, when system is usable
++extern int _dummy_puts( int, char*, int );
++extern int _dummy_putc( int, char*, int );
 +
 +__END_DECLS
 +
@@ -14427,7 +14422,7 @@ index 000000000..c16f481ad
 +#endif
 diff --git newlib/libc/sys/bolthur/io.c newlib/libc/sys/bolthur/io.c
 new file mode 100644
-index 000000000..e7b9db204
+index 000000000..3caabdaba
 --- /dev/null
 +++ newlib/libc/sys/bolthur/io.c
 @@ -0,0 +1,40 @@
@@ -14440,7 +14435,7 @@ index 000000000..e7b9db204
 + * is freely granted, provided that this notice is preserved.
 + */
 +
-+#include <bolthur/syscall.h>
++#include <sys/bolthur.h>
 +
 +int _close( int file ) {
 +  return -1;
@@ -14567,10 +14562,10 @@ index 000000000..11ba26f77
 +}
 diff --git newlib/libc/sys/bolthur/mman/map.c newlib/libc/sys/bolthur/mman/map.c
 new file mode 100644
-index 000000000..d5a58d49a
+index 000000000..c1d969740
 --- /dev/null
 +++ newlib/libc/sys/bolthur/mman/map.c
-@@ -0,0 +1,140 @@
+@@ -0,0 +1,142 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -14583,7 +14578,7 @@ index 000000000..d5a58d49a
 +#include <string.h>
 +#include <sys/mman.h>
 +#include <errno.h>
-+#include <bolthur/syscall.h>
++#include <sys/bolthur.h>
 +
 +/**
 + * @brief map pages of memory
@@ -14647,19 +14642,21 @@ index 000000000..d5a58d49a
 +  if ( flags & MAP_ANONYMOUS ) {
 +    sys_flag |= MEMORY_ACQUIRE_MAP_ANONYMOUS;
 +  }
-+  // allocate memory
-+  void* ret_addr = _memory_acquire( addr, len, sys_prot, sys_flag );
-+  // handle system call error
-+  if ( ( void* )-1 == ret_addr ) {
-+    errno = ENOMEM;
++
++  // handle file descriptor
++  const char* name = NULL;
++  if ( -1 != filedes ) {
++    // FIXME: CONTACT VFS VIA MESSAGE AND GET NAME BY FILE DESCRIPTOR
++    // FIXME: CONSIDER POSSIBLE OFFSET
++    errno = EINVAL;
 +    return MAP_FAILED;
 +  }
 +
-+  // handle file descriptor
-+  if ( -1 != filedes ) {
-+    // FIXME: CONTACT VFS WITH MESSAGES
-+    // FIXME: CONSIDER OFFSET!
-+    errno = EINVAL;
++  // allocate memory
++  void* ret_addr = _memory_acquire( addr, len, sys_prot, sys_flag, name );
++  // handle system call error
++  if ( ( void* )-1 == ret_addr ) {
++    errno = ENOMEM;
 +    return MAP_FAILED;
 +  }
 +
@@ -14787,10 +14784,10 @@ index 000000000..b8cd35797
 +}
 diff --git newlib/libc/sys/bolthur/mman/shm.c newlib/libc/sys/bolthur/mman/shm.c
 new file mode 100644
-index 000000000..0cf4507cd
+index 000000000..24d140deb
 --- /dev/null
 +++ newlib/libc/sys/bolthur/mman/shm.c
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,37 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -14812,6 +14809,7 @@ index 000000000..0cf4507cd
 + * @return int
 + */
 +int shm_open( const char* name, int oflag , mode_t mode ) {
++  // FIXME: CONTACT VFS AND GET DESCRIPTOR OF PATH
 +  errno = ENOSYS;
 +  return -1;
 +}
@@ -15121,7 +15119,7 @@ index 000000000..ca3c51489
 +}
 diff --git newlib/libc/sys/bolthur/pid.c newlib/libc/sys/bolthur/pid.c
 new file mode 100644
-index 000000000..5125f1c7c
+index 000000000..5af830bec
 --- /dev/null
 +++ newlib/libc/sys/bolthur/pid.c
 @@ -0,0 +1,15 @@
@@ -15135,7 +15133,7 @@ index 000000000..5125f1c7c
 + */
 +
 +#include <unistd.h>
-+#include <bolthur/syscall.h>
++#include <sys/bolthur.h>
 +
 +pid_t _getpid( void ) {
 +  return _process_id();
