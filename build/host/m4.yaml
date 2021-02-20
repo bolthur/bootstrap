@@ -1,11 +1,11 @@
 
-name: host-m4
-source: m4@1.4.18
-dependency:
-  - host-patch
-prepare:
-  - '{SOURCE_DIR}/configure --prefix={PREFIX}'
-build:
-  - 'make all -j{CPU_COUNT}'
-install:
-  - 'make install -j{CPU_COUNT}'
+- name: host-m4
+  source: m4@1.4.18
+  dependency:
+    - host-patch
+  prepare:
+    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install -j{CPU_COUNT}'

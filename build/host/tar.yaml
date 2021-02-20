@@ -1,11 +1,6 @@
 
-- name: host-libtool
-  source: libtool@2.4.6
-  dependency:
-    - host-patch
-    - host-m4
-    - host-autoconf
-    - host-automake
+- name: host-tar
+  source: tar@1.34
   prepare:
     - '{SOURCE_DIR}/configure --prefix={PREFIX}'
   build:

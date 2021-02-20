@@ -159,11 +159,12 @@ def download_package( package_list, base ):
     target_file = os.path.join( base, filename )
 
     # delete on rebuild
-    if package[ 'name' ] == rebuild_package:
-      if os.path.exists( target_file ):
-        os.remove( target_file )
-      if os.path.exists( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) ):
-        shutil.rmtree( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) )
+    if not rebuild_package is None:
+      if package[ 'name' ] in ( rebuild_package ) or 'all' in ( rebuild_package ):
+        if os.path.exists( target_file ):
+          os.remove( target_file )
+        if os.path.exists( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) ):
+          shutil.rmtree( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) )
 
     # skip if already loaded
     if not os.path.exists( target_file ):
@@ -265,8 +266,10 @@ def prepare_command( command, version, out_prefix, source_directory, install_ver
 # build and install single package
 def build_install_single_package( package, out_prefix, build_folder, build_file, install_file, configure_file, prepare_file, source_directory, emulated_target = '', build_flag = '' ):
   # delete on rebuild
-  if package[ 'name' ] == rebuild_package and os.path.exists( build_folder ):
-    shutil.rmtree( build_folder )
+  if not rebuild_package is None:
+    if package[ 'name' ] in ( rebuild_package ) or 'all' in ( rebuild_package ):
+      if os.path.exists( build_folder ):
+        shutil.rmtree( build_folder )
 
   # create build folder if not existing
   if not os.path.exists( build_folder ):
@@ -436,6 +439,8 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
       option = splitted[ 1 ].replace( '@', ' -' )
       # folder in sysroot
       folder = splitted[ 0 ]
+      # change dot to empty
+      if '.' == folder: folder = ''
       # determine build folder
       build_folder = os.path.join(
         build_directory,
@@ -460,7 +465,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   # add supported arguments
   parser.add_argument( '--host', help='build host toolchain', action='store_true' )
-  parser.add_argument( '--rebuild', help='rebuild package by name', type=str, default=None)
+  parser.add_argument( '--rebuild', help='rebuild package by name', action='append', type=str, default=None)
   # parse arguments
   args = parser.parse_args()
 

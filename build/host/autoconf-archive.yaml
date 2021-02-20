@@ -1,15 +1,15 @@
 
-name: host-autoconf-archive
-source: autoconf-archive@2019.01.06
-dependency:
-  - host-patch
-  - host-m4
-  - host-autoconf
-  - host-automake
-  - host-libtool
-prepare:
-  - '{SOURCE_DIR}/configure --prefix={PREFIX}'
-build:
-  - 'make all -j{CPU_COUNT}'
-install:
-  - 'make install -j{CPU_COUNT}'
+- name: host-autoconf-archive
+  source: autoconf-archive@2019.01.06
+  dependency:
+    - host-patch
+    - host-m4
+    - host-autoconf
+    - host-automake
+    - host-libtool
+  prepare:
+    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install -j{CPU_COUNT}'
