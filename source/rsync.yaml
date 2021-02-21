@@ -1,0 +1,6 @@
+
+name: rsync
+allowed_version:
+  - '3.2.3'
+url: 'https://download.samba.org/pub/rsync/src/rsync-{VERSION}.tar.gz'
+extract_name: 'rsync-{VERSION}'

@@ -1,0 +1,6 @@
+
+name: findutils
+allowed_version:
+  - '4.8.0'
+url: 'https://ftp.gnu.org/gnu/findutils/findutils-{VERSION}.tar.xz'
+extract_name: 'findutils-{VERSION}'

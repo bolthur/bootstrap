@@ -4,7 +4,6 @@
   dependency:
     - host-binutils-arm
     - host-gcc-arm
-    - host-newlib-arm
   emulate_multilib: 'arm-unknown-bolthur-eabi-gcc -print-multi-lib'
   prepare:
     - 'CHOST=arm-unknown-bolthur-eabi CFLAGS="{BUILD_FLAG}" {SOURCE_DIR}/configure --prefix={SYSROOT}/arm-unknown-bolthur-eabi --includedir={SYSROOT}/arm-unknown-bolthur-eabi/usr/include --libdir={SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET} --static'

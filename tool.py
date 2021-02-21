@@ -125,7 +125,7 @@ def prepare_package( package_list, base ):
 
     # check for allowed version
     if not version in data[ 'allowed_version' ]:
-      print( 'used version is not allowed!' )
+      print( 'version ' + version + ' of package ' + name + ' is not allowed!' )
       quit()
 
     # prepare url for fetch

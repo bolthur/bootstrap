@@ -3,8 +3,8 @@
   source: newlib@4.1.0
   dependency:
     - host-patch
-  #  - host-rsync
-  #  - host-findutils
+    - host-rsync
+    - host-findutils
     - host-binutils-arm
     - host-gcc-stage1-arm
     - tmp-autoconf-newlib-2.68
