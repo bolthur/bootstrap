@@ -31,7 +31,7 @@
       command: autoreconf
   prepare:
     - 'if [ ! -f "{PREFIX}/bin/arm-unknown-bolthur-eabi-cc" ]; then ln {PREFIX}/bin/arm-unknown-bolthur-eabi-gcc {PREFIX}/bin/arm-unknown-bolthur-eabi-cc; fi'
-    - '{SOURCE_DIR}/configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib {VERSION}; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-shared'
+    - '{SOURCE_DIR}/configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib {VERSION}; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-shared --enable-newlib-io-c99-formats'
   build:
     - 'make all -j{CPU_COUNT}'
   install:

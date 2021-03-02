@@ -2,6 +2,7 @@
 name: cppcheck
 allowed_version:
   - '2.2'
+  - '2.3'
 url: 'https://github.com/danmar/cppcheck/archive/{VERSION}.tar.gz'
 url_file_overwrite: 'cppcheck-{VERSION}.tar.gz'
 extract_name: 'cppcheck-{VERSION}'

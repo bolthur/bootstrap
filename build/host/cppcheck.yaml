@@ -1,5 +1,5 @@
 
 - name: host-cppcheck
-  source: cppcheck@2.2
+  source: cppcheck@2.3
   install:
     - 'make install MATCHCOMPILER=yes PREFIX="{PREFIX}" FILESDIR="{PREFIX}/cppcheck" HAVE_RULES=yes CXXFLAGS="-O2 -DNDEBUG -Wall -Wno-sign-compare -Wno-unused-function" -j{CPU_COUNT} -C "{SOURCE_DIR}"'

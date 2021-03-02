@@ -2,7 +2,7 @@
 - name: host-rsync
   source: rsync@3.2.3
   prepare:
-    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+    - '{SOURCE_DIR}/configure --prefix={PREFIX} --disable-openssl'
   build:
     - 'make all -j{CPU_COUNT}'
   install:
