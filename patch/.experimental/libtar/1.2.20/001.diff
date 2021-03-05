@@ -1,0 +1,28 @@
+diff --git .gitignore .gitignore
+index 45937bb..a7ebf0b 100644
+--- .gitignore
++++ .gitignore
+@@ -13,3 +13,4 @@ Makefile
+ /config.status
+ /libtool
+ /stamp-h1
++/build
+diff --git lib/handle.c lib/handle.c
+index 28a7dc2..c3c0f6a 100644
+--- lib/handle.c
++++ lib/handle.c
+@@ -44,7 +44,7 @@ tar_init(TAR **t, const char *pathname, tartype_t *type,
+ 	if (*t == NULL)
+ 		return -1;
+ 
+-	(*t)->pathname = pathname;
++	(*t)->pathname = ( char* )pathname;
+ 	(*t)->options = options;
+ 	(*t)->type = (type ? type : &default_type);
+ 	(*t)->oflags = oflags;
+@@ -128,5 +128,3 @@ tar_close(TAR *t)
+ 
+ 	return i;
+ }
+-
+-
