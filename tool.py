@@ -139,6 +139,12 @@ def prepare_package( package_list, base ):
     # replace source information of package with data from source file
     package[ 'source' ] = data
 
+# some progress bar print helper
+def print_progress( total, current, barsize = 60 ):
+  progress=int( current * barsize / total )
+  completed= str( int( current * 100 / total ) ) + '%'
+  print( "\x1b[?25l", completed,' [' , chr(9608)*progress,'.'*(barsize-progress),'] ',str(current)+'/'+str(total), sep='', end='\r',flush=True)
+
 # download sources from package data
 def download_package( package_list, base ):
   # create folder
@@ -153,6 +159,11 @@ def download_package( package_list, base ):
     # handle optional file overwrite
     try:
       filename = package[ 'source' ][ 'url_file_overwrite' ]
+    except KeyError:
+      pass
+    extract_name_to_change = None
+    try:
+      extract_name_to_change = package[ 'source' ][ 'extract_name_to_change' ]
     except KeyError:
       pass
     # get target file
@@ -171,18 +182,33 @@ def download_package( package_list, base ):
       print( '-> loading ' + target_file )
       # request file
       response = requests.get( url, stream=True )
+      total_length = response.headers.get( 'content-length' )
       # handle invalid status code
       if response.status_code != 200:
         print( 'unable to download file ' + url )
         quit()
       # save file
       with open( target_file, 'wb' ) as stream:
-        stream.write( response.raw.read() )
+        if total_length is None:
+          stream.write( response.raw.read() )
+        else:
+          loaded = 0
+          total_length = int( total_length )
+          for data in response.iter_content( chunk_size=4096 ):
+            loaded += len( data )
+            stream.write( data )
+            print_progress( total_length, loaded )
+          # show cursor again properly
+          print( "\x1b[?25h" )
 
     # Extract sources
     if not os.path.exists( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) ):
-      print( '-> extracting ' + target_file )
+      print( '-> extracting ' + target_file + ' to ' + base )
       shutil.unpack_archive( target_file, base )
+      if extract_name_to_change != None:
+        os.rename(
+          os.path.join( base, extract_name_to_change ),
+          os.path.join( base, package[ 'source' ][ 'extract_name' ] ) )
 
 # apply patches to sources if set
 def patch_package( package_list, source_directory, patch_directory ):
@@ -436,7 +462,7 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
       # skip invalid
       if 2 != len(splitted): continue
       # compile options
-      option = splitted[ 1 ].replace( '@', ' -' )
+      option = splitted[ 1 ].replace( '@', ' -' ).strip()
       # folder in sysroot
       folder = splitted[ 0 ]
       # change dot to empty

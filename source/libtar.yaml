@@ -1,0 +1,10 @@
+
+name: libtar
+allowed_version:
+  - '1.2.20'
+#url: 'https://github.com/tklauser/libtar/archive/v{VERSION}.tar.gz'
+#url_file_overwrite: 'libtar-{VERSION}.tar.gz'
+url: 'https://github.com/tklauser/libtar/archive/master.tar.gz'
+url_file_overwrite: 'libtar-{VERSION}.tar.gz'
+extract_name: 'libtar-{VERSION}'
+extract_name_to_change: libtar-master

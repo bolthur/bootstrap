@@ -1,0 +1,17 @@
+
+- name: host-libyaml-arm
+  source: libyaml@0.2.5
+  dependency:
+    - host-binutils-arm
+    - host-gcc-arm
+    - host-newlib-arm
+  emulate_multilib: 'arm-unknown-bolthur-eabi-gcc -print-multi-lib'
+  configure:
+    - folder: '{SOURCE_DIR}'
+      command: 'autoreconf --force --install'
+  prepare:
+    - 'CFLAGS="{BUILD_FLAG}" {SOURCE_DIR}/configure --host=arm-unknown-bolthur-eabi --prefix={SYSROOT}/arm-unknown-bolthur-eabi --includedir={SYSROOT}/arm-unknown-bolthur-eabi/usr/include --libdir={SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET} --disable-shared'
+  build:
+    - 'make -j{CPU_COUNT}'
+  install:
+    - 'make install'

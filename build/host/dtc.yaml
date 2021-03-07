@@ -2,4 +2,15 @@
 - name: host-dtc
   source: dtc@1.6.0
   install:
+    - 'make clean -C "{SOURCE_DIR}"'
     - 'make install SETUP_PREFIX="{PREFIX}" PREFIX="{PREFIX}" NO_PYTHON=1 -C "{SOURCE_DIR}"'
+- name: host-dtc-arm
+  dependency:
+    - host-binutils-arm
+    - host-gcc-arm
+    - host-newlib-arm
+  source: dtc@1.6.0
+  emulate_multilib: 'arm-unknown-bolthur-eabi-gcc -print-multi-lib'
+  install:
+    - 'make clean -C "{SOURCE_DIR}"'
+    - 'make install CC=arm-unknown-bolthur-eabi-gcc EXTRA_CFLAGS="{BUILD_FLAG}" LIBDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET} INCLUDEDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/include BINDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/bin/{EMULATED_TARGET} NO_PYTHON=1 NO_VALGRIND=1 -C "{SOURCE_DIR}"'

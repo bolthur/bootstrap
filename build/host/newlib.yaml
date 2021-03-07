@@ -31,10 +31,10 @@
       command: autoreconf
   prepare:
     - 'if [ ! -f "{PREFIX}/bin/arm-unknown-bolthur-eabi-cc" ]; then ln {PREFIX}/bin/arm-unknown-bolthur-eabi-gcc {PREFIX}/bin/arm-unknown-bolthur-eabi-cc; fi'
-    - '{SOURCE_DIR}/configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib {VERSION}; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-shared --enable-newlib-io-c99-formats'
+    - '{SOURCE_DIR}/configure --prefix=/ --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib {VERSION}; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-shared --enable-newlib-io-c99-formats'
   build:
     - 'make all -j{CPU_COUNT}'
   install:
-    - 'make DESTDIR={SYSROOT} install'
-    - 'rsync -av --exclude usr {SYSROOT}/arm-unknown-bolthur-eabi/* {SYSROOT}/arm-unknown-bolthur-eabi/usr --remove-source-files'
+    - 'make DESTDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr install'
+    - 'rsync -av --exclude usr {SYSROOT}/arm-unknown-bolthur-eabi/usr/arm-unknown-bolthur-eabi/* {SYSROOT}/arm-unknown-bolthur-eabi/usr --remove-source-files'
     - 'find {SYSROOT}/arm-unknown-bolthur-eabi -type d -empty -delete'

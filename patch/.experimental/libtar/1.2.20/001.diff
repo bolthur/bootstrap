@@ -1,17 +1,8 @@
-diff --git .gitignore .gitignore
-index 45937bb..a7ebf0b 100644
---- .gitignore
-+++ .gitignore
-@@ -13,3 +13,4 @@ Makefile
- /config.status
- /libtool
- /stamp-h1
-+/build
 diff --git lib/handle.c lib/handle.c
-index 28a7dc2..c3c0f6a 100644
+index fce84be..f07be3d 100644
 --- lib/handle.c
 +++ lib/handle.c
-@@ -44,7 +44,7 @@ tar_init(TAR **t, const char *pathname, tartype_t *type,
+@@ -49,7 +49,7 @@ tar_init(TAR **t, const char *pathname, tartype_t *type,
  	if (*t == NULL)
  		return -1;
  
@@ -20,9 +11,27 @@ index 28a7dc2..c3c0f6a 100644
  	(*t)->options = options;
  	(*t)->type = (type ? type : &default_type);
  	(*t)->oflags = oflags;
-@@ -128,5 +128,3 @@ tar_close(TAR *t)
+@@ -133,5 +133,3 @@ tar_close(TAR *t)
  
  	return i;
  }
 -
+-
+diff --git libtar/Makefile.in libtar/Makefile.in
+index 7c6f1bc..2b2c748 100644
+--- libtar/Makefile.in
++++ libtar/Makefile.in
+@@ -20,7 +20,7 @@ SHELL           = @SHELL@
+ 
+ ### Installation programs and flags
+ INSTALL		= @INSTALL@
+-INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s
++INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+ INSTALL_DATA	= @INSTALL_DATA@
+ LN_S		= @LN_S@
+ MKDIR		= @MKDIR@
+@@ -75,4 +75,3 @@ distclean: clean
+ install: ${ALL}
+ 	${MKDIR} ${DESTDIR}${bindir}
+ 	$(LIBTOOL) --mode=install ${INSTALL_PROGRAM} libtar ${DESTDIR}${bindir}
 -

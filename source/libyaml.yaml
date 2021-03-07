@@ -1,0 +1,7 @@
+
+name: libyaml
+allowed_version:
+  - '0.2.5'
+url: 'https://github.com/yaml/libyaml/archive/{VERSION}.tar.gz'
+url_file_overwrite: 'libyaml-{VERSION}.tar.gz'
+extract_name: 'libyaml-{VERSION}'
