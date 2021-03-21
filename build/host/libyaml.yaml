@@ -1,4 +1,15 @@
 
+- name: host-libyaml
+  source: libyaml@0.2.5
+  configure:
+    - folder: '{SOURCE_DIR}'
+      command: 'autoreconf --force --install'
+  prepare:
+    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  build:
+    - 'make -j{CPU_COUNT}'
+  install:
+    - 'make install'
 - name: host-libyaml-arm
   source: libyaml@0.2.5
   dependency:

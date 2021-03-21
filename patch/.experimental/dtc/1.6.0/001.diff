@@ -1,5 +1,5 @@
 diff --git Makefile Makefile
-index f02aa19..38aa6bb 100644
+index f02aa19..cfc418a 100644
 --- Makefile
 +++ Makefile
 @@ -23,7 +23,7 @@ ASSUME_MASK ?= 0
@@ -11,10 +11,17 @@ index f02aa19..38aa6bb 100644
  
  BISON = bison
  LEX = flex
-@@ -61,20 +61,6 @@ else
- 	LDLIBS_dtc += $(shell $(PKG_CONFIG) --libs yaml-0.1)
+@@ -54,26 +54,7 @@ else
+ 	CFLAGS += $(shell $(PKG_CONFIG) --cflags valgrind)
  endif
  
+-NO_YAML := $(shell $(PKG_CONFIG) --exists yaml-0.1; echo $$?)
+-ifeq ($(NO_YAML),1)
+-	CFLAGS += -DNO_YAML
+-else
+-	LDLIBS_dtc += $(shell $(PKG_CONFIG) --libs yaml-0.1)
+-endif
+-
 -ifeq ($(HOSTOS),darwin)
 -SHAREDLIB_EXT     = dylib
 -SHAREDLIB_CFLAGS  = -fPIC
@@ -28,11 +35,11 @@ index f02aa19..38aa6bb 100644
 -SHAREDLIB_CFLAGS  = -fPIC
 -SHAREDLIB_LDFLAGS = -fPIC -shared -Wl,--version-script=$(LIBFDT_version) -Wl,-soname,
 -endif
--
++LDLIBS_dtc += -lyaml
+ 
  #
  # Overall rules
- #
-@@ -191,23 +177,16 @@ endif
+@@ -191,23 +172,16 @@ endif
  #
  LIBFDT_dir = libfdt
  LIBFDT_archive = $(LIBFDT_dir)/libfdt.a
@@ -57,7 +64,7 @@ index f02aa19..38aa6bb 100644
  ifneq ($(DEPTARGETS),)
  -include $(LIBFDT_OBJS:%.o=$(LIBFDT_dir)/%.d)
  endif
-@@ -226,9 +205,6 @@ install-bin: all $(SCRIPTS)
+@@ -226,9 +200,6 @@ install-bin: all $(SCRIPTS)
  install-lib: all
  	@$(VECHO) INSTALL-LIB
  	$(INSTALL) -d $(DESTDIR)$(LIBDIR)
@@ -67,7 +74,7 @@ index f02aa19..38aa6bb 100644
  	$(INSTALL_DATA) $(LIBFDT_archive) $(DESTDIR)$(LIBDIR)
  
  install-includes:
-@@ -258,11 +234,11 @@ convert-dtsv0: $(CONVERT_OBJS)
+@@ -258,11 +229,11 @@ convert-dtsv0: $(CONVERT_OBJS)
  
  fdtdump:	$(FDTDUMP_OBJS)
  
@@ -82,7 +89,7 @@ index f02aa19..38aa6bb 100644
  
  dist:
  	git archive --format=tar --prefix=dtc-$(dtc_version)/ HEAD \
-@@ -323,7 +299,7 @@ include tests/Makefile.tests
+@@ -323,7 +294,7 @@ include tests/Makefile.tests
  #
  # Clean rules
  #

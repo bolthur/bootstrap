@@ -27,6 +27,7 @@
   dependency:
     - tmp-autoconf-gcc-2.69
     - tmp-automake-gcc-1.15.1
+    - host-patch
     - host-binutils-arm
     - host-newlib-arm
   path:

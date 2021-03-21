@@ -24,3 +24,9 @@ touch /opt/bolthur/foo/include/gnu/stubs.h
 ../configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib 3.3.0; bolthur bootstrap" --enable-newlib-elix-level=4  --enable-newlib-register-fini --enable-newlib-mb  --disable-multilib  --with-cpu=armv7-a --with-mode=thumb --with-float=hard
 
 ```
+
+## building bash
+
+```bash
+CFLAGS="-D_POSIX_VERSION=1 -DNEED_EXTERN_PC -marm -march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard" ../configure --host=arm-unknown-bolthur-eabi --enable-static-link --without-bash-malloc --disable-nls
+```

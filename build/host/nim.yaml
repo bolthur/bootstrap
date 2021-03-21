@@ -1,0 +1,10 @@
+
+- name: host-nim
+  source: nim@1.4.4
+  dependency:
+    - host-patch
+  install:
+    - 'cd {SOURCE_DIR} && sh build.sh'
+    - 'cd {SOURCE_DIR} && bin/nim c koch'
+    - 'cd {SOURCE_DIR} && ./koch tools'
+    - 'cd {SOURCE_DIR} && sh install.sh {PREFIX}'

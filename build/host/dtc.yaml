@@ -1,5 +1,7 @@
 
 - name: host-dtc
+  dependency:
+    - host-libyaml
   source: dtc@1.6.0
   install:
     - 'make clean -C "{SOURCE_DIR}"'
@@ -9,8 +11,9 @@
     - host-binutils-arm
     - host-gcc-arm
     - host-newlib-arm
+    - host-libyaml-arm
   source: dtc@1.6.0
   emulate_multilib: 'arm-unknown-bolthur-eabi-gcc -print-multi-lib'
   install:
     - 'make clean -C "{SOURCE_DIR}"'
-    - 'make install CC=arm-unknown-bolthur-eabi-gcc EXTRA_CFLAGS="{BUILD_FLAG}" LIBDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET} INCLUDEDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/include BINDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/bin/{EMULATED_TARGET} NO_PYTHON=1 NO_VALGRIND=1 -C "{SOURCE_DIR}"'
+    - 'make install AR=arm-unknown-bolthur-eabi-ar CC=arm-unknown-bolthur-eabi-gcc EXTRA_CFLAGS="{BUILD_FLAG}" LIBDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET} INCLUDEDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/include BINDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/bin/{EMULATED_TARGET} NO_PYTHON=1 NO_VALGRIND=1 -C "{SOURCE_DIR}"'
