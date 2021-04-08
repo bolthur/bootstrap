@@ -8,7 +8,7 @@ https://preshing.com/20141119/how-to-build-a-gcc-cross-compiler/
 
 ```bash
 # configure
-MAKE=make ../configure --prefix=/opt/bolthur/foo --build=$MACHTYPE --host=arm-unknown-bolthur-eabi --target=arm-unknown-bolthur-eabi  --with-headers=/opt/bolthur/foo/include --with-pkgversion="GLIBC; bolthur bootstrap cross" --enable-add-ons
+MAKE=make ../configure --prefix=/opt/bolthur/foo --build=$MACHTYPE --host=arm-unknown-bolthur-eabi --target=arm-unknown-bolthur-eabi --with-headers=/opt/bolthur/foo/include --with-pkgversion="GLIBC; bolthur bootstrap cross" --enable-add-ons
 # --enable-static-pie
 # install bootstrap stuff
 make install-bootstrap-headers=yes install-headers
@@ -19,9 +19,11 @@ touch /opt/bolthur/foo/include/gnu/stubs.h
 
 
 
---enable-shared
+# shared build
+../configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib 4.1.0; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-multilib --with-cpu=armv7-a --with-mode=thumb --with-float=hard --enable-shared
 
-../configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib 3.3.0; bolthur bootstrap" --enable-newlib-elix-level=4  --enable-newlib-register-fini --enable-newlib-mb  --disable-multilib  --with-cpu=armv7-a --with-mode=thumb --with-float=hard
+# static build
+../configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib 4.1.0; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-multilib --with-cpu=armv7-a --with-mode=thumb --with-float=hard --disable-shared
 
 ```
 
