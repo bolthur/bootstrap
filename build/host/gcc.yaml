@@ -1,6 +1,6 @@
 
 - name: host-gcc-stage1-arm
-  source: gcc@10.2.0
+  source: gcc@10.3.0
   dependency:
     - tmp-autoconf-gcc-2.69
     - tmp-automake-gcc-1.15.1
@@ -23,7 +23,7 @@
   install:
     - 'make install-strip-gcc -j{CPU_COUNT}'
 - name: host-gcc-arm
-  source: gcc@10.2.0
+  source: gcc@10.3.0
   dependency:
     - tmp-autoconf-gcc-2.69
     - tmp-automake-gcc-1.15.1

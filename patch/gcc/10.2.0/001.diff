@@ -26,7 +26,7 @@ index df90720b716..f63b159e51b 100755
  	#  THEN create a no-op fixer and exit
  	(echo "#! /bin/sh" ; echo "exit 0" ) > ${target}
 diff --git gcc/config.gcc gcc/config.gcc
-index 6a349965c0a..4e3a01932e7 100644
+index 6a349965c0a..70dce758a3d 100644
 --- gcc/config.gcc
 +++ gcc/config.gcc
 @@ -180,7 +180,7 @@
@@ -65,7 +65,7 @@ index 6a349965c0a..4e3a01932e7 100644
  	  	tm_file="${tm_file} rtems.h aarch64/rtems.h"
  		;;
 +	aarch64-*-bolthur*)
-+		tm_file="${tm_file} bolthur.h"
++	  	tm_file="${tm_file} bolthur.h"
 +		;;
  	esac
  	case $target in
@@ -84,7 +84,7 @@ index 6a349965c0a..4e3a01932e7 100644
  	target_cpu_cname="arm7tdmi"
  	case ${target} in
 +	arm*-bolthur-*)
-+	  tm_file="${tm_file} newlib-stdint.h bolthur.h"
++	  tm_file="${tm_file} bolthur.h newlib-stdint.h" #glibc-stdint.h
 +	  tmake_file="${tmake_file} arm/t-bpabi"
 +	  use_gcc_stdint=wrap
 +	  ;;
@@ -93,10 +93,10 @@ index 6a349965c0a..4e3a01932e7 100644
  	  tmake_file="${tmake_file} arm/t-bpabi"
 diff --git gcc/config/bolthur.h gcc/config/bolthur.h
 new file mode 100644
-index 00000000000..cc735132e26
+index 00000000000..c8a2d467e2b
 --- /dev/null
 +++ gcc/config/bolthur.h
-@@ -0,0 +1,45 @@
+@@ -0,0 +1,49 @@
 +
 +/* Useful if you wish to make target-specific GCC changes. */
 +#undef TARGET_BOLTHUR
@@ -104,34 +104,38 @@ index 00000000000..cc735132e26
 +
 +/* Machine dependent libraries. */
 +#undef LIB_SPEC
-+#define LIB_SPEC "-lc -lg -lm  %{!specs=bolthur.specs:-lgloss-bolthur}" /* link against C standard library */
-+
-+/* Linker enforce 4K pages */
-+#undef LINK_SPEC
-+#define LINK_SPEC "-z max-page-size=4096"
++#define LIB_SPEC "%{!shared: -lc -lg -lm %{!specs=bolthur.specs:-lgloss-bolthur}}" /* link against C standard library */
 +
 +/* Files that are linked before user code. */
 +#undef STARTFILE_SPEC
-+#define STARTFILE_SPEC "bolthur-crt0.o%s crti.o%s crtbegin.o%s"
++#define STARTFILE_SPEC "%{!shared: bolthur-crt0.o%s} crti.o%s %{!shared: crtbegin.o%s} %{shared: crtbeginS.o%s}"
 +
 +/* Files that are linked after user code. */
 +#undef ENDFILE_SPEC
-+#define ENDFILE_SPEC "crtend.o%s crtn.o%s"
++#define ENDFILE_SPEC "%{!shared: crtend.o%s} %{shared: crtendS.o%s} crtn.o%s"
 +
-+///* Include directory */
-+//#undef GPLUSPLUS_INCLUDE_DIR
-+//#define GPLUSPLUS_INCLUDE_DIR "/usr/include/g++"
++// /* Dynamic linker */
++// #define DYNAMIC_LINKER "/lib/loader.so"
++
++/* Linker enforce 4K pages and handle shared libraries */
++#undef LINK_SPEC
++#define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{!shared: %{static:-static} %{!static: %{rdynamic:-export-dynamic}}}"
++//#define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{!shared: %{static:-static} %{!static: -dynamic-linker " DYNAMIC_LINKER "}}"
++
++// /* Start file prefix  */
++// #undef STANDARD_STARTFILE_PREFIX
++// #define STANDARD_STARTFILE_PREFIX "/usr/lib/"
++// /* Default include directory */
++// #undef GCC_INCLUDE_DIR
++// #define GCC_INCLUDE_DIR "/usr/include"
 +//
-+//#undef GCC_INCLUDE_DIR
-+//#define GCC_INCLUDE_DIR "/usr/include"
++// /* Include directory */
++// #undef GPLUSPLUS_INCLUDE_DIR
++// #define GPLUSPLUS_INCLUDE_DIR "/usr/include/g++"
 +//
-+///* Compiler backend folder */
-+//#undef STANDARD_EXEC_PREFIX
-+//#define STANDARD_EXEC_PREFIX "/usr/libexec/"
-+//
-+///* Start file prefix  */
-+//#undef STANDARD_STARTFILE_PREFIX
-+//#define STANDARD_STARTFILE_PREFIX "/usr/lib/"
++// /* Compiler backend folder */
++// #undef STANDARD_EXEC_PREFIX
++// #define STANDARD_EXEC_PREFIX "/usr/libexec/"
 +
 +/* Additional predefined macros. */
 +#undef TARGET_OS_CPP_BUILTINS
@@ -143,7 +147,7 @@ index 00000000000..cc735132e26
 +    builtin_assert ( "system=unix"); \
 +  } while(0);
 diff --git libgcc/config.host libgcc/config.host
-index c529cc40f0c..2513ba7d0af 100644
+index c529cc40f0c..250cb43677f 100644
 --- libgcc/config.host
 +++ libgcc/config.host
 @@ -103,7 +103,7 @@ arm*-*-*)
@@ -159,37 +163,45 @@ index c529cc40f0c..2513ba7d0af 100644
    tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-eh-dw2-dip t-slibgcc t-slibgcc-fuchsia"
    extra_parts="crtbegin.o crtend.o"
    ;;
-+*-bolthur-*)
++*-*-bolthur*)
 +  tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-slibgcc"
-+  extra_parts="crtbegin.o crtend.o"
++  extra_parts="crtbegin.o crtbeginS.o crtend.o crtendS.o"
 +  ;;
  *-*-linux* | frv-*-*linux* | *-*-kfreebsd*-gnu | *-*-gnu* | *-*-kopensolaris*-gnu | *-*-uclinuxfdpiceabi)
    tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-eh-dw2-dip t-slibgcc t-slibgcc-gld t-slibgcc-elf-ver t-linux"
    extra_parts="crtbegin.o crtbeginS.o crtbeginT.o crtend.o crtendS.o"
-@@ -359,7 +363,7 @@ i[34567]86-*-cygwin* | x86_64-*-cygwin*)
+@@ -359,6 +363,13 @@ i[34567]86-*-cygwin* | x86_64-*-cygwin*)
  esac
  
  case ${host} in
--aarch64*-*-elf | aarch64*-*-rtems*)
-+aarch64*-*-elf | aarch64*-*-rtems* | aarch64*-bolthur-* )
++aarch64*-bolthur-*)
++	extra_parts="$extra_parts crti.o crtn.o crtfastmath.o"
++	tmake_file="${tmake_file} ${cpu_type}/t-aarch64"
++	tmake_file="${tmake_file} ${cpu_type}/t-lse t-slibgcc-libgcc"
++	tmake_file="${tmake_file} ${cpu_type}/t-softfp t-softfp t-crtfm"
++	md_unwind_header=aarch64/aarch64-unwind.h
++	;;
+ aarch64*-*-elf | aarch64*-*-rtems*)
  	extra_parts="$extra_parts crtbegin.o crtend.o crti.o crtn.o"
  	extra_parts="$extra_parts crtfastmath.o"
- 	tmake_file="${tmake_file} ${cpu_type}/t-aarch64"
-@@ -493,11 +497,11 @@ arm*-*-phoenix*)
+@@ -493,7 +504,15 @@ arm*-*-phoenix*)
  	extra_parts="crtbegin.o crtend.o crti.o crtn.o"
  	unwind_header=config/arm/unwind-arm.h
  	;;
 -arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems*)
-+arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-bolthur-* )
++arm*-bolthur-*)
++	tm_file="$tm_file arm/bpabi-lib.h"
++	extra_parts="$extra_parts crti.o crtn.o crtfastmath.o"
++	tmake_file="${tmake_file} arm/t-arm arm/t-elf t-fixedpoint-gnu-prefix"
++	tmake_file="${tmake_file} arm/t-bpabi t-crtfm t-softfp-sfdf t-softfp-excl"
++	tmake_file="${tmake_file} arm/t-softfp t-softfp"
++	unwind_header=config/arm/unwind-arm.h
++	;;
++arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* )
  	tmake_file="${tmake_file} arm/t-arm arm/t-elf t-fixedpoint-gnu-prefix"
  	tm_file="$tm_file arm/bpabi-lib.h"
  	case ${host} in
--	arm*-*-eabi* | arm*-*-rtems*)
-+	arm*-*-eabi* | arm*-*-rtems* | arm*-bolthur-*)
- 	  tmake_file="${tmake_file} arm/t-bpabi t-crtfm"
- 	  extra_parts="crtbegin.o crtend.o crti.o crtn.o"
- 	  ;;
-@@ -927,7 +931,7 @@ lm32-*-rtems*)
+@@ -927,7 +946,7 @@ lm32-*-rtems*)
  lm32-*-uclinux*)
          extra_parts="$extra_parts crtbegin.o crtendS.o crtbeginT.o"
          tmake_file="lm32/t-lm32 lm32/t-uclinux t-libgcc-pic t-softfp-sfdf t-softfp"

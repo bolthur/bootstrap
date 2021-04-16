@@ -91,23 +91,59 @@ index 6f46e0a6329..a3b9f726198 100644
    xgate-*-*)    			fmt=elf ;;
  
    xtensa*-*-*)				fmt=elf ;;
+diff --git ld/Makefile.am ld/Makefile.am
+index 2c9a487335c..695b8cb895e 100644
+--- ld/Makefile.am
++++ ld/Makefile.am
+@@ -165,6 +165,7 @@ ALL_EMULATION_SOURCES = \
+ 	earclinux_nps.c \
+ 	earm_wince_pe.c \
+ 	earmelf.c \
++	earmelf_bolthur.c \
+ 	earmelf_fbsd.c \
+ 	earmelf_fuchsia.c \
+ 	earmelf_linux.c \
+@@ -656,6 +657,7 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earclinux_nps.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earm_wince_pe.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf.Pc@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_bolthur.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_fbsd.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_fuchsia.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_linux.Pc@am__quote@
 diff --git ld/configure.tgt ld/configure.tgt
-index 0c780b24d57..337ae3707ad 100644
+index 0c780b24d57..cef242c30bf 100644
 --- ld/configure.tgt
 +++ ld/configure.tgt
-@@ -59,6 +59,7 @@ aarch64-*-freebsd*)	targ_emul=aarch64fbsd
+@@ -59,6 +59,9 @@ aarch64-*-freebsd*)	targ_emul=aarch64fbsd
  aarch64-*-fuchsia*)	targ_emul=aarch64elf
  			targ_extra_emuls="aarch64elfb armelf armelfb"
  			;;
-+aarch64*-*-bolthur*)	targ_emul=aarch64elf ;;
++aarch64*-*-bolthur*)
++			targ_emul=aarch64elf
++			;;
  aarch64_be-*-linux-gnu_ilp32)
  			targ_emul=aarch64linux32b
  			targ_extra_libpath="aarch64linuxb aarch64linux aarch64linux32 armelfb_linux_eabi armelf_linux_eabi"
-@@ -200,6 +201,7 @@ arm*-*-conix*)		targ_emul=armelf
+@@ -200,6 +203,10 @@ arm*-*-conix*)		targ_emul=armelf
  arm*-*-fuchsia*)	targ_emul=armelf_fuchsia
  			targ_extra_emuls="armelfb_fuchsia armelf armelfb"
  			;;
-+arm*-*-bolthur*)	targ_emul=armelf ;;
++arm*-*-bolthur*)
++			targ_extra_emuls="armelf armelf_bolthur"
++			targ_extra_libpath="armelf_bolthur"
++			;;
  avr-*-*)		targ_emul=avr2
  			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega3 avrxmega4 avrxmega5 avrxmega6 avrxmega7 avrtiny"
  			;;
+diff --git ld/emulparams/armelf_bolthur.sh ld/emulparams/armelf_bolthur.sh
+new file mode 100644
+index 00000000000..1fd63a2a1a5
+--- /dev/null
++++ ld/emulparams/armelf_bolthur.sh
+@@ -0,0 +1,5 @@
++
++. ${srcdir}/emulparams/armelf.sh
++
++GENERATE_SHLIB_SCRIPT=yes
++GENERATE_PIE_SCRIPT=yes

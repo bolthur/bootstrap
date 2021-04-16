@@ -26,7 +26,7 @@ index df90720b716..f63b159e51b 100755
  	#  THEN create a no-op fixer and exit
  	(echo "#! /bin/sh" ; echo "exit 0" ) > ${target}
 diff --git gcc/config.gcc gcc/config.gcc
-index 6a349965c0a..70dce758a3d 100644
+index 6fcdd771d4c..3aec2ca9c2d 100644
 --- gcc/config.gcc
 +++ gcc/config.gcc
 @@ -180,7 +180,7 @@
@@ -51,7 +51,7 @@ index 6a349965c0a..70dce758a3d 100644
  *-*-darwin*)
    tmake_file="t-darwin "
    tm_file="${tm_file} darwin.h"
-@@ -1033,7 +1039,7 @@ case ${target} in
+@@ -1063,7 +1069,7 @@ case ${target} in
  esac
  
  case ${target} in
@@ -60,7 +60,7 @@ index 6a349965c0a..70dce758a3d 100644
  	tm_file="${tm_file} dbxelf.h elfos.h newlib-stdint.h"
  	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-errata.h aarch64/aarch64-elf-raw.h"
  	tmake_file="${tmake_file} aarch64/t-aarch64"
-@@ -1047,6 +1053,9 @@ aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)
+@@ -1077,6 +1083,9 @@ aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)
  	aarch64-*-rtems*)
  	  	tm_file="${tm_file} rtems.h aarch64/rtems.h"
  		;;
@@ -70,7 +70,7 @@ index 6a349965c0a..70dce758a3d 100644
  	esac
  	case $target in
  	aarch64_be-*)
-@@ -1298,7 +1307,7 @@ arm*-*-phoenix*)
+@@ -1328,7 +1337,7 @@ arm*-*-phoenix*)
  	tmake_file="${tmake_file} arm/t-arm arm/t-bpabi arm/t-phoenix"
  	target_cpu_cname="arm7tdmi"
  	;;
@@ -79,7 +79,7 @@ index 6a349965c0a..70dce758a3d 100644
  	case ${target} in
  	arm*eb-*-eabi*)
  	  tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=1"
-@@ -1308,6 +1317,11 @@ arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-*-fuchsia*)
+@@ -1338,6 +1347,11 @@ arm*-*-eabi* | arm*-*-symbianelf* | arm*-*-rtems* | arm*-*-fuchsia*)
  	tmake_file="${tmake_file} arm/t-arm arm/t-arm-elf"
  	target_cpu_cname="arm7tdmi"
  	case ${target} in

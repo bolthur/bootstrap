@@ -1,34 +1,29 @@
 # bootstrap
 
-Stuff necessary to build bolthur distribution
+> bootsrap is a project to build all the necessary software on host system for development of kernel and other related projects.
 
-## building glibc
+## Requirements
 
-https://preshing.com/20141119/how-to-build-a-gcc-cross-compiler/
+* Linux or macOS
+* python 3
 
-```bash
-# configure
-MAKE=make ../configure --prefix=/opt/bolthur/foo --build=$MACHTYPE --host=arm-unknown-bolthur-eabi --target=arm-unknown-bolthur-eabi --with-headers=/opt/bolthur/foo/include --with-pkgversion="GLIBC; bolthur bootstrap cross" --enable-add-ons
-# --enable-static-pie
-# install bootstrap stuff
-make install-bootstrap-headers=yes install-headers
-make -j4 csu/subdir_lib
-install csu/crt1.o csu/crti.o csu/crtn.o /opt/bolthur/foo/lib
-aarch64-linux-gcc -nostdlib -nostartfiles -static -x c /dev/null -o /opt/bolthur/foo/libc.a
-touch /opt/bolthur/foo/include/gnu/stubs.h
+## Usage
 
-
-
-# shared build
-../configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib 4.1.0; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-multilib --with-cpu=armv7-a --with-mode=thumb --with-float=hard --enable-shared
-
-# static build
-../configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib 4.1.0; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-multilib --with-cpu=armv7-a --with-mode=thumb --with-float=hard --disable-shared
-
-```
-
-## building bash
+To build all the necessary software for development just execute one of the following commands.
 
 ```bash
-CFLAGS="-D_POSIX_VERSION=1 -DNEED_EXTERN_PC -marm -march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard" ../configure --host=arm-unknown-bolthur-eabi --enable-static-link --without-bash-malloc --disable-nls
+./tool.py --host
 ```
+
+```bash
+python3 tool.py --host
+```
+
+All host software installed with this python script is installed into folder `/opt/bolthur`, so it needs to be ensured, that write access for user is set correctly.
+
+## Hacking
+
+[hacking](hacking.md) contains a bunch of libraries and/or programs with compile/configure commands, which are not yet ported but somehow planned to be ported.
+
+## License
+[GPL-3.0](LICENSE)

@@ -141,9 +141,9 @@ def prepare_package( package_list, base ):
 
 # some progress bar print helper
 def print_progress( total, current, barsize = 60 ):
-  progress=int( current * barsize / total )
-  completed= str( int( current * 100 / total ) ) + '%'
-  print( "\x1b[?25l", completed,' [' , chr(9608)*progress,'.'*(barsize-progress),'] ',str(current)+'/'+str(total), sep='', end='\r',flush=True)
+  progress = int( current * barsize / total )
+  completed = str( int( current * 100 / total ) ) + '%'
+  print( "\x1b[?25l", completed,' [' , chr(35)*progress,'.'*(barsize-progress),'] ',str(current)+'/'+str(total), sep='', end='\r',flush=True)
 
 # download sources from package data
 def download_package( package_list, base ):
