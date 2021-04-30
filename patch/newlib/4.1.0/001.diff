@@ -93,10 +93,10 @@ index e1bad1710..ec96c92eb 100644
 +include $(srcdir)/../multi-build.in
 diff --git libgloss/arm/bolthur-crt0.c libgloss/arm/bolthur-crt0.c
 new file mode 100644
-index 000000000..a3997531e
+index 000000000..ed84de752
 --- /dev/null
 +++ libgloss/arm/bolthur-crt0.c
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,97 @@
 +
 +/**
 + * Bolthur system startup for the ARM processor.
@@ -113,6 +113,8 @@ index 000000000..a3997531e
 +#include <stdlib.h>
 +#include <unistd.h>
 +#include <stdnoreturn.h>
++#include <errno.h>
++#include <sys/bolthur.h>
 +#include "arm.h"
 +
 +/* forward declaration */
@@ -183,15 +185,21 @@ index 000000000..a3997531e
 +  #endif
 +  // init signals
 +  // _init_signal();
++  // create message queue
++  _message_create();
++  if ( errno ) {
++    _process_exit( errno );
++    return;
++  }
 +  // call early main
 +  _main( *sp, ( char** )( sp + 1 ) );
 +}
 diff --git libgloss/arm/bolthur-system-call.h libgloss/arm/bolthur-system-call.h
 new file mode 100644
-index 000000000..a4a9dd28f
+index 000000000..f9d5c2fd8
 --- /dev/null
 +++ libgloss/arm/bolthur-system-call.h
-@@ -0,0 +1,50 @@
+@@ -0,0 +1,51 @@
 +
 +/**
 + * Bolthur system call numbers for the ARM processor.
@@ -229,6 +237,7 @@ index 000000000..a4a9dd28f
 +#define SYSTEM_CALL_message_receive_type 36
 +#define SYSTEM_CALL_message_wait_for_response 37
 +#define SYSTEM_CALL_message_wait_for_response_type 38
++#define SYSTEM_CALL_message_has_by_name 39
 +
 +/*#define SYSTEM_CALL_io_acquire 41
 +#define SYSTEM_CALL_io_release 42
@@ -244,10 +253,10 @@ index 000000000..a4a9dd28f
 +#endif /* _LIBGLOSS_ARM_BOLTHUR_SYSTEM_CALL_H */
 diff --git libgloss/arm/bolthur-system-call0.S libgloss/arm/bolthur-system-call0.S
 new file mode 100644
-index 000000000..fb8cf25a8
+index 000000000..be02bd71f
 --- /dev/null
 +++ libgloss/arm/bolthur-system-call0.S
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,77 @@
 +
 +/**
 + * Bolthur system call numbers for the ARM processor.
@@ -312,6 +321,7 @@ index 000000000..fb8cf25a8
 +SYSTEM_CALL( message_receive_type )
 +SYSTEM_CALL( message_wait_for_response )
 +SYSTEM_CALL( message_wait_for_response_type )
++SYSTEM_CALL( message_has_by_name )
 +
 +//SYSTEM_CALL( io_acquire )
 +//SYSTEM_CALL( io_release )
@@ -19044,7 +19054,7 @@ index 809d49238..0cbb9c82e 100644
  if USE_LIBTOOL
  libm_la_SOURCES =
 diff --git newlib/configure.host newlib/configure.host
-index 1ddbb6c76..8425664de 100644
+index 1ddbb6c76..9e351f8ab 100644
 --- newlib/configure.host
 +++ newlib/configure.host
 @@ -195,11 +195,11 @@ case "${host_cpu}" in
@@ -19133,8 +19143,8 @@ index 1ddbb6c76..8425664de 100644
  case "${host}" in
 +	*-*-bolthur*)
 +	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DMALLOC_PROVIDED -D_COMPILING_NEWLIB"
-+  # dirname and base name are defined by bolthur sys
-+  newlib_cflags="${newlib_cflags} -D_NO_BASENAME -D_NO_DIRNAME -DHAVE_FCNTL -DHAVE_NANOSLEEP"
++	# dirname and base name are defined by bolthur sys
++	newlib_cflags="${newlib_cflags} -D_NO_BASENAME -D_NO_DIRNAME -DHAVE_FCNTL -DHAVE_NANOSLEEP"
 +	#newlib_cflags="${newlib_cflags} -Werror"
 +	newlib_cflags="${newlib_cflags} -Wall"
 +	;;
@@ -19897,10 +19907,10 @@ index 000000000..62e5b381c
 +#endif
 diff --git newlib/libc/sys/bolthur/include/sys/bolthur.h newlib/libc/sys/bolthur/include/sys/bolthur.h
 new file mode 100644
-index 000000000..c679ae624
+index 000000000..827d414bb
 --- /dev/null
 +++ newlib/libc/sys/bolthur/include/sys/bolthur.h
-@@ -0,0 +1,183 @@
+@@ -0,0 +1,188 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -19928,6 +19938,10 @@ index 000000000..c679ae624
 +
 +#define MAX_READ_LEN 32
 +#define MAX_WRITE_LEN 32
++
++#if defined( _COMPILING_NEWLIB )
++  #define VFS_DAEMON_NAME "daemon:/vfs"
++#endif
 +
 +__BEGIN_DECLS
 +
@@ -20076,6 +20090,7 @@ index 000000000..c679ae624
 +extern size_t _message_receive_type( void );
 +extern void _message_wait_for_response( char*, size_t, size_t );
 +extern size_t _message_wait_for_response_type( size_t, size_t );
++extern bool _message_has_by_name( char* );
 +
 +// FIXME: remove finally, when system is usable
 +extern int _dummy_puts( int, char*, int );
@@ -21554,10 +21569,10 @@ index 000000000..d42118a0f
 +}
 diff --git newlib/libc/sys/bolthur/syscall/_close.c newlib/libc/sys/bolthur/syscall/_close.c
 new file mode 100644
-index 000000000..c5eb948ff
+index 000000000..c985992a1
 --- /dev/null
 +++ newlib/libc/sys/bolthur/syscall/_close.c
-@@ -0,0 +1,75 @@
+@@ -0,0 +1,76 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -21593,12 +21608,13 @@ index 000000000..c5eb948ff
 +  vfs_close_response_t response;
 +  size_t message_id = 0;
 +  bool send = true;
++  // handle no daemon
++  if ( ! _message_has_by_name( VFS_DAEMON_NAME ) ) {
++    return -1;
++  }
 +  // allocate message structures
 +  memset( &request, 0, sizeof( vfs_close_request_t ) );
 +  memset( &response, 0, sizeof( vfs_close_response_t ) );
-+  // create message queue
-+  _message_create();
-+  assert( ! errno );
 +  // prepare message structure
 +  request.handle = file;
 +  // loop until message has been sent and answer has been received
@@ -21606,7 +21622,7 @@ index 000000000..c5eb948ff
 +    // send message ( may be delayed when vfs is starting up )
 +    while ( send && 0 == message_id ) {
 +      message_id = _message_send_by_name(
-+        "daemon:/vfs",
++        VFS_DAEMON_NAME,
 +        VFS_CLOSE_REQUEST,
 +        ( const char* )&request,
 +        sizeof( vfs_close_request_t ),
@@ -21980,10 +21996,10 @@ index 000000000..b1fc1ac91
 +}
 diff --git newlib/libc/sys/bolthur/syscall/_open.c newlib/libc/sys/bolthur/syscall/_open.c
 new file mode 100644
-index 000000000..bb2b7d4eb
+index 000000000..576757515
 --- /dev/null
 +++ newlib/libc/sys/bolthur/syscall/_open.c
-@@ -0,0 +1,93 @@
+@@ -0,0 +1,94 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -22035,12 +22051,13 @@ index 000000000..bb2b7d4eb
 +    errno = ENAMETOOLONG;
 +    return -1;
 +  }
++  // handle no daemon
++  if ( ! _message_has_by_name( VFS_DAEMON_NAME ) ) {
++    return -1;
++  }
 +  // allocate message structures
 +  memset( &request, 0, sizeof( vfs_open_request_t ) );
 +  memset( &response, 0, sizeof( vfs_open_response_t ) );
-+  // create message queue
-+  _message_create();
-+  assert( ! errno );
 +  // prepare message structure
 +  strcpy( request.path, name );
 +  request.flags = flags;
@@ -22050,7 +22067,7 @@ index 000000000..bb2b7d4eb
 +    // send message ( may be delayed when vfs is starting up )
 +    while ( send && 0 == message_id ) {
 +      message_id = _message_send_by_name(
-+        "daemon:/vfs",
++        VFS_DAEMON_NAME,
 +        VFS_OPEN_REQUEST,
 +        ( const char* )&request,
 +        sizeof( vfs_open_request_t ),
@@ -22079,10 +22096,10 @@ index 000000000..bb2b7d4eb
 +}
 diff --git newlib/libc/sys/bolthur/syscall/_read.c newlib/libc/sys/bolthur/syscall/_read.c
 new file mode 100644
-index 000000000..c77bbefdf
+index 000000000..ff223ccb8
 --- /dev/null
 +++ newlib/libc/sys/bolthur/syscall/_read.c
-@@ -0,0 +1,99 @@
+@@ -0,0 +1,101 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -22116,17 +22133,19 @@ index 000000000..c77bbefdf
 + * @todo remove __weak_symbol once finished
 + */
 +__weak_symbol ssize_t _read( int file, void* ptr, size_t len ) {
-+  if ( file == STDIN_FILENO ) {
-+    return -1;
-+  }
 +  // variables
 +  vfs_read_request_t request;
 +  vfs_read_response_t response;
 +  size_t read_amount = 0;
 +  char* buf = ( char* )ptr;
-+  // create message queue
-+  _message_create();
-+  assert( ! errno );
++  // handle no daemon
++  if ( ! _message_has_by_name( VFS_DAEMON_NAME ) ) {
++    return -1;
++  }
++  /// FIXME: Add stdin handling
++  if ( file == STDIN_FILENO ) {
++    return -1;
++  }
 +
 +  while( read_amount < len ) {
 +    // set amount to read
@@ -22146,7 +22165,7 @@ index 000000000..c77bbefdf
 +      // send message ( may be delayed when vfs is starting up )
 +      while ( send && 0 == message_id ) {
 +        message_id = _message_send_by_name(
-+          "daemon:/vfs",
++          VFS_DAEMON_NAME,
 +          VFS_READ_REQUEST,
 +          ( const char* )&request,
 +          sizeof( vfs_read_request_t ),
@@ -22304,10 +22323,10 @@ index 000000000..aa74de520
 +}
 diff --git newlib/libc/sys/bolthur/syscall/_write.c newlib/libc/sys/bolthur/syscall/_write.c
 new file mode 100644
-index 000000000..a33fce208
+index 000000000..9a3f4b815
 --- /dev/null
 +++ newlib/libc/sys/bolthur/syscall/_write.c
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,37 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -22329,6 +22348,16 @@ index 000000000..a33fce208
 +#include <sys/cdefs.h>
 +#include <sys/bolthur.h>
 +
++/**
++ * @brief Write implementation
++ *
++ * @param file file to write to
++ * @param ptr data pointer
++ * @param len amount to write
++ * @return ssize_t
++ *
++ * @todo add logic
++ */
 +__weak_symbol ssize_t _write( int file, const void* ptr, size_t len ) {
 +  if ( file == STDOUT_FILENO || file == STDERR_FILENO ) {
 +    return _dummy_puts( file, ( char* )ptr, len );
