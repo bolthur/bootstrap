@@ -434,10 +434,17 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
     except KeyError:
       pass
 
+    # determine source path
+    source_path = os.path.join(
+      source_directory,
+      package[ 'source' ][ 'extract_name' ] )
+
     # handle normal emulation
     if emulate_multilib is None:
       # base build folder
-      build_folder = os.path.join( build_directory, package[ 'name' ] + '.' + package[ 'source' ][ 'extract_name' ] )
+      build_folder = os.path.join(
+        build_directory,
+        package[ 'name' ] + '.' + package[ 'source' ][ 'extract_name' ] )
       # just execute build and install once
       build_install_single_package(
         package,
@@ -445,7 +452,7 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
         build_folder,
         os.path.join( build_folder, '.' + package[ 'name' ] + '.build.applied' ),
         os.path.join( build_folder, '.' + package[ 'name' ] + '.install.applied' ),
-        os.path.join( build_folder, '.' + package[ 'name' ] + '.configure.applied' ),
+        os.path.join( source_path, '.configure.applied' ),
         os.path.join( build_folder, '.' + package[ 'name' ] + '.prepare.applied' ),
         source_directory )
       # skip rest
@@ -479,7 +486,7 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
         build_folder,
         os.path.join( build_folder, '.' + package[ 'name' ] + '.build.applied' ),
         os.path.join( build_folder, '.' + package[ 'name' ] + '.install.applied' ),
-        os.path.join( build_folder, '.' + package[ 'name' ] + '.configure.applied' ),
+        os.path.join( source_path, '.configure.applied' ),
         os.path.join( build_folder, '.' + package[ 'name' ] + '.prepare.applied' ),
         source_directory,
         folder,
