@@ -1,5 +1,5 @@
 
-name: autoconf
+name: libtool
 allowed_version:
   - '2.4.6'
 url: 'https://ftp.gnu.org/gnu/libtool/libtool-{VERSION}.tar.gz'

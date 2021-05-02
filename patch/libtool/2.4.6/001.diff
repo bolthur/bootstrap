@@ -1,0 +1,46 @@
+diff --git build-aux/ltmain.in build-aux/ltmain.in
+index d5cf07a6..ce97a5fc 100644
+--- build-aux/ltmain.in
++++ build-aux/ltmain.in
+@@ -6449,7 +6449,7 @@ func_mode_link ()
+ 	      fi
+ 	    else
+ 	      # We cannot seem to hardcode it, guess we'll fake it.
+-	      add_dir=-L$libdir
++	      add_dir=-L$lt_sysroot$libdir
+ 	      # Try looking first in the location we're being installed to.
+ 	      if test -n "$inst_prefix_dir"; then
+ 		case $libdir in
+diff --git m4/libtool.m4 m4/libtool.m4
+index a3bc337b..ded5666b 100644
+--- m4/libtool.m4
++++ m4/libtool.m4
+@@ -2905,6 +2905,17 @@ netbsd*)
+   hardcode_into_libs=yes
+   ;;
+ 
++bolthur*)
++  version_type=linux # correct to gnu/linux during the next big refactor
++  need_lib_prefix=no
++  need_version=no
++  library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
++  soname_spec='$libname$release$shared_ext$major'
++  shlibpath_var=LD_LIBRARY_PATH
++  shlibpath_overrides_runpath=no
++  hardcode_into_libs=yes
++  ;;
++
+ newsos6)
+   version_type=linux # correct to gnu/linux during the next big refactor
+   library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
+@@ -3508,6 +3519,10 @@ haiku*)
+   lt_cv_deplibs_check_method=pass_all
+   ;;
+ 
++bolthur*)
++  lt_cv_deplibs_check_method=pass_all
++  ;;
++
+ hpux10.20* | hpux11*)
+   lt_cv_file_magic_cmd=/usr/bin/file
+   case $host_cpu in

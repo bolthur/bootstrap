@@ -93,7 +93,7 @@ index 6fcdd771d4c..3aec2ca9c2d 100644
  	  tmake_file="${tmake_file} arm/t-bpabi"
 diff --git gcc/config/bolthur.h gcc/config/bolthur.h
 new file mode 100644
-index 00000000000..c8a2d467e2b
+index 00000000000..f5e5deaf241
 --- /dev/null
 +++ gcc/config/bolthur.h
 @@ -0,0 +1,49 @@
@@ -115,7 +115,7 @@ index 00000000000..c8a2d467e2b
 +#define ENDFILE_SPEC "%{!shared: crtend.o%s} %{shared: crtendS.o%s} crtn.o%s"
 +
 +// /* Dynamic linker */
-+// #define DYNAMIC_LINKER "/lib/loader.so"
++// #define DYNAMIC_LINKER "/lib/dl.so"
 +
 +/* Linker enforce 4K pages and handle shared libraries */
 +#undef LINK_SPEC
@@ -255,3 +255,45 @@ index fe182883536..86ca0ebbe03 100644
      GLIBCXX_CHECK_LINKER_FEATURES
      AC_DEFINE(HAVE_COSF)
      AC_DEFINE(HAVE_COSL)
+diff --git libtool.m4 libtool.m4
+index 00206549f54..8858b1bf674 100644
+--- libtool.m4
++++ libtool.m4
+@@ -1139,7 +1139,7 @@ fi
+ # Invoke $ECHO with all args, space-separated.
+ func_echo_all ()
+ {
+-    $ECHO "$*" 
++    $ECHO "$*"
+ }
+ 
+ case "$ECHO" in
+@@ -2519,6 +2519,17 @@ netbsd*)
+   hardcode_into_libs=yes
+   ;;
+ 
++bolthur*)
++  version_type=linux # correct to gnu/linux during the next big refactor
++  need_lib_prefix=no
++  need_version=no
++  library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
++  soname_spec='$libname$release$shared_ext$major'
++  shlibpath_var=LD_LIBRARY_PATH
++  shlibpath_overrides_runpath=no
++  hardcode_into_libs=yes
++  ;;
++
+ newsos6)
+   version_type=linux
+   library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+@@ -3062,6 +3073,10 @@ haiku*)
+   lt_cv_deplibs_check_method=pass_all
+   ;;
+ 
++bolthur*)
++  lt_cv_deplibs_check_method=pass_all
++  ;;
++
+ hpux10.20* | hpux11*)
+   lt_cv_file_magic_cmd=/usr/bin/file
+   case $host_cpu in

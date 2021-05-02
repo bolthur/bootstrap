@@ -11,7 +11,7 @@
     - folder: '{SOURCE_DIR}/ld'
       command: automake
   prepare:
-    - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX} --disable-nls --disable-werror --disable-libssp --with-sysroot={SYSROOT}/arm-unknown-bolthur-eabi --with-pkgversion="GNU Binutils; bolthur bootstrap cross" --disable-shared'
+    - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX} --disable-nls --disable-werror --disable-libssp --with-sysroot={SYSROOT}/arm-unknown-bolthur-eabi --with-pkgversion="GNU Binutils; bolthur bootstrap cross" --enable-shared'
   build:
     - 'make -j{CPU_COUNT}'
   install:

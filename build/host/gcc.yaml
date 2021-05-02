@@ -17,7 +17,7 @@
     - folder: '{SOURCE_DIR}'
       command: './contrib/download_prerequisites'
   prepare:
-    - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX} --disable-nls --enable-languages=c,c++ --disable-werror --disable-libssp --without-headers --with-newlib --with-sysroot={SYSROOT}/arm-unknown-bolthur-eabi --with-pkgversion="GCC; bolthur bootstrap cross" --disable-shared --with-multilib-list=aprofile,rmprofile'
+    - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX} --disable-nls --enable-languages=c,c++ --disable-werror --disable-libssp --without-headers --with-newlib --with-sysroot={SYSROOT}/arm-unknown-bolthur-eabi --with-pkgversion="GCC; bolthur bootstrap cross" --enable-shared --with-multilib-list=aprofile'
   build:
     - 'make all-gcc -j{CPU_COUNT}'
   install:
@@ -41,7 +41,7 @@
     - folder: '{SOURCE_DIR}'
       command: './contrib/download_prerequisites'
   prepare:
-    - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX} --disable-nls --enable-languages=c,c++ --disable-werror --disable-libssp --with-newlib --with-sysroot={SYSROOT}/arm-unknown-bolthur-eabi --with-pkgversion="GCC; bolthur bootstrap cross" --disable-shared --with-multilib-list=aprofile,rmprofile'
+    - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX} --disable-nls --enable-languages=c,c++ --disable-werror --disable-libssp --with-newlib --with-sysroot={SYSROOT}/arm-unknown-bolthur-eabi --with-pkgversion="GCC; bolthur bootstrap cross" --enable-shared --with-multilib-list=aprofile'
   build:
     - 'make all-gcc -j{CPU_COUNT}'
     - 'make all-target-libgcc -j{CPU_COUNT}'

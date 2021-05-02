@@ -6,6 +6,9 @@
     - host-m4
     - host-autoconf
     - host-automake
+  configure:
+    - folder: '{SOURCE_DIR}'
+      command: autoreconf
   prepare:
     - '{SOURCE_DIR}/configure --prefix={PREFIX}'
   build:

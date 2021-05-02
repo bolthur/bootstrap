@@ -112,38 +112,106 @@ index 2c9a487335c..695b8cb895e 100644
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_fuchsia.Pc@am__quote@
  @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earmelf_linux.Pc@am__quote@
 diff --git ld/configure.tgt ld/configure.tgt
-index 0c780b24d57..cef242c30bf 100644
+index 0c780b24d57..61a6cd436d7 100644
 --- ld/configure.tgt
 +++ ld/configure.tgt
-@@ -59,6 +59,9 @@ aarch64-*-freebsd*)	targ_emul=aarch64fbsd
+@@ -59,6 +59,10 @@ aarch64-*-freebsd*)	targ_emul=aarch64fbsd
  aarch64-*-fuchsia*)	targ_emul=aarch64elf
  			targ_extra_emuls="aarch64elfb armelf armelfb"
  			;;
 +aarch64*-*-bolthur*)
 +			targ_emul=aarch64elf
++			targ_extra_emuls="aarch64elfb armelf armelfb"
 +			;;
  aarch64_be-*-linux-gnu_ilp32)
  			targ_emul=aarch64linux32b
  			targ_extra_libpath="aarch64linuxb aarch64linux aarch64linux32 armelfb_linux_eabi armelf_linux_eabi"
-@@ -200,6 +203,10 @@ arm*-*-conix*)		targ_emul=armelf
+@@ -200,6 +204,10 @@ arm*-*-conix*)		targ_emul=armelf
  arm*-*-fuchsia*)	targ_emul=armelf_fuchsia
  			targ_extra_emuls="armelfb_fuchsia armelf armelfb"
  			;;
 +arm*-*-bolthur*)
-+			targ_extra_emuls="armelf armelf_bolthur"
-+			targ_extra_libpath="armelf_bolthur"
++			targ_emul=armelf_bolthur
++			targ_extra_emuls="armelfb_bolthur armelf armelfb"
 +			;;
  avr-*-*)		targ_emul=avr2
  			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega3 avrxmega4 avrxmega5 avrxmega6 avrxmega7 avrtiny"
  			;;
-diff --git ld/emulparams/armelf_bolthur.sh ld/emulparams/armelf_bolthur.sh
+diff --git ld/emulparams/aarch64bolthur.sh ld/emulparams/aarch64bolthur.sh
 new file mode 100644
-index 00000000000..1fd63a2a1a5
+index 00000000000..d035186bac0
 --- /dev/null
-+++ ld/emulparams/armelf_bolthur.sh
-@@ -0,0 +1,5 @@
-+
-+. ${srcdir}/emulparams/armelf.sh
++++ ld/emulparams/aarch64bolthur.sh
+@@ -0,0 +1,4 @@
++source_sh ${srcdir}/emulparams/aarch64elf.sh
 +
 +GENERATE_SHLIB_SCRIPT=yes
 +GENERATE_PIE_SCRIPT=yes
+diff --git ld/emulparams/aarch64fbolthurb.sh ld/emulparams/aarch64fbolthurb.sh
+new file mode 100644
+index 00000000000..545b5ec1c9a
+--- /dev/null
++++ ld/emulparams/aarch64fbolthurb.sh
+@@ -0,0 +1,2 @@
++source_sh ${srcdir}/emulparams/aarch64bolthur.sh
++OUTPUT_FORMAT="elf64-bigaarch64"
+diff --git ld/emulparams/armelf_bolthur.sh ld/emulparams/armelf_bolthur.sh
+new file mode 100644
+index 00000000000..694377d8d23
+--- /dev/null
++++ ld/emulparams/armelf_bolthur.sh
+@@ -0,0 +1,4 @@
++source_sh ${srcdir}/emulparams/armelf.sh
++
++GENERATE_SHLIB_SCRIPT=yes
++GENERATE_PIE_SCRIPT=yes
+diff --git ld/emulparams/armelfb_bolthur.sh ld/emulparams/armelfb_bolthur.sh
+new file mode 100644
+index 00000000000..50b913d0638
+--- /dev/null
++++ ld/emulparams/armelfb_bolthur.sh
+@@ -0,0 +1,2 @@
++source_sh ${srcdir}/emulparams/armelf_bolthur.sh
++OUTPUT_FORMAT="$BIG_OUTPUT_FORMAT"
+diff --git libtool.m4 libtool.m4
+index e993b621ac2..7c306521825 100644
+--- libtool.m4
++++ libtool.m4
+@@ -1137,7 +1137,7 @@ fi
+ # Invoke $ECHO with all args, space-separated.
+ func_echo_all ()
+ {
+-    $ECHO "$*" 
++    $ECHO "$*"
+ }
+ 
+ case "$ECHO" in
+@@ -2502,6 +2502,17 @@ netbsd*)
+   hardcode_into_libs=yes
+   ;;
+ 
++bolthur*)
++  version_type=linux # correct to gnu/linux during the next big refactor
++  need_lib_prefix=no
++  need_version=no
++  library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
++  soname_spec='$libname$release$shared_ext$major'
++  shlibpath_var=LD_LIBRARY_PATH
++  shlibpath_overrides_runpath=no
++  hardcode_into_libs=yes
++  ;;
++
+ newsos6)
+   version_type=linux
+   library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+@@ -3045,6 +3056,10 @@ haiku*)
+   lt_cv_deplibs_check_method=pass_all
+   ;;
+ 
++bolthur*)
++  lt_cv_deplibs_check_method=pass_all
++  ;;
++
+ hpux10.20* | hpux11*)
+   lt_cv_file_magic_cmd=/usr/bin/file
+   case $host_cpu in

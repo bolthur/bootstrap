@@ -285,8 +285,32 @@ def prepare_command( command, version, out_prefix, source_directory, install_ver
   to_execute = to_execute.replace( '{CPU_COUNT}', str( multiprocessing.cpu_count() ) )
   to_execute = to_execute.replace( '{SOURCE_DIR}', os.path.abspath( source_directory ) )
   to_execute = to_execute.replace( '{SYSROOT}', os.path.abspath( os.path.join( out_prefix, '..', 'sysroot' ) ) )
-  to_execute = to_execute.replace( '{EMULATED_TARGET}', emulated_target )
   to_execute = to_execute.replace( '{BUILD_FLAG}', build_flag )
+  # special handling for emulated target
+  if "" == emulated_target:
+    # remove if used in path
+    if -1 != to_execute.find( '{EMULATED_TARGET}' + os.pathsep ):
+      to_execute = to_execute.replace( '{EMULATED_TARGET}' + os.pathsep, '' )
+    # remove emulated target
+    to_execute = to_execute.replace( '{EMULATED_TARGET}', emulated_target )
+  else:
+    # split by separator
+    tmp_target = emulated_target.split( os.sep )
+    # remove build dir if existing
+    if tmp_target[ 0 ].startswith( '.build-' ):
+      tmp_target[ 0 ] = tmp_target[ 0 ].replace( '.build-', '' )
+    if 'default' == tmp_target[ 0 ]: tmp_target.pop( 0 )
+    # append emulated target
+    if not tmp_target:
+      # remove if used in path
+      if -1 != to_execute.find( '{EMULATED_TARGET}' + os.pathsep ):
+        to_execute = to_execute.replace( '{EMULATED_TARGET}' + os.pathsep, '' )
+      # remove emulated target
+      to_execute = to_execute.replace( '{EMULATED_TARGET}', '' )
+    else:
+      # replace emulated target by joined path
+      to_execute = to_execute.replace( '{EMULATED_TARGET}', os.path.join( *tmp_target ) )
+  # return prepared command
   return to_execute
 
 # build and install single package
@@ -473,7 +497,10 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
       # folder in sysroot
       folder = splitted[ 0 ]
       # change dot to empty
-      if '.' == folder: folder = ''
+      if '.' == folder:
+        folder = '.build-default'
+      else:
+        folder = '.build-' + folder
       # determine build folder
       build_folder = os.path.join(
         build_directory,
@@ -546,9 +573,6 @@ if __name__ == '__main__':
   for subdir, dirs, files in os.walk( tool_directory ):
     for filename in files:
       prepare_package_order( package_list, os.path.join( subdir, filename ), base_directory )
-  #for package in package_list:
-  #  print( package[ 'name' ] )
-  #quit( 1 )
   # prepare package source data
   prepare_package( package_list, source_directory )
   # download sources
