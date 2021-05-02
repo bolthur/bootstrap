@@ -13,6 +13,7 @@ cd "$DIR/newlib"
 echo "$DIR/newlib"
 # reconfigure
 autoconf
+automake --cygnus Makefile
 # check for error
 if [ $? -ne 0 ]; then
   exit 1

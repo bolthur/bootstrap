@@ -15,6 +15,8 @@
   configure:
     - folder: '{SOURCE_DIR}/newlib'
       command: autoconf
+    - folder: '{SOURCE_DIR}/newlib'
+      command: 'automake --cygnus Makefile'
     - folder: '{SOURCE_DIR}/newlib/libm'
       command: autoreconf
     - folder: '{SOURCE_DIR}/newlib/libm/machine/arm'
@@ -38,3 +40,45 @@
     - 'make DESTDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr install'
     - 'rsync -av --exclude usr {SYSROOT}/arm-unknown-bolthur-eabi/usr/arm-unknown-bolthur-eabi/* {SYSROOT}/arm-unknown-bolthur-eabi/usr --remove-source-files'
     - 'find {SYSROOT}/arm-unknown-bolthur-eabi -type d -empty -delete'
+# - name: host-newlib-arm-shared
+#   source: newlib@4.1.0
+#   dependency:
+#     - host-patch
+#     - host-rsync
+#     - host-findutils
+#     - host-binutils-arm
+#     - host-gcc-arm
+#     - tmp-autoconf-newlib-2.68
+#     - tmp-automake-newlib-1.11.6
+#   emulate_multilib: 'arm-unknown-bolthur-eabi-gcc -print-multi-lib'
+#   path:
+#     - '{PREFIX}/bin'
+#     - '{PREFIX}/../build/tmp/newlib-build/bin'
+#   configure:
+#     - folder: '{SOURCE_DIR}/newlib'
+#       command: autoconf
+#     - folder: '{SOURCE_DIR}/newlib'
+#       command: 'automake --cygnus Makefile'
+#     - folder: '{SOURCE_DIR}/newlib/libm'
+#       command: autoreconf
+#     - folder: '{SOURCE_DIR}/newlib/libm/machine/arm'
+#       command: autoreconf
+#     - folder: '{SOURCE_DIR}/newlib/libc'
+#       command: autoreconf
+#     - folder: '{SOURCE_DIR}/newlib/libc/machine/arm'
+#       command: autoreconf
+#     - folder: '{SOURCE_DIR}/newlib/libc/sys'
+#       command: autoreconf
+#     - folder: '{SOURCE_DIR}/newlib/libc/sys/bolthur'
+#       command: autoreconf
+#     - folder: '{SOURCE_DIR}/libgloss/arm'
+#       command: autoreconf
+#   prepare:
+#     - 'if [ ! -f "{PREFIX}/bin/arm-unknown-bolthur-eabi-cc" ]; then ln {PREFIX}/bin/arm-unknown-bolthur-eabi-gcc {PREFIX}/bin/arm-unknown-bolthur-eabi-cc; fi'
+#     - 'TARGET_CFLAGS="{BUILD_FLAG}" {SOURCE_DIR}/configure --prefix=/ --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib {VERSION}; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --enable-newlib-io-c99-formats --enable-shared --disable-multilib'
+#   build:
+#     - 'TARGET_CFLAGS="{BUILD_FLAG}" make all -j{CPU_COUNT}'
+#   install:
+#     - 'TARGET_CFLAGS="{BUILD_FLAG}" make DESTDIR={SYSROOT}/arm-unknown-bolthur-eabi/usr/{EMULATED_TARGET} install'
+#     - 'rsync -av --exclude usr {SYSROOT}/arm-unknown-bolthur-eabi/{EMULATED_TARGET}/usr/arm-unknown-bolthur-eabi/lib/* {SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET} --remove-source-files'
+#     - 'rm -rf {SYSROOT}/arm-unknown-bolthur-eabi/{EMULATED_TARGET}/usr'

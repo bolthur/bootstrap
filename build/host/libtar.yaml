@@ -10,7 +10,7 @@
     - folder: '{SOURCE_DIR}'
       command: 'autoreconf --force --install'
   prepare:
-    - 'CFLAGS="{BUILD_FLAG}" {SOURCE_DIR}/configure --host=arm-unknown-bolthur-eabi --prefix={SYSROOT}/arm-unknown-bolthur-eabi --mandir={SYSROOT}/arm-unknown-bolthur-eabi/usr/share/man --includedir={SYSROOT}/arm-unknown-bolthur-eabi/usr/include --libdir={SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET} --bindir={SYSROOT}/arm-unknown-bolthur-eabi/usr/bin/{EMULATED_TARGET} --disable-shared'
+    - 'CFLAGS="{BUILD_FLAG}" {SOURCE_DIR}/configure --host=arm-unknown-bolthur-eabi --prefix={SYSROOT}/arm-unknown-bolthur-eabi --mandir={SYSROOT}/arm-unknown-bolthur-eabi/usr/share/man --includedir={SYSROOT}/arm-unknown-bolthur-eabi/usr/include --libdir={SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET} --bindir={SYSROOT}/arm-unknown-bolthur-eabi/usr/bin/{EMULATED_TARGET}'
   build:
     - 'make -j{CPU_COUNT}'
   install:
