@@ -20,8 +20,11 @@
   configure:
     - folder: '{SOURCE_DIR}'
       command: 'autoreconf --force --install'
+  env:
+    - name: 'CFLAGS'
+      value: '{BUILD_FLAG}'
   prepare:
-    - 'CFLAGS="{BUILD_FLAG}" {SOURCE_DIR}/configure --host=arm-unknown-bolthur-eabi --prefix={SYSROOT}/arm-unknown-bolthur-eabi --includedir={SYSROOT}/arm-unknown-bolthur-eabi/usr/include --libdir={SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET}'
+    - '{SOURCE_DIR}/configure --host=arm-unknown-bolthur-eabi --prefix={SYSROOT}/arm-unknown-bolthur-eabi --includedir={SYSROOT}/arm-unknown-bolthur-eabi/usr/include --libdir={SYSROOT}/arm-unknown-bolthur-eabi/usr/lib/{EMULATED_TARGET}'
   build:
     - 'make -j{CPU_COUNT}'
   install:

@@ -277,22 +277,21 @@ def patch_package( package_list, source_directory, patch_directory ):
     # mark as patched
     pathlib.Path( extract_name ).touch()
 
-# prepare command for execution
-def prepare_command( command, version, out_prefix, source_directory, install_version, emulated_target, build_flag ):
-  to_execute = command.replace( '{VERSION}', version )
-  to_execute = to_execute.replace( '{INSTALL_VERSION}', str( install_version ) )
-  to_execute = to_execute.replace( '{PREFIX}', os.path.abspath( out_prefix ) )
-  to_execute = to_execute.replace( '{CPU_COUNT}', str( multiprocessing.cpu_count() ) )
-  to_execute = to_execute.replace( '{SOURCE_DIR}', os.path.abspath( source_directory ) )
-  to_execute = to_execute.replace( '{SYSROOT}', os.path.abspath( os.path.join( out_prefix, '..', 'sysroot' ) ) )
-  to_execute = to_execute.replace( '{BUILD_FLAG}', build_flag )
+def handle_placeholder( haystack, version, out_prefix, source_directory, install_version, emulated_target, build_flag ):
+  haystack = haystack.replace( '{VERSION}', version )
+  haystack = haystack.replace( '{INSTALL_VERSION}', str( install_version ) )
+  haystack = haystack.replace( '{PREFIX}', os.path.abspath( out_prefix ) )
+  haystack = haystack.replace( '{CPU_COUNT}', str( multiprocessing.cpu_count() ) )
+  haystack = haystack.replace( '{SOURCE_DIR}', os.path.abspath( source_directory ) )
+  haystack = haystack.replace( '{SYSROOT}', os.path.abspath( os.path.join( out_prefix, '..', 'sysroot' ) ) )
+  haystack = haystack.replace( '{BUILD_FLAG}', build_flag )
   # special handling for emulated target
   if "" == emulated_target:
     # remove if used in path
-    if -1 != to_execute.find( '{EMULATED_TARGET}' + os.pathsep ):
-      to_execute = to_execute.replace( '{EMULATED_TARGET}' + os.pathsep, '' )
+    if -1 != haystack.find( os.pathsep + '{EMULATED_TARGET}' ):
+      haystack = haystack.replace( os.pathsep + '{EMULATED_TARGET}', '' )
     # remove emulated target
-    to_execute = to_execute.replace( '{EMULATED_TARGET}', emulated_target )
+    haystack = haystack.replace( '{EMULATED_TARGET}', emulated_target )
   else:
     # split by separator
     tmp_target = emulated_target.split( os.sep )
@@ -303,15 +302,25 @@ def prepare_command( command, version, out_prefix, source_directory, install_ver
     # append emulated target
     if not tmp_target:
       # remove if used in path
-      if -1 != to_execute.find( '{EMULATED_TARGET}' + os.pathsep ):
-        to_execute = to_execute.replace( '{EMULATED_TARGET}' + os.pathsep, '' )
+      if -1 != haystack.find( os.pathsep + '{EMULATED_TARGET}' ):
+        haystack = haystack.replace( os.pathsep + '{EMULATED_TARGET}', '' )
       # remove emulated target
-      to_execute = to_execute.replace( '{EMULATED_TARGET}', '' )
+      haystack = haystack.replace( '{EMULATED_TARGET}', '' )
     else:
       # replace emulated target by joined path
-      to_execute = to_execute.replace( '{EMULATED_TARGET}', os.path.join( *tmp_target ) )
+      haystack = haystack.replace( '{EMULATED_TARGET}', os.path.join( *tmp_target ) )
   # return prepared command
-  return to_execute
+  return haystack
+
+# prepare command for execution
+def prepare_command( command, version, out_prefix, source_directory, install_version, emulated_target, build_flag, process_env ):
+  # prepare command
+  command = handle_placeholder( command, version, out_prefix, source_directory, install_version, emulated_target, build_flag )
+  # prepare possible variables
+  for key, value in process_env.items():
+    process_env[ key ] = handle_placeholder(
+      value, version, out_prefix, source_directory, install_version, emulated_target, build_flag )
+  return command, process_env
 
 # build and install single package
 def build_install_single_package( package, out_prefix, build_folder, build_file, install_file, configure_file, prepare_file, source_directory, emulated_target = '', build_flag = '' ):
@@ -351,6 +360,14 @@ def build_install_single_package( package, out_prefix, build_folder, build_file,
   except KeyError:
     pass
 
+  process_env = []
+  try:
+    for env_entry in package[ 'env' ]:
+      process_env.append( [ env_entry[ 'name' ], env_entry[ 'value' ] ] )
+  except KeyError:
+    pass
+  process_env = dict( process_env )
+
   # execute configure steps if not done
   if not os.path.exists( configure_file ):
     try:
@@ -381,14 +398,16 @@ def build_install_single_package( package, out_prefix, build_folder, build_file,
       # execute command by command
       for command in package[ 'prepare' ]:
         # prepare command
-        to_execute = prepare_command(
+        to_execute, process_env = prepare_command(
           command,
           package[ 'source' ][ 'version' ],
           used_prefix,
           os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
           install_version,
           emulated_target,
-          build_flag )
+          build_flag,
+          process_env )
+        env = env | process_env
         # execute command
         if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
           print( 'Error on prepare ' + package[ 'source' ][ 'extract_name' ] )
@@ -405,15 +424,17 @@ def build_install_single_package( package, out_prefix, build_folder, build_file,
       print( '-> building ' + package[ 'name' ] )
       # execute command by command
       for command in package[ 'build' ]:
-        # prepare command to execute
-        to_execute = prepare_command(
+        # prepare command
+        to_execute, process_env = prepare_command(
           command,
           package[ 'source' ][ 'version' ],
           used_prefix,
           os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
           install_version,
           emulated_target,
-          build_flag )
+          build_flag,
+          process_env )
+        env = env | process_env
         # execute command in folder
         if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
           print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
@@ -430,15 +451,17 @@ def build_install_single_package( package, out_prefix, build_folder, build_file,
       print( '-> installing ' + package[ 'source' ][ 'extract_name' ] )
       # command by command
       for command in package[ 'install' ]:
-        # prepare command to execute
-        to_execute = prepare_command(
+        # prepare command
+        to_execute, process_env = prepare_command(
           command,
           package[ 'source' ][ 'version' ],
           used_prefix,
           os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ),
           install_version,
           emulated_target,
-          build_flag )
+          build_flag,
+          process_env )
+        env = env | process_env
         # execute command in folder
         if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
           print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
