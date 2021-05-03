@@ -29,7 +29,7 @@
     - tmp-automake-gcc-1.15.1
     - host-patch
     - host-binutils-arm
-    - host-newlib-arm
+    - host-newlib-stage1-arm
   path:
     - '{PREFIX}/bin'
     - '{PREFIX}/../build/tmp/gcc-build/bin'
