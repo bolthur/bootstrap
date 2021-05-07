@@ -20719,10 +20719,10 @@ index 13d014cc8..61b85c16a 100644
  */
 diff --git newlib/libc/sys/bolthur/Makefile.am newlib/libc/sys/bolthur/Makefile.am
 new file mode 100644
-index 000000000..49e591762
+index 000000000..11de36bd3
 --- /dev/null
 +++ newlib/libc/sys/bolthur/Makefile.am
-@@ -0,0 +1,153 @@
+@@ -0,0 +1,154 @@
 +## Process this file with automake to generate Makefile.in
 +
 +AUTOMAKE_OPTIONS = cygnus
@@ -20786,6 +20786,7 @@ index 000000000..49e591762
 +  thirdparty/dlmalloc.c \
 +  unix/basename.c \
 +  unix/dirname.c \
++  _misc.c \
 +  access.c \
 +  alarm.c \
 +  chmod.c \
@@ -20892,6 +20893,104 @@ index 000000000..5b4850ebe
 + */
 +
 +// dummy file for configure
+diff --git newlib/libc/sys/bolthur/_misc.c newlib/libc/sys/bolthur/_misc.c
+new file mode 100644
+index 000000000..4c1f80a03
+--- /dev/null
++++ newlib/libc/sys/bolthur/_misc.c
+@@ -0,0 +1,92 @@
++
++/**
++ * Written by Christian Freitag <cfreitag.cf@googlemail.com>
++ * Copyright 2020 (c) Christian Freitag
++ *
++ * Permission to use, copy, modify, and distribute this software
++ * is freely granted, provided that this notice is preserved.
++ */
++
++#include <errno.h>
++#include <sched.h>
++#include <unistd.h>
++#include <stdlib.h>
++
++__weak_symbol int sched_setscheduler(
++  pid_t pid,
++  int policy,
++  const struct sched_param *param
++) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol int sched_setparam( pid_t pid, const struct sched_param* param ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol int dup( int fildes ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol int dup2( int fildes, int fildes2 )  {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol pid_t vfork( void ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol pid_t wait( int* stat_loc ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol pid_t waitpid( pid_t pid, int* stat_loc, int options ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol int sigblock( int mask ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol int sigsetmask( int newmask ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol int sigmask( int signum ) {
++  return 1 << signum;
++}
++
++__weak_symbol int issetugid( void ) {
++  return 0;
++}
++
++__weak_symbol int getentropy( void* buffer, size_t length ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol int execvpe(
++  const char* file,
++  char* const argv[],
++  char* const envp[]
++) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol void* _memalign_r(
++  struct _reent* ptr,
++  size_t alignment,
++  size_t bytes
++) {
++  return memalign( alignment, bytes );
++}
 diff --git newlib/libc/sys/bolthur/access.c newlib/libc/sys/bolthur/access.c
 new file mode 100644
 index 000000000..303864e7f
@@ -21155,10 +21254,10 @@ index 000000000..d7d5f47c6
 +}
 diff --git newlib/libc/sys/bolthur/id.c newlib/libc/sys/bolthur/id.c
 new file mode 100644
-index 000000000..a04fbace4
+index 000000000..ded51a853
 --- /dev/null
 +++ newlib/libc/sys/bolthur/id.c
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,63 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -21185,6 +21284,11 @@ index 000000000..a04fbace4
 +  return -1;
 +}
 +
++__weak_symbol int seteuid( uid_t uid ) {
++  errno = ENOSYS;
++  return -1;
++}
++
 +__weak_symbol int setreuid( uid_t ruid, uid_t euid ) {
 +  errno = ENOSYS;
 +  return -1;
@@ -21199,6 +21303,16 @@ index 000000000..a04fbace4
 +}
 +
 +__weak_symbol int setgid( gid_t gid ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol int setegid( gid_t gid ) {
++  errno = ENOSYS;
++  return -1;
++}
++
++__weak_symbol int setpgid( pid_t pid, pid_t pgid ) {
 +  errno = ENOSYS;
 +  return -1;
 +}
@@ -21452,10 +21566,10 @@ index 000000000..827d414bb
 +#endif
 diff --git newlib/libc/sys/bolthur/include/sys/dirent.h newlib/libc/sys/bolthur/include/sys/dirent.h
 new file mode 100644
-index 000000000..73d183897
+index 000000000..5fc0ae0d7
 --- /dev/null
 +++ newlib/libc/sys/bolthur/include/sys/dirent.h
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,50 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -21481,6 +21595,8 @@ index 000000000..73d183897
 +#define	DT_LNK 10
 +#define	DT_SOCK 12
 +#define	DT_WHT 14
++
++#define __dirfd( dp ) ( ( dp )->dd_fd )
 +
 +__BEGIN_DECLS
 +
@@ -22732,10 +22848,10 @@ index 000000000..4fd8b71be
 +}
 diff --git newlib/libc/sys/bolthur/shared.ld newlib/libc/sys/bolthur/shared.ld
 new file mode 100644
-index 000000000..f8080d16c
+index 000000000..52dea163c
 --- /dev/null
 +++ newlib/libc/sys/bolthur/shared.ld
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,80 @@
 +
 +VERS_1.10 {
 +  global: *;
@@ -22810,6 +22926,10 @@ index 000000000..f8080d16c
 +};
 +
 +VERS_4.0 {
++  global: *;
++};
++
++VERS_4.1 {
 +  global: *;
 +};
 diff --git newlib/libc/sys/bolthur/signal.c newlib/libc/sys/bolthur/signal.c

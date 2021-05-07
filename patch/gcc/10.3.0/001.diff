@@ -93,7 +93,7 @@ index 6fcdd771d4c..3aec2ca9c2d 100644
  	  tmake_file="${tmake_file} arm/t-bpabi"
 diff --git gcc/config/bolthur.h gcc/config/bolthur.h
 new file mode 100644
-index 00000000000..f5e5deaf241
+index 00000000000..285f8b343a5
 --- /dev/null
 +++ gcc/config/bolthur.h
 @@ -0,0 +1,49 @@
@@ -104,23 +104,23 @@ index 00000000000..f5e5deaf241
 +
 +/* Machine dependent libraries. */
 +#undef LIB_SPEC
-+#define LIB_SPEC "%{!shared: -lc -lg -lm %{!specs=bolthur.specs:-lgloss-bolthur}}" /* link against C standard library */
++#define LIB_SPEC "%{!shared:-lc -lg -lm %{!specs=bolthur.specs:-lgloss-bolthur}}" /* link against C standard library */
 +
 +/* Files that are linked before user code. */
 +#undef STARTFILE_SPEC
-+#define STARTFILE_SPEC "%{!shared: bolthur-crt0.o%s} crti.o%s %{!shared: crtbegin.o%s} %{shared: crtbeginS.o%s}"
++#define STARTFILE_SPEC "%{!shared:bolthur-crt0.o%s} crti.o%s %{shared:crtbeginS.o%s;:crtbegin.o%s}"
 +
 +/* Files that are linked after user code. */
 +#undef ENDFILE_SPEC
-+#define ENDFILE_SPEC "%{!shared: crtend.o%s} %{shared: crtendS.o%s} crtn.o%s"
++#define ENDFILE_SPEC "%{shared:crtendS.o%s;:crtend.o%s} crtn.o%s"
 +
 +// /* Dynamic linker */
-+// #define DYNAMIC_LINKER "/lib/dl.so"
++#define DYNAMIC_LINKER "/lib/dl.so"
 +
 +/* Linker enforce 4K pages and handle shared libraries */
 +#undef LINK_SPEC
-+#define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{!shared: %{static:-static} %{!static: %{rdynamic:-export-dynamic}}}"
-+//#define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{!shared: %{static:-static} %{!static: -dynamic-linker " DYNAMIC_LINKER "}}"
++//#define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{!shared: %{static:-static} %{!static: %{rdynamic:-export-dynamic}}}"
++#define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{!shared: %{static:-static} %{!static: %{rdynamic:-export-dynamic} %{!dynamic-linker:-dynamic-linker " DYNAMIC_LINKER "}}}"
 +
 +// /* Start file prefix  */
 +// #undef STANDARD_STARTFILE_PREFIX

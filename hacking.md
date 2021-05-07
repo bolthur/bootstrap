@@ -1,19 +1,5 @@
 # hacking
 
-## shared newlib
-
-### shared
-
-```bash
-../configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib 4.1.0; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-multilib --with-cpu=armv7-a --with-mode=thumb --with-float=hard --enable-shared
-```
-
-### static
-
-```bash
-../configure --prefix= --target=arm-unknown-bolthur-eabi --disable-newlib-supplied-syscalls --enable-newlib-io-long-long --enable-newlib-io-long-double --with-pkgversion="newlib 4.1.0; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --enable-newlib-mb --disable-multilib --with-cpu=armv7-a --with-mode=thumb --with-float=hard --disable-shared
-```
-
 ## bash
 
 ```bash
