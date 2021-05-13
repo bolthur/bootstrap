@@ -196,7 +196,7 @@ index 000000000..ed84de752
 +}
 diff --git libgloss/arm/bolthur-system-call.h libgloss/arm/bolthur-system-call.h
 new file mode 100644
-index 000000000..f9d5c2fd8
+index 000000000..1fb0b7281
 --- /dev/null
 +++ libgloss/arm/bolthur-system-call.h
 @@ -0,0 +1,51 @@
@@ -213,11 +213,10 @@ index 000000000..f9d5c2fd8
 +#ifndef _LIBGLOSS_ARM_BOLTHUR_SYSTEM_CALL_H
 +#define _LIBGLOSS_ARM_BOLTHUR_SYSTEM_CALL_H
 +
-+#define SYSTEM_CALL_process_create 1
-+#define SYSTEM_CALL_process_exit 2
-+#define SYSTEM_CALL_process_id 3
-+#define SYSTEM_CALL_process_fork 4
-+#define SYSTEM_CALL_process_replace 5
++#define SYSTEM_CALL_process_exit 1
++#define SYSTEM_CALL_process_id 2
++#define SYSTEM_CALL_process_fork 3
++#define SYSTEM_CALL_process_replace 4
 +
 +#define SYSTEM_CALL_thread_create 11
 +#define SYSTEM_CALL_thread_exit 12
@@ -238,6 +237,7 @@ index 000000000..f9d5c2fd8
 +#define SYSTEM_CALL_message_wait_for_response 37
 +#define SYSTEM_CALL_message_wait_for_response_type 38
 +#define SYSTEM_CALL_message_has_by_name 39
++#define SYSTEM_CALL_message_register_handler 40
 +
 +/*#define SYSTEM_CALL_io_acquire 41
 +#define SYSTEM_CALL_io_release 42
@@ -253,7 +253,7 @@ index 000000000..f9d5c2fd8
 +#endif /* _LIBGLOSS_ARM_BOLTHUR_SYSTEM_CALL_H */
 diff --git libgloss/arm/bolthur-system-call0.S libgloss/arm/bolthur-system-call0.S
 new file mode 100644
-index 000000000..be02bd71f
+index 000000000..34e9e16d9
 --- /dev/null
 +++ libgloss/arm/bolthur-system-call0.S
 @@ -0,0 +1,77 @@
@@ -297,7 +297,6 @@ index 000000000..be02bd71f
 +	SIZE(_ ## name)
 +
 +// system calls
-+SYSTEM_CALL( process_create )
 +SYSTEM_CALL( process_exit )
 +SYSTEM_CALL( process_id )
 +SYSTEM_CALL( process_fork )
@@ -322,6 +321,7 @@ index 000000000..be02bd71f
 +SYSTEM_CALL( message_wait_for_response )
 +SYSTEM_CALL( message_wait_for_response_type )
 +SYSTEM_CALL( message_has_by_name )
++SYSTEM_CALL( message_register_handler )
 +
 +//SYSTEM_CALL( io_acquire )
 +//SYSTEM_CALL( io_release )
@@ -19213,6 +19213,37 @@ index 1ddbb6c76..44c4598d4 100644
  	fi
  fi
  
+diff --git newlib/libc/include/sys/features.h newlib/libc/include/sys/features.h
+index 218807178..16a2bedda 100644
+--- newlib/libc/include/sys/features.h
++++ newlib/libc/include/sys/features.h
+@@ -139,6 +139,13 @@ extern "C" {
+ #define	_POSIX_C_SOURCE		200809L
+ #endif
+ 
++// #if defined( __bolthur__ )
++// #undef _POSIX_SOURCE
++// #define	_POSIX_SOURCE 1
++// #undef _POSIX_C_SOURCE
++// #define	_POSIX_C_SOURCE 200112L
++// #endif
++
+ #if !defined(_POSIX_SOURCE) && !defined(_POSIX_C_SOURCE) && \
+   ((!defined(__STRICT_ANSI__) && !defined(_ANSI_SOURCE)) || \
+    (_XOPEN_SOURCE - 0) >= 500)
+@@ -332,6 +339,12 @@ extern "C" {
+ 
+ /* RTEMS adheres to POSIX -- 1003.1b with some features from annexes.  */
+ 
++#ifdef __bolthur__
++// FIXME: ADD CONFIGS
++#define _POSIX_PRIORITY_SCHEDULING 1
++#define _POSIX_TIMERS 1
++#endif
++
+ #ifdef __rtems__
+ #define _POSIX_JOB_CONTROL     		1
+ #define _POSIX_SAVED_IDS       		1
 diff --git newlib/libc/include/sys/stat.h newlib/libc/include/sys/stat.h
 index 8769112b0..eb8092625 100644
 --- newlib/libc/include/sys/stat.h
@@ -19430,6 +19461,18 @@ index 23754baf5..b7ecad801 100644
  
  libssp_la_LDFLAGS = -Xcompiler -nostdlib
  
+diff --git newlib/libc/stdlib/aligned_alloc.c newlib/libc/stdlib/aligned_alloc.c
+index feb22c24b..06b3883cf 100644
+--- newlib/libc/stdlib/aligned_alloc.c
++++ newlib/libc/stdlib/aligned_alloc.c
+@@ -28,6 +28,7 @@
+ 
+ #include <reent.h>
+ #include <stdlib.h>
++#include <malloc.h>
+ 
+ void *
+ aligned_alloc (size_t align, size_t size)
 diff --git newlib/libc/stdlib/mallocr.c newlib/libc/stdlib/mallocr.c
 index 13d014cc8..61b85c16a 100644
 --- newlib/libc/stdlib/mallocr.c
@@ -20895,10 +20938,10 @@ index 000000000..5b4850ebe
 +// dummy file for configure
 diff --git newlib/libc/sys/bolthur/_misc.c newlib/libc/sys/bolthur/_misc.c
 new file mode 100644
-index 000000000..4c1f80a03
+index 000000000..3d82fa8e5
 --- /dev/null
 +++ newlib/libc/sys/bolthur/_misc.c
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,93 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -20912,6 +20955,7 @@ index 000000000..4c1f80a03
 +#include <sched.h>
 +#include <unistd.h>
 +#include <stdlib.h>
++#include <malloc.h>
 +
 +__weak_symbol int sched_setscheduler(
 +  pid_t pid,
@@ -21372,7 +21416,7 @@ index 000000000..62e5b381c
 +#endif
 diff --git newlib/libc/sys/bolthur/include/sys/bolthur.h newlib/libc/sys/bolthur/include/sys/bolthur.h
 new file mode 100644
-index 000000000..827d414bb
+index 000000000..a21d08dc7
 --- /dev/null
 +++ newlib/libc/sys/bolthur/include/sys/bolthur.h
 @@ -0,0 +1,188 @@
@@ -21529,7 +21573,6 @@ index 000000000..827d414bb
 +
 +// system call declarations
 +// process related
-+extern pid_t _process_create( void*, const char* );
 +extern void __attribute__((__noreturn__)) _process_exit( int );
 +extern pid_t _process_id( void );
 +extern pid_t _process_fork( void );
@@ -21556,6 +21599,7 @@ index 000000000..827d414bb
 +extern void _message_wait_for_response( char*, size_t, size_t );
 +extern size_t _message_wait_for_response_type( size_t, size_t );
 +extern bool _message_has_by_name( char* );
++extern bool _message_register_handler( size_t, void* );
 +
 +// FIXME: remove finally, when system is usable
 +extern int _dummy_puts( int, char*, int );
@@ -23122,10 +23166,10 @@ index 000000000..c985992a1
 +}
 diff --git newlib/libc/sys/bolthur/syscall/_execve.c newlib/libc/sys/bolthur/syscall/_execve.c
 new file mode 100644
-index 000000000..c680784fb
+index 000000000..957f7e4be
 --- /dev/null
 +++ newlib/libc/sys/bolthur/syscall/_execve.c
-@@ -0,0 +1,57 @@
+@@ -0,0 +1,68 @@
 +
 +/**
 + * Written by Christian Freitag <cfreitag.cf@googlemail.com>
@@ -23141,6 +23185,17 @@ index 000000000..c680784fb
 +#include <sys/cdefs.h>
 +#include <sys/bolthur.h>
 +
++/**
++ * @brief Execute file
++ *
++ * @param name path to executable
++ * @param argv arguments
++ * @param env environment
++ * @return
++ *
++ * @todo use dynamic linker file for replace
++ * @todo pass arguments, environment and executable to linker
++ */
 +__weak_symbol int _execve( char* name, char** argv, char** env ) {
 +  // open file to read binary
 +  FILE* fp = fopen( name, "rb" );

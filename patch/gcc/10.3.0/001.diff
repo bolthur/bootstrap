@@ -93,7 +93,7 @@ index 6fcdd771d4c..3aec2ca9c2d 100644
  	  tmake_file="${tmake_file} arm/t-bpabi"
 diff --git gcc/config/bolthur.h gcc/config/bolthur.h
 new file mode 100644
-index 00000000000..285f8b343a5
+index 00000000000..a80444122c3
 --- /dev/null
 +++ gcc/config/bolthur.h
 @@ -0,0 +1,49 @@
@@ -115,11 +115,11 @@ index 00000000000..285f8b343a5
 +#define ENDFILE_SPEC "%{shared:crtendS.o%s;:crtend.o%s} crtn.o%s"
 +
 +// /* Dynamic linker */
-+#define DYNAMIC_LINKER "/lib/dl.so"
++#undef DYNAMIC_LINKER
++#define DYNAMIC_LINKER "/usr/bin/linker.so"
 +
 +/* Linker enforce 4K pages and handle shared libraries */
 +#undef LINK_SPEC
-+//#define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{!shared: %{static:-static} %{!static: %{rdynamic:-export-dynamic}}}"
 +#define LINK_SPEC "-z max-page-size=4096 %{shared:-shared} %{!shared: %{static:-static} %{!static: %{rdynamic:-export-dynamic} %{!dynamic-linker:-dynamic-linker " DYNAMIC_LINKER "}}}"
 +
 +// /* Start file prefix  */
