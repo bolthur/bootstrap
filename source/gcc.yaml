@@ -1,7 +1,6 @@
 
 name: gcc
 allowed_version:
-  - '10.2.0'
-  - '10.3.0'
+  - '11.1.0'
 url: 'https://ftp.gnu.org/gnu/gcc/gcc-{VERSION}/gcc-{VERSION}.tar.gz'
 extract_name: 'gcc-{VERSION}'
