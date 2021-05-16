@@ -111,6 +111,19 @@ index 8acbc05..0e0e61c 100644
  	if (!streq(unitname, unit_addr))
  		FAIL(c, dti, node, "graph node unit address error, expected \"%s\"",
  		     unit_addr);
+diff --git fdtdump.c fdtdump.c
+index 9613bef..d9fb374 100644
+--- fdtdump.c
++++ fdtdump.c
+@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
+ 		char *p = buf;
+ 		char *endp = buf + len;
+ 
+-		fdt_set_magic(smagic, FDT_MAGIC);
++		fdt32_st(smagic, FDT_MAGIC);
+ 
+ 		/* poor man's memmem */
+ 		while ((endp - p) >= FDT_MAGIC_SIZE) {
 diff --git fdtget.c fdtget.c
 index 777582e..f05aaa1 100644
 --- fdtget.c

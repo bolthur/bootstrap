@@ -1,5 +1,5 @@
 diff --git bfd/config.bfd bfd/config.bfd
-index 6c2919e..7f32970 100644
+index 6c2919e47eb..7f329704f3f 100644
 --- bfd/config.bfd
 +++ bfd/config.bfd
 @@ -231,6 +231,11 @@ case "${targ}" in
@@ -26,7 +26,7 @@ index 6c2919e..7f32970 100644
    arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \
    arm*-*-eabi* | arm-*-rtems* | arm*-*-uclinuxfdpiceabi)
 diff --git config.sub config.sub
-index f02d43a..6222c95 100755
+index f02d43ad500..6222c954897 100755
 --- config.sub
 +++ config.sub
 @@ -1366,7 +1366,7 @@ case $os in
@@ -39,7 +39,7 @@ index f02d43a..6222c95 100755
  		;;
  	qnx*)
 diff --git gdb/acinclude.m4 gdb/acinclude.m4
-index 6fbc88b..9b26046 100644
+index aed9730a6df..c2026cd1648 100644
 --- gdb/acinclude.m4
 +++ gdb/acinclude.m4
 @@ -186,7 +186,7 @@ case "x$am_cv_prog_cc_stdc" in
@@ -60,7 +60,7 @@ index 6fbc88b..9b26046 100644
    #include "$4"
    ],
 diff --git readline/readline/support/config.sub readline/readline/support/config.sub
-index 22d774e..df87d2e 100755
+index 22d774e429e..df87d2e3e34 100755
 --- readline/readline/support/config.sub
 +++ readline/readline/support/config.sub
 @@ -1368,7 +1368,8 @@ case $os in

@@ -1,10 +1,14 @@
 
 - name: host-nim
-  source: nim@1.4.4
+  source: nim@1.4.6
   dependency:
     - host-patch
+    - host-binutils-arm
+    - host-gcc-arm
+    - host-newlib-arm
   install:
     - 'cd {SOURCE_DIR} && sh build.sh'
     - 'cd {SOURCE_DIR} && bin/nim c koch'
+    - 'cd {SOURCE_DIR} && ./koch boot -d:release'
     - 'cd {SOURCE_DIR} && ./koch tools'
     - 'cd {SOURCE_DIR} && sh install.sh {PREFIX}'

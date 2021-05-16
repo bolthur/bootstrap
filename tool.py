@@ -273,7 +273,6 @@ def patch_package( package_list, source_directory, patch_directory ):
         if 0 != subprocess.call( to_execute, cwd=source_folder, shell=True ):
           print( 'Error on patching ' + package[ 'source' ][ 'extract_name' ] )
           quit()
-
     # mark as patched
     pathlib.Path( extract_name ).touch()
 
