@@ -1,0 +1,18 @@
+
+- name: host-patchelf
+  source: patchelf@0.18.0
+  dependency:
+    - host-patch
+    - host-m4
+    - host-autoconf
+    - host-automake
+    - host-libtool
+  configure:
+    - folder: '{SOURCE_DIR}'
+      command: './bootstrap.sh'
+  prepare:
+    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install -j{CPU_COUNT}'

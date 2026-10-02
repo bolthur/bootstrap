@@ -1,0 +1,10 @@
+
+name: bfs
+allowed_version:
+  - '0.1.0'
+#url: 'https://github.com/bolthur/bfs/archive/v{VERSION}.tar.gz'
+#url_file_overwrite: 'bfs-{VERSION}.tar.gz'
+url: 'https://github.com/bolthur/bfs/archive/develop.tar.gz'
+url_file_overwrite: 'bfs-{VERSION}.tar.gz'
+extract_name: 'bfs-{VERSION}'
+extract_name_to_change: bfs-develop

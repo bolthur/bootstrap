@@ -1,0 +1,54 @@
+diff --git bfd/config.bfd bfd/config.bfd
+index 0bc27fdce97..28b50f15952 100644
+--- bfd/config.bfd
++++ bfd/config.bfd
+@@ -244,6 +244,11 @@ case "${targ}" in
+     targ_archs="$targ_archs bfd_i386_arch bfd_powerpc_arch bfd_rs6000_arch"
+     want64=true
+     ;;
++  aarch64*-*-bolthur*)
++    targ_defvec=aarch64_elf64_le_vec
++    targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec"
++    want64=true
++    ;;
+   aarch64-*-elf | aarch64-*-rtems* | aarch64-*-genode*)
+     targ_defvec=aarch64_elf64_le_vec
+     targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec aarch64_pei_le_vec aarch64_pe_le_vec"
+@@ -421,6 +426,10 @@ case "${targ}" in
+     targ_defvec=arm_elf32_le_vec
+     targ_selvecs=arm_elf32_be_vec
+     ;;
++  arm*-*-bolthur*)
++    targ_defvec=arm_elf32_le_vec
++    targ_selvecs="arm_elf32_fdpic_le_vec arm_elf32_be_vec arm_elf32_fdpic_be_vec"
++    ;;
+   arm-*-elf | arm*-*-freebsd* | arm*-*-linux-* | arm*-*-conix* | \
+   arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \
+   arm*-*-eabi* | arm-*-rtems* | arm*-*-uclinuxfdpiceabi)
+diff --git config.sub config.sub
+index dba16e84c77..47cbb18f02e 100755
+--- config.sub
++++ config.sub
+@@ -1754,7 +1754,7 @@ case $os in
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+ 	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
+-	     | fiwix* )
++	     | fiwix* | bolthur* )
+ 		;;
+ 	# This one is extra strict with allowed versions
+ 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)
+diff --git readline/readline/support/config.sub readline/readline/support/config.sub
+index 7384e9198b4..1c391d7d1a9 100755
+--- readline/readline/support/config.sub
++++ readline/readline/support/config.sub
+@@ -1729,7 +1729,8 @@ case $os in
+ 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+-	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx*)
++	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* \
++	     | bolthur*)
+ 		;;
+ 	# This one is extra strict with allowed versions
+ 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)

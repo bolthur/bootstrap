@@ -1,0 +1,8 @@
+
+name: libcheck
+allowed_version:
+  - '0.15.2'
+url: 'https://github.com/libcheck/check/archive/refs/tags/{VERSION}.tar.gz'
+url_file_overwrite: 'libcheck-{VERSION}.tar.gz'
+extract_name: 'libcheck-{VERSION}'
+extract_name_to_change: 'check-{VERSION}'

@@ -27,3 +27,13 @@ All host software installed with this python script is installed into folder `/o
 
 ## License
 [GPL-3.0](LICENSE)
+
+## To be done
+
+### general
+
+* Update packages
+
+### newlib
+
+* Get rid of static objects e.g. in open syscall for thread safety

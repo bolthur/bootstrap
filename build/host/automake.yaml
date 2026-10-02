@@ -1,6 +1,6 @@
 
 - name: host-automake
-  source: automake@1.16.3
+  source: automake@1.18.1
   dependency:
     - host-patch
     - host-m4

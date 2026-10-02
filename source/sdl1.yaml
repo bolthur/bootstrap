@@ -1,0 +1,8 @@
+
+name: sdl1
+allowed_version:
+  - '1.2.15'
+url: 'https://github.com/libsdl-org/SDL-1.2/archive/refs/tags/release-{VERSION}.tar.gz'
+extract_name: 'sdl1-{VERSION}'
+url_file_overwrite: 'sdl-{VERSION}.tar.gz'
+extract_name_to_change: 'SDL-1.2-release-{VERSION}'

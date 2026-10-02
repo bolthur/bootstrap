@@ -1,0 +1,18 @@
+
+- name: host-unifont-raspi2b_r1-arm-hosted
+  source: unifont@15.0.01
+  install:
+    - 'install -d "{SYSROOT}/arm-raspi2b_r1-bolthur-eabi/usr/share/font/unifont"'
+    - 'install -m644 "{SOURCE_DIR}/font/precompiled/unifont-{VERSION}.ttf" "{SYSROOT}/arm-raspi2b_r1-bolthur-eabi/usr/share/font/unifont/unifont.ttf"'
+    - 'install -m644 "{SOURCE_DIR}/font/precompiled/unifont_jp-{VERSION}.ttf" "{SYSROOT}/arm-raspi2b_r1-bolthur-eabi/usr/share/font/unifont/unifont_jp.ttf"'
+    - 'install -m644 "{SOURCE_DIR}/font/precompiled/unifont_upper-{VERSION}.ttf" "{SYSROOT}/arm-raspi2b_r1-bolthur-eabi/usr/share/font/unifont/unifont_upper.ttf"'
+    - 'install -m644 "{SOURCE_DIR}/font/precompiled/unifont_csur-{VERSION}.ttf" "{SYSROOT}/arm-raspi2b_r1-bolthur-eabi/usr/share/font/unifont/unifont_csur.ttf"'
+
+- name: host-unifont-raspi0_1-arm-hosted
+  source: unifont@15.0.01
+  install:
+    - 'install -d "{SYSROOT}/arm-raspi0_1-bolthur-eabi/usr/share/font/unifont"'
+    - 'install -m644 "{SOURCE_DIR}/font/precompiled/unifont-{VERSION}.ttf" "{SYSROOT}/arm-raspi0_1-bolthur-eabi/usr/share/font/unifont/unifont.ttf"'
+    - 'install -m644 "{SOURCE_DIR}/font/precompiled/unifont_jp-{VERSION}.ttf" "{SYSROOT}/arm-raspi0_1-bolthur-eabi/usr/share/font/unifont/unifont_jp.ttf"'
+    - 'install -m644 "{SOURCE_DIR}/font/precompiled/unifont_upper-{VERSION}.ttf" "{SYSROOT}/arm-raspi0_1-bolthur-eabi/usr/share/font/unifont/unifont_upper.ttf"'
+    - 'install -m644 "{SOURCE_DIR}/font/precompiled/unifont_csur-{VERSION}.ttf" "{SYSROOT}/arm-raspi0_1-bolthur-eabi/usr/share/font/unifont/unifont_csur.ttf"'

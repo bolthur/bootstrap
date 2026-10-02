@@ -1,6 +1,6 @@
 
-- name: host-gdb-arm
-  source: gdb@10.2
+- name: host-gdb-raspi2b_r1-arm-hosted
+  source: gdb@17.2
   dependency:
     - host-patch
     - tmp-autoconf-gdb-2.69
@@ -12,7 +12,26 @@
     - folder: '{SOURCE_DIR}/gdb'
       command: autoreconf
   prepare:
-    - '{SOURCE_DIR}/configure --target=arm-unknown-bolthur-eabi --prefix={PREFIX}'
+    - '{SOURCE_DIR}/configure --target=arm-raspi2b_r1-bolthur-eabi --prefix={PREFIX}'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install'
+
+- name: host-gdb-raspi0_1-arm-hosted
+  source: gdb@17.2
+  dependency:
+    - host-patch
+    - tmp-autoconf-gdb-2.69
+    - tmp-automake-gdb-1.15.1
+  path:
+    - '{PREFIX}/bin'
+    - '{PREFIX}/../build/tmp/gdb-build/bin'
+  configure:
+    - folder: '{SOURCE_DIR}/gdb'
+      command: autoreconf
+  prepare:
+    - '{SOURCE_DIR}/configure --target=arm-raspi0_1-bolthur-eabi --prefix={PREFIX}'
   build:
     - 'make all -j{CPU_COUNT}'
   install:

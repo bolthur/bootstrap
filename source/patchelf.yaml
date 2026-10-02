@@ -1,0 +1,6 @@
+
+name: patchelf
+allowed_version:
+  - '0.18.0'
+url: 'https://github.com/NixOS/patchelf/archive/refs/tags/{VERSION}.tar.gz'
+extract_name: 'patchelf-{VERSION}'

@@ -44,15 +44,15 @@
     - 'make all -j{CPU_COUNT}'
   install:
     - 'make install -j{CPU_COUNT}'
-- name: tmp-autoconf-newlib-2.68
-  source: autoconf@2.68
+- name: tmp-autoconf-libsdl1-2.59
+  source: autoconf@2.59
   dependency:
     - host-patch
     - host-m4
     - host-autoconf
     - host-automake
     - host-libtool
-  prefix_suffix: ../build/tmp/newlib-build
+  prefix_suffix: ../build/tmp/libsdl1-build
   prepare:
     - '{SOURCE_DIR}/configure --prefix={PREFIX}'
   build:

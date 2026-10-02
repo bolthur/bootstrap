@@ -1,0 +1,22 @@
+diff --git config.sub config.sub
+index 2c5120f..a72d856 100755
+--- config.sub
++++ config.sub
+@@ -1768,7 +1768,7 @@ case $os in
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+ 	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
+-	     | fiwix* | mlibc* | cos* | mbr* | ironclad* )
++	     | fiwix* | mlibc* | cos* | mbr* | ironclad* | bolthur* )
+ 		;;
+ 	# This one is extra strict with allowed versions
+ 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)
+@@ -1865,7 +1865,7 @@ case $kernel-$os-$obj in
+ 	os2-emx-)
+ 		;;
+ 	ios*-simulator* | tvos*-simulator* | watchos*-simulator*)
+-		;;	
++		;;
+ 	*-eabi*- | *-gnueabi*-)
+ 		;;
+ 	none--*)

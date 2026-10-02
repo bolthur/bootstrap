@@ -1,0 +1,6 @@
+
+name: unifont
+allowed_version:
+  - '15.0.01'
+url: 'https://ftpmirror.gnu.org/gnu/unifont/unifont-{VERSION}/unifont-{VERSION}.tar.gz'
+extract_name: 'unifont-{VERSION}'

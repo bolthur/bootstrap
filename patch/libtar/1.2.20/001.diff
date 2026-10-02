@@ -1,3 +1,16 @@
+diff --git compat/fnmatch.c compat/fnmatch.c
+index fe75f0e..10213bd 100644
+--- compat/fnmatch.c
++++ compat/fnmatch.c
+@@ -73,7 +73,7 @@ static char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp
+ #ifdef NO_IBM_COMPILER_HORKAGE
+ static int rangematch (const char *, char, int, char **);
+ #else
+-static int rangematch ();
++static int rangematch (const char *, char, int, char **);
+ #endif
+ 
+ int
 diff --git lib/handle.c lib/handle.c
 index fce84be..f07be3d 100644
 --- lib/handle.c

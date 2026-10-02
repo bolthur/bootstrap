@@ -1,6 +1,6 @@
 
 - name: host-patch
-  source: patch@2.7.6
+  source: patch@2.8
   prepare:
     - '{SOURCE_DIR}/configure --prefix={PREFIX}'
   build:

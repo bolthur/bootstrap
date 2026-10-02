@@ -1,0 +1,47 @@
+diff --git build-aux/ltmain.in build-aux/ltmain.in
+index a5f21a1d..c06d55c4 100644
+--- build-aux/ltmain.in
++++ build-aux/ltmain.in
+@@ -6497,7 +6497,7 @@ func_mode_link ()
+ 	      fi
+ 	    else
+ 	      # We cannot seem to hardcode it, guess we'll fake it.
+-	      add_dir=-L$libdir
++	      add_dir=-L$lt_sysroot$libdir
+ 	      # Try looking first in the location we're being installed to.
+ 	      if test -n "$inst_prefix_dir"; then
+ 		case $libdir in
+diff --git m4/libtool.m4 m4/libtool.m4
+index 79a2451e..ab54ba0f 100644
+--- m4/libtool.m4
++++ m4/libtool.m4
+@@ -2925,6 +2925,18 @@ netbsd*)
+   hardcode_into_libs=yes
+   ;;
+ 
++bolthur*)
++  version_type=linux # correct to gnu/linux during the next big refactor
++  need_lib_prefix=no
++  need_version=no
++  library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
++  soname_spec='$libname$release$shared_ext$major'
++  dynamic_linker='Bolthur ld-bolthur.so'
++  shlibpath_var=LD_LIBRARY_PATH
++  shlibpath_overrides_runpath=no
++  hardcode_into_libs=yes
++  ;;
++
+ newsos6)
+   version_type=linux # correct to gnu/linux during the next big refactor
+   library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
+@@ -3528,6 +3540,10 @@ haiku*)
+   lt_cv_deplibs_check_method=pass_all
+   ;;
+ 
++bolthur*)
++  lt_cv_deplibs_check_method=pass_all
++  ;;
++
+ hpux10.20* | hpux11*)
+   lt_cv_file_magic_cmd=$FILECMD
+   case $host_cpu in

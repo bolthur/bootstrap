@@ -1,0 +1,6 @@
+
+name: libxcrypt
+allowed_version:
+  - '4.5.2'
+url: 'https://github.com/besser82/libxcrypt/archive/refs/tags/v{VERSION}.tar.gz'
+extract_name: 'libxcrypt-{VERSION}'

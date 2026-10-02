@@ -1,0 +1,6 @@
+
+name: bzip2
+allowed_version:
+  - '1.0.8'
+url: 'https://sourceware.org/pub/bzip2/bzip2-{VERSION}.tar.gz'
+extract_name: 'bzip2-{VERSION}'

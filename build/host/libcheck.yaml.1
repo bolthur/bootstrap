@@ -1,0 +1,34 @@
+
+- name: host-libcheck-raspi2b_r1-arm-hosted
+  source: libcheck@0.15.2
+  dependency:
+    - host-binutils-raspi2b_r1-arm-hosted
+    - host-gcc-final-raspi2b_r1-arm-hosted
+    - host-newlib-static-raspi2b_r1-arm-hosted
+    - host-pkg-config-raspi2b_r1-arm
+  configure:
+    - folder: '{SOURCE_DIR}'
+      command: 'autoreconf --force --install'
+  prepare:
+    - '{SOURCE_DIR}/configure --host=arm-raspi2b_r1-bolthur-eabi --prefix={SYSROOT}/arm-raspi2b_r1-bolthur-eabi/usr'
+  build:
+    - 'make -j{CPU_COUNT}'
+  install:
+    - 'make install'
+
+- name: host-libcheck-raspi0_1-arm-hosted
+  source: libcheck@0.15.2
+  dependency:
+    - host-binutils-raspi0_1-arm-hosted
+    - host-gcc-final-raspi0_1-arm-hosted
+    - host-newlib-static-raspi0_1-arm-hosted
+    - host-pkg-config-raspi0_1-arm
+  configure:
+    - folder: '{SOURCE_DIR}'
+      command: 'autoreconf --force --install'
+  prepare:
+    - '{SOURCE_DIR}/configure --host=arm-raspi0_1-bolthur-eabi --prefix={SYSROOT}/arm-raspi0_1-bolthur-eabi/usr'
+  build:
+    - 'make -j{CPU_COUNT}'
+  install:
+    - 'make install'

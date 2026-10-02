@@ -1,0 +1,59 @@
+diff --git src/arg_int.c src/arg_int.c
+index 29c20e5..4e16e79 100644
+--- src/arg_int.c
++++ src/arg_int.c
+@@ -30,6 +30,7 @@ USA.
+ 
+ #include "argtable2.h"
+ #include <limits.h>
++#include <ctype.h>
+ 
+ /* local error codes */
+ enum {EMINCOUNT=1,EMAXCOUNT,EBADINT,EOVERFLOW};
+@@ -74,13 +75,13 @@ static long int strtol0X(const char* str, const char **endptr, char X, int base)
+             break;
+         default:
+             s=1;
+-            break;    
++            break;
+         }
+     /* printf("2) %s\n",ptr); */
+ 
+     /* '0X' prefix */
+     if ((*ptr++)!='0')
+-        { 
++        {
+         /* printf("failed to detect '0'\n"); */
+         *endptr=str;
+         return 0;
+@@ -119,7 +120,7 @@ static int detectsuffix(const char *str, const char *suffix)
+ 
+         /* return 1 (success) if match persists until the string terminator */
+         if (*str=='\0')
+-           return 1; 
++           return 1;
+ 
+         /* next chars */
+         str++;
+@@ -212,7 +213,7 @@ static int scanfn(struct arg_int *parent, const char *argval)
+             else
+                 val*=1073741824;                /* 1GB = 1024*1024*1024 */
+             }
+-        else if (!detectsuffix(end,""))  
++        else if (!detectsuffix(end,""))
+             errorcode = EBADINT;                /* invalid suffix detected */
+ 
+         /* if success then store result in parent->ival[] array */
+diff --git src/getopt.h src/getopt.h
+index 2fa12f7..c1e8162 100644
+--- src/getopt.h
++++ src/getopt.h
+@@ -100,7 +100,7 @@ extern "C"
+ #define optional_argument	2
+ 
+ #if defined (__STDC__) && __STDC__
+-#ifdef __GNU_LIBRARY__
++#if defined(__GNU_LIBRARY__) || __bolthur__
+ /* Many other libraries have conflicting prototypes for getopt, with
+    differences in the consts, in stdlib.h.  To avoid compilation
+    errors, only prototype getopt for the GNU C library.  */

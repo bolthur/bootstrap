@@ -1,8 +1,8 @@
 
 - name: host-findutils
-  source: findutils@4.8.0
+  source: findutils@4.10.0
   prepare:
-    - 'CFLAGS="-D__nonnull\\(params\\)=" {SOURCE_DIR}/configure --prefix={PREFIX} --disable-nls'
+    - '{SOURCE_DIR}/configure --prefix={PREFIX}'
   build:
     - 'make all -j{CPU_COUNT}'
   install:

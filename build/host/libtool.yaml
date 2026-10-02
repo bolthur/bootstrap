@@ -1,6 +1,6 @@
 
 - name: host-libtool
-  source: libtool@2.4.6
+  source: libtool@2.6.1
   dependency:
     - host-patch
     - host-m4
@@ -9,6 +9,15 @@
   configure:
     - folder: '{SOURCE_DIR}'
       command: autoreconf
+    # Necessary hack to get correct config.guess and config.sub from automake into libtool
+    - folder: '{SOURCE_DIR}/build-aux'
+      command: rm config.guess
+    - folder: '{SOURCE_DIR}/build-aux'
+      command: rm config.sub
+    - folder: '{SOURCE_DIR}/build-aux'
+      command: cp {PREFIX}/share/automake-1.16/config.guess ./config.guess
+    - folder: '{SOURCE_DIR}/build-aux'
+      command: cp {PREFIX}/share/automake-1.16/config.sub ./config.sub
   prepare:
     - '{SOURCE_DIR}/configure --prefix={PREFIX}'
   build:

@@ -1,0 +1,7 @@
+
+name: libconfini
+allowed_version:
+  - '1.16.4'
+url: 'https://github.com/madmurphy/libconfini/archive/refs/tags/{VERSION}.tar.gz'
+url_file_overwrite: 'libconfini-{VERSION}.tar.gz'
+extract_name: 'libconfini-{VERSION}'

@@ -1,0 +1,10 @@
+
+- name: host-newlib-header-arm-raspi2b_r1-hosted
+  source: newlib@4.6.0.20260123
+  install:
+    - 'sh {HELPER}/copy-newlib-header.sh {SYSROOT}/arm-raspi2b_r1-bolthur-eabi {SOURCE_DIR}'
+
+- name: host-newlib-header-arm-raspi0_1-hosted
+  source: newlib@4.6.0.20260123
+  install:
+    - 'sh {HELPER}/copy-newlib-header.sh {SYSROOT}/arm-raspi0_1-bolthur-eabi {SOURCE_DIR}'

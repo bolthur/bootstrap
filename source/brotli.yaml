@@ -1,0 +1,6 @@
+
+name: brotli
+allowed_version:
+  - '1.2.0'
+url: 'https://github.com/google/brotli/archive/refs/tags/v{VERSION}.tar.gz'
+extract_name: 'brotli-{VERSION}'

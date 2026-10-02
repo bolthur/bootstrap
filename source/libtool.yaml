@@ -1,6 +1,6 @@
 
 name: libtool
 allowed_version:
-  - '2.4.6'
-url: 'https://ftp.gnu.org/gnu/libtool/libtool-{VERSION}.tar.gz'
+  - '2.6.1'
+url: 'https://alpha.gnu.org/gnu/libtool/libtool-{VERSION}.tar.gz'
 extract_name: 'libtool-{VERSION}'

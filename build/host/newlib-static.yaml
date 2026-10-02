@@ -1,0 +1,56 @@
+
+- name: host-newlib-static-raspi2b_r1-arm-hosted
+  source: newlib@4.6.0.20260123
+  dependency:
+    - host-patch
+    - host-rsync
+    - host-findutils
+    - host-binutils-raspi2b_r1-arm-hosted
+    - host-gcc-stage1-raspi2b_r1-arm-hosted
+    - tmp-autoconf-gcc-2.69
+    - tmp-automake-gcc-1.15.1
+  path:
+    - '{PREFIX}/bin'
+    - '{PREFIX}/../build/tmp/gcc-build/bin'
+  configure:
+    - folder: '{SOURCE_DIR}'
+      command: autoreconf -ivf
+    - folder: '{SOURCE_DIR}/newlib'
+      command: autoreconf -ivf
+    - folder: '{SOURCE_DIR}/libgloss'
+      command: autoreconf -ivf
+  prepare:
+    - 'if [ ! -f "{PREFIX}/bin/arm-raspi2b_r1-bolthur-eabi-cc" ]; then ln {PREFIX}/bin/arm-raspi2b_r1-bolthur-eabi-gcc {PREFIX}/bin/arm-raspi2b_r1-bolthur-eabi-cc; fi'
+    - '{SOURCE_DIR}/configure --prefix={SYSROOT}/arm-raspi2b_r1-bolthur-eabi/usr --target=arm-raspi2b_r1-bolthur-eabi --disable-newlib-supplied-syscalls --with-pkgversion="newlib {VERSION}; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --disable-shared --enable-multilib --with-tooldir={SYSROOT}/arm-raspi2b_r1-bolthur-eabi/usr'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install'
+
+- name: host-newlib-static-raspi0_1-arm-hosted
+  source: newlib@4.6.0.20260123
+  dependency:
+    - host-patch
+    - host-rsync
+    - host-findutils
+    - host-binutils-raspi0_1-arm-hosted
+    - host-gcc-stage1-raspi0_1-arm-hosted
+    - tmp-autoconf-gcc-2.69
+    - tmp-automake-gcc-1.15.1
+  path:
+    - '{PREFIX}/bin'
+    - '{PREFIX}/../build/tmp/gcc-build/bin'
+  configure:
+    - folder: '{SOURCE_DIR}'
+      command: autoreconf -ivf
+    - folder: '{SOURCE_DIR}/newlib'
+      command: autoreconf -ivf
+    - folder: '{SOURCE_DIR}/libgloss'
+      command: autoreconf -ivf
+  prepare:
+    - 'if [ ! -f "{PREFIX}/bin/arm-raspi0_1-bolthur-eabi-cc" ]; then ln {PREFIX}/bin/arm-raspi0_1-bolthur-eabi-gcc {PREFIX}/bin/arm-raspi0_1-bolthur-eabi-cc; fi'
+    - '{SOURCE_DIR}/configure --prefix={SYSROOT}/arm-raspi0_1-bolthur-eabi/usr --target=arm-raspi0_1-bolthur-eabi --disable-newlib-supplied-syscalls --with-pkgversion="newlib {VERSION}; bolthur bootstrap" --enable-newlib-elix-level=4 --enable-newlib-register-fini --disable-shared --enable-multilib --with-tooldir={SYSROOT}/arm-raspi0_1-bolthur-eabi/usr'
+  build:
+    - 'make all -j{CPU_COUNT}'
+  install:
+    - 'make install'

@@ -8,6 +8,7 @@ import shutil
 import pathlib
 import multiprocessing
 import subprocess
+import json
 
 # search helper for check if exists
 def lookup_package( package_list, **kw ):
@@ -15,6 +16,14 @@ def lookup_package( package_list, **kw ):
 
 # parse package file data and populate to package list
 def parse_package_file_data( package_list, data, base, build='' ):
+  # FIXME: Treat valid option use_build_dir_from as dependency to be built before
+
+  # create list if not existing
+  if not 'dependency' in data:
+    data[ 'dependency' ] = []
+  if 'use_build_dir_from' in data:
+    data[ 'dependency' ].append( data[ 'use_build_dir_from' ] )
+
   idx = None
   # handle possible dependencies
   try:
@@ -136,6 +145,10 @@ def prepare_package( package_list, base ):
       data[ 'url_file_overwrite' ] = data[ 'url_file_overwrite' ].replace( '{VERSION}', version )
     except KeyError:
       pass
+    try:
+      data[ 'extract_name_to_change' ] = data[ 'extract_name_to_change' ].replace( '{VERSION}', version )
+    except KeyError:
+      pass
     # replace source information of package with data from source file
     package[ 'source' ] = data
 
@@ -169,17 +182,9 @@ def download_package( package_list, base ):
     # get target file
     target_file = os.path.join( base, filename )
 
-    # delete on rebuild
-    if not rebuild_package is None:
-      if package[ 'name' ] in ( rebuild_package ) or 'all' in ( rebuild_package ):
-        if os.path.exists( target_file ):
-          os.remove( target_file )
-        if os.path.exists( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) ):
-          shutil.rmtree( os.path.join( base, package[ 'source' ][ 'extract_name' ] ) )
-
     # skip if already loaded
     if not os.path.exists( target_file ):
-      print( '-> loading ' + target_file )
+      print( '-> loading ' + target_file + ' from ' + url )
       # request file
       response = requests.get( url, stream=True )
       total_length = response.headers.get( 'content-length' )
@@ -222,7 +227,6 @@ def patch_package( package_list, source_directory, patch_directory ):
     if os.path.exists( extract_name ):
       continue
 
-    print( '-> patching ' + package[ 'source' ][ 'extract_name' ] )
     # set
     package_patch_folder = None
 
@@ -256,6 +260,7 @@ def patch_package( package_list, source_directory, patch_directory ):
       # skip rest
       continue
 
+    print( '-> patching ' + package[ 'source' ][ 'extract_name' ] )
     # apply patch
     source_folder = os.path.abspath( os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ) )
     patch_folder = os.path.abspath( package_patch_folder )
@@ -276,19 +281,22 @@ def patch_package( package_list, source_directory, patch_directory ):
     # mark as patched
     pathlib.Path( extract_name ).touch()
 
-def handle_placeholder( haystack, version, out_prefix, source_directory, install_version, emulated_target, build_flag ):
+def handle_placeholder( haystack, version, out_prefix, source_directory, install_version, emulated_target, build_flag, cwd ):
   haystack = haystack.replace( '{VERSION}', version )
   haystack = haystack.replace( '{INSTALL_VERSION}', str( install_version ) )
   haystack = haystack.replace( '{PREFIX}', os.path.abspath( out_prefix ) )
   haystack = haystack.replace( '{CPU_COUNT}', str( multiprocessing.cpu_count() ) )
   haystack = haystack.replace( '{SOURCE_DIR}', os.path.abspath( source_directory ) )
+  haystack = haystack.replace( '{BUILD_DIR}', os.path.abspath( cwd ) )
   haystack = haystack.replace( '{SYSROOT}', os.path.abspath( os.path.join( out_prefix, '..', 'sysroot' ) ) )
   haystack = haystack.replace( '{BUILD_FLAG}', build_flag )
+  haystack = haystack.replace( '{HELPER}', os.path.abspath( os.path.join( os.getcwd(), '.helper' ) ) )
+  haystack = haystack.replace( '{UTIL}', os.path.abspath( os.path.join( os.getcwd(), '.util' ) ) )
   # special handling for emulated target
   if "" == emulated_target:
     # remove if used in path
-    if -1 != haystack.find( os.pathsep + '{EMULATED_TARGET}' ):
-      haystack = haystack.replace( os.pathsep + '{EMULATED_TARGET}', '' )
+    if -1 != haystack.find( os.sep + '{EMULATED_TARGET}' ):
+      haystack = haystack.replace( os.sep + '{EMULATED_TARGET}', '' )
     # remove emulated target
     haystack = haystack.replace( '{EMULATED_TARGET}', emulated_target )
   else:
@@ -301,8 +309,8 @@ def handle_placeholder( haystack, version, out_prefix, source_directory, install
     # append emulated target
     if not tmp_target:
       # remove if used in path
-      if -1 != haystack.find( os.pathsep + '{EMULATED_TARGET}' ):
-        haystack = haystack.replace( os.pathsep + '{EMULATED_TARGET}', '' )
+      if -1 != haystack.find( os.sep + '{EMULATED_TARGET}' ):
+        haystack = haystack.replace( os.sep + '{EMULATED_TARGET}', '' )
       # remove emulated target
       haystack = haystack.replace( '{EMULATED_TARGET}', '' )
     else:
@@ -312,23 +320,18 @@ def handle_placeholder( haystack, version, out_prefix, source_directory, install
   return haystack
 
 # prepare command for execution
-def prepare_command( command, version, out_prefix, source_directory, install_version, emulated_target, build_flag, process_env ):
+def prepare_command( command, version, out_prefix, source_directory, install_version, emulated_target, build_flag, process_env, cwd ):
   # prepare command
-  command = handle_placeholder( command, version, out_prefix, source_directory, install_version, emulated_target, build_flag )
+  command = handle_placeholder( command, version, out_prefix, source_directory, install_version, emulated_target, build_flag, cwd )
+  print( command )
   # prepare possible variables
   for key, value in process_env.items():
     process_env[ key ] = handle_placeholder(
-      value, version, out_prefix, source_directory, install_version, emulated_target, build_flag )
+      value, version, out_prefix, source_directory, install_version, emulated_target, build_flag, cwd )
   return command, process_env
 
 # build and install single package
 def build_install_single_package( package, out_prefix, build_folder, build_file, install_file, configure_file, prepare_file, source_directory, emulated_target = '', build_flag = '' ):
-  # delete on rebuild
-  if not rebuild_package is None:
-    if package[ 'name' ] in ( rebuild_package ) or 'all' in ( rebuild_package ):
-      if os.path.exists( build_folder ):
-        shutil.rmtree( build_folder )
-
   # create build folder if not existing
   if not os.path.exists( build_folder ):
     os.makedirs( build_folder )
@@ -370,30 +373,34 @@ def build_install_single_package( package, out_prefix, build_folder, build_file,
   # execute configure steps if not done
   if not os.path.exists( configure_file ):
     try:
+      # output
+      if len( package[ 'configure' ] ):
+        print( '-> configuring ' + package[ 'name' ] )
       # execute configure commands
-      print( '-> configuring ' + package[ 'name' ] )
       for command in package[ 'configure' ]:
         # default source path
         source_path = os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] )
         # handle possible differences
         to_execute = command
         if not isinstance( command, str ):
+          # FIXME: HANDLE ALL POSSIBLE PLACEHOLDERS HERE
           source_path = command[ 'folder' ].replace( '{SOURCE_DIR}', source_path )
-          to_execute = command[ 'command' ]
+          to_execute = command[ 'command' ].replace( '{PREFIX}', out_prefix )
         # execute command
         if 0 != subprocess.call( to_execute, cwd=os.path.abspath( source_path ), shell=True, env=env ):
           print( 'Error on configure ' + package[ 'source' ][ 'extract_name' ] )
           quit()
+      # create file
+      pathlib.Path( configure_file ).touch()
     except KeyError:
       pass
-    # create file
-    pathlib.Path( configure_file ).touch()
 
   # execute prepare steps if not done
   if not os.path.exists( prepare_file ):
     try:
-      # execute prepare commands
-      print( '-> preparing ' + package[ 'name' ] )
+      # output
+      if len( package[ 'prepare' ] ):
+        print( '-> preparing ' + package[ 'name' ] )
       # execute command by command
       for command in package[ 'prepare' ]:
         # prepare command
@@ -405,22 +412,24 @@ def build_install_single_package( package, out_prefix, build_folder, build_file,
           install_version,
           emulated_target,
           build_flag,
-          process_env )
+          process_env,
+          os.path.abspath( build_folder ) )
         env = env | process_env
         # execute command
         if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
           print( 'Error on prepare ' + package[ 'source' ][ 'extract_name' ] )
           quit()
+      # create file
+      pathlib.Path( prepare_file ).touch()
     except KeyError:
       pass
-    # create file
-    pathlib.Path( prepare_file ).touch()
 
   # execute build steps if not done
   if not os.path.exists( build_file ):
     try:
-      # execute build commands
-      print( '-> building ' + package[ 'name' ] )
+      # output
+      if len( package[ 'build' ] ):
+        print( '-> building ' + package[ 'name' ] )
       # execute command by command
       for command in package[ 'build' ]:
         # prepare command
@@ -432,23 +441,25 @@ def build_install_single_package( package, out_prefix, build_folder, build_file,
           install_version,
           emulated_target,
           build_flag,
-          process_env )
+          process_env,
+          os.path.abspath( build_folder ) )
         env = env | process_env
         # execute command in folder
         if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
           print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
           quit()
+      # create file
+      pathlib.Path( build_file ).touch()
     except KeyError:
       pass
-    # create file
-    pathlib.Path( build_file ).touch()
 
   # execute install commands if not done
   if not os.path.exists( install_file ):
     try:
+      # output
+      if len( package[ 'install' ] ):
+        print( '-> installing ' + package[ 'name' ] )
       # execute commands
-      print( '-> installing ' + package[ 'source' ][ 'extract_name' ] )
-      # command by command
       for command in package[ 'install' ]:
         # prepare command
         to_execute, process_env = prepare_command(
@@ -459,16 +470,93 @@ def build_install_single_package( package, out_prefix, build_folder, build_file,
           install_version,
           emulated_target,
           build_flag,
-          process_env )
+          process_env,
+          os.path.abspath( build_folder ) )
         env = env | process_env
         # execute command in folder
         if 0 != subprocess.call( to_execute, cwd=os.path.abspath( build_folder ), shell=True, env=env ):
           print( 'Error on installing ' + package[ 'source' ][ 'extract_name' ] )
           quit()
+      # create file
+      pathlib.Path( install_file ).touch()
     except KeyError:
       pass
-    # create file
-    pathlib.Path( install_file ).touch()
+
+def cleanup_build_source_folder( package_list, build_directory, source_directory ):
+  for package in package_list:
+    # try to get possible multilib emulation
+    emulate_multilib = None
+    try:
+      emulate_multilib = package[ 'emulate_multilib' ]
+    except KeyError:
+      pass
+
+    # build path overwrite
+    build_folder_overwrite = None
+    try:
+      build_folder_overwrite = package[ 'use_build_dir_from' ]
+      found = list( lookup_package( package_list, name=build_folder_overwrite ) )
+      if 1 != len( found ):
+        raise KeyError()
+      # check for unsupported multilib
+      overwrite_multilib = None
+      try:
+        overwrite_multilib = found[ 0 ][ 'emulate_multilib' ]
+      except KeyError:
+        pass
+      # throw exception
+      if not overwrite_multilib is None:
+        raise KeyError()
+      # push to rebuild if not existing in there
+      if package[ 'name' ] in ( rebuild_package ) or 'all' in ( rebuild_package ):
+        if not found[ 0 ][ 'name' ] in ( rebuild_package ):
+          rebuild_package.append( found[ 0 ][ 'name' ] )
+          cleanup_build_source_folder( package_list, build_directory, source_directory )
+      # base build folder
+      build_folder_overwrite = os.path.join(
+        build_directory,
+        found[ 0 ][ 'name' ] + '.' + found[ 0 ][ 'source' ][ 'extract_name' ] )
+    except KeyError:
+      pass
+
+    # skip if build folder overwrite is set or skip when rebuild is not set
+    if not build_folder_overwrite is None:
+      continue
+
+    # remove source folder and file
+    # cache url and extract filename
+    url = package[ 'source' ][ 'url' ]
+    filename = url.split( '/' )[ -1 ]
+    # handle optional file overwrite
+    try:
+      filename = package[ 'source' ][ 'url_file_overwrite' ]
+    except KeyError:
+      pass
+    # get target file
+    target_file = os.path.join( source_directory, filename )
+    # skip package
+    if not package[ 'name' ] in ( rebuild_package ) and not 'all' in ( rebuild_package ):
+      continue
+
+    # delete on rebuild
+    if os.path.exists( target_file ):
+      os.remove( target_file )
+    if os.path.exists( os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ) ):
+      shutil.rmtree( os.path.join( source_directory, package[ 'source' ][ 'extract_name' ] ) )
+
+    # base build folder
+    build_folder = os.path.join(
+      build_directory,
+      package[ 'name' ] + '.' + package[ 'source' ][ 'extract_name' ] )
+    # handle normal emulation
+    if not emulate_multilib is None:
+      # determine build folder
+      build_folder = os.path.join(
+        build_directory,
+        package[ 'name' ] + '.' + package[ 'source' ][ 'extract_name' ] )
+    # delete on rebuild
+    if os.path.exists( build_folder ):
+      shutil.rmtree( build_folder )
 
 # build and install packages
 def build_install_package( package_list, out_prefix, build_directory, source_directory ):
@@ -485,12 +573,39 @@ def build_install_package( package_list, out_prefix, build_directory, source_dir
       source_directory,
       package[ 'source' ][ 'extract_name' ] )
 
+    # build path overwrite
+    build_folder_overwrite = None
+    try:
+      build_folder_overwrite = package[ 'use_build_dir_from' ]
+    except KeyError:
+      pass
+    if not build_folder_overwrite is None:
+      found = list( lookup_package( package_list, name=build_folder_overwrite ) )
+      if 1 != len( found ):
+        raise KeyError()
+      # check for unsupported multilib
+      overwrite_multilib = None
+      try:
+        overwrite_multilib = found[ 0 ][ 'emulate_multilib' ]
+      except KeyError:
+        pass
+      # throw exception
+      if not overwrite_multilib is None:
+        raise KeyError()
+      # base build folder
+      build_folder_overwrite = os.path.join(
+        build_directory,
+        found[ 0 ][ 'name' ] + '.' + found[ 0 ][ 'source' ][ 'extract_name' ] )
+
     # handle normal emulation
     if emulate_multilib is None:
       # base build folder
       build_folder = os.path.join(
         build_directory,
         package[ 'name' ] + '.' + package[ 'source' ][ 'extract_name' ] )
+      # overwrite build folder if set
+      if not build_folder_overwrite is None:
+        build_folder = build_folder_overwrite
       # just execute build and install once
       build_install_single_package(
         package,
@@ -555,6 +670,9 @@ if __name__ == '__main__':
   base_directory = 'build'
   source_directory = 'source'
   rebuild_package = args.rebuild
+  # handle none
+  if rebuild_package is None:
+    rebuild_package = []
   # handle host build
   if args.host:
     tool_directory = os.path.join( 'build', 'host' )
@@ -597,6 +715,8 @@ if __name__ == '__main__':
       prepare_package_order( package_list, os.path.join( subdir, filename ), base_directory )
   # prepare package source data
   prepare_package( package_list, source_directory )
+  # cleanup build and source folder
+  cleanup_build_source_folder( package_list, env_build_directory, env_source_directory )
   # download sources
   download_package( package_list, env_source_directory )
   # apply package patches if set

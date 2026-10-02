@@ -1,7 +1,9 @@
 
 name: nim
 allowed_version:
-  - '1.4.6'
+  - '1.6.8'
+  - '2.2.4'
+  - '2.2.10'
 url: 'https://nim-lang.org/download/nim-{VERSION}.tar.xz'
 url_file_overwrite: 'nim-{VERSION}.tar.xz'
 extract_name: 'nim-{VERSION}'

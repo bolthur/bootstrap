@@ -1,0 +1,8 @@
+
+name: libargtable2
+allowed_version:
+  - '2.13'
+url: 'https://github.com/jonathanmarvens/argtable2/archive/refs/tags/v{VERSION}.tar.gz'
+url_file_overwrite: 'libargtable2-{VERSION}.tar.gz'
+extract_name: 'libargtable2-{VERSION}'
+extract_name_to_change: 'argtable2-{VERSION}'

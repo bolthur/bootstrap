@@ -1,6 +1,6 @@
 
 - name: host-autoconf
-  source: autoconf@2.71
+  source: autoconf@2.73
   dependency:
     - host-patch
     - host-m4

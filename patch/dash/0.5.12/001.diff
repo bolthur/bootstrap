@@ -1,0 +1,13 @@
+diff --git src/jobs.c src/jobs.c
+index f3b9ffc..1132b0b 100644
+--- src/jobs.c
++++ src/jobs.c
+@@ -1176,7 +1176,7 @@ waitproc(int block, int *status)
+ 	do {
+ 		gotsigchld = 0;
+ 		do
+-			err = wait3(status, flags, NULL);
++			err = waitpid(-1, status, flags);
+ 		while (err < 0 && errno == EINTR);
+ 
+ 		if (err || (err = -!block))

@@ -1,0 +1,9 @@
+#!/bin/bash
+SYSROOT_DIR="{SYSROOT_PLACEHOLDER}"
+
+export PKG_CONFIG_PATH=
+export PKG_CONFIG_LIBDIR=${SYSROOT_DIR}/usr/lib/pkgconfig:${SYSROOT_DIR}/usr/share/pkgconfig
+#${SYSROOT_DIR}
+export PKG_CONFIG_SYSROOT_DIR=
+
+exec bolthur-pkg-config "$@"

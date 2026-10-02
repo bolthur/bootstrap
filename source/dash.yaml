@@ -1,0 +1,6 @@
+
+name: dash
+allowed_version:
+  - '0.5.13.4'
+url: 'http://gondor.apana.org.au/~herbert/dash/files/dash-{VERSION}.tar.gz'
+extract_name: 'dash-{VERSION}'

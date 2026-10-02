@@ -1,0 +1,52 @@
+diff --git bfd/config.bfd bfd/config.bfd
+index a5c3953a18a..f1f9bbef398 100644
+--- bfd/config.bfd
++++ bfd/config.bfd
+@@ -245,6 +245,11 @@ case "${targ}" in
+     targ_archs="$targ_archs bfd_i386_arch bfd_powerpc_arch bfd_rs6000_arch"
+     want64=true
+     ;;
++  aarch64*-*-bolthur*)
++    targ_defvec=aarch64_elf64_le_vec
++    targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec"
++    want64=true
++    ;;
+   aarch64-*-elf | aarch64-*-rtems* | aarch64-*-genode*)
+     targ_defvec=aarch64_elf64_le_vec
+     targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec aarch64_pei_le_vec aarch64_pe_le_vec"
+@@ -409,6 +414,10 @@ case "${targ}" in
+     targ_defvec=arm_elf32_le_vec
+     targ_selvecs=arm_elf32_be_vec
+     ;;
++  arm*-*-bolthur*)
++    targ_defvec=arm_elf32_le_vec
++    targ_selvecs="arm_elf32_fdpic_le_vec arm_elf32_be_vec arm_elf32_fdpic_be_vec"
++    ;;
+   arm-*-elf | arm*-*-freebsd* | arm*-*-linux-* | arm*-*-conix* | \
+   arm*-*-uclinux* | arm-*-kfreebsd*-gnu | \
+   arm*-*-eabi* | arm-*-rtems* | arm*-*-uclinuxfdpiceabi)
+diff --git config.sub config.sub
+index 4aaae46f6f7..ebb21d95689 100755
+--- config.sub
++++ config.sub
+@@ -1979,6 +1979,7 @@ case $os in
+ 	| beos* \
+ 	| bitrig* \
+ 	| bme* \
++	| bolthur* \
+ 	| bosx* \
+ 	| bsd* \
+ 	| cegcc* \
+diff --git readline/readline/support/config.sub readline/readline/support/config.sub
+index 9b62e37c43c..03364e854d1 100644
+--- readline/readline/support/config.sub
++++ readline/readline/support/config.sub
+@@ -1754,7 +1754,7 @@ case $os in
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+ 	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
+-	     | fiwix* )
++	     | fiwix* | bolthur*)
+ 		;;
+ 	# This one is extra strict with allowed versions
+ 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)

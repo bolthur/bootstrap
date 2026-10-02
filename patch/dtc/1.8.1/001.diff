@@ -1,0 +1,233 @@
+diff --git Makefile Makefile
+index 9110d17..0f7fabd 100644
+--- Makefile
++++ Makefile
+@@ -28,7 +28,7 @@ WARNINGS = -Wall -Wpointer-arith -Wcast-qual -Wnested-externs -Wsign-compare \
+ ifeq ($(shell $(CC) --version | grep -q gcc && echo gcc),gcc)
+ WARNINGS += -Wsuggest-attribute=format
+ endif
+-CFLAGS = -g -Os $(SHAREDLIB_CFLAGS) -Werror $(WARNINGS) $(EXTRA_CFLAGS)
++CFLAGS = -g -Os -Werror $(WARNINGS) $(EXTRA_CFLAGS)
+ 
+ BISON = bison
+ LEX = flex
+@@ -60,17 +60,16 @@ endif
+ # both variants would require either cpp magic or passing
+ # -Wno-error=discarded-qualifiers to the compiler. For the sake of simplicity
+ # just support libyaml >= 0.2.3.
+-NO_YAML := $(shell $(PKG_CONFIG) --atleast-version 0.2.3 yaml-0.1; echo $$?)
+-ifeq ($(NO_YAML),1)
+-	CFLAGS += -DNO_YAML
+-else
+-	LDLIBS_dtc += $(shell $(PKG_CONFIG) --libs yaml-0.1)
+-	CFLAGS += $(shell $(PKG_CONFIG) --cflags yaml-0.1)
+-endif
++LDLIBS_dtc += -lyaml
+ 
+ HAS_VERSION_SCRIPT := $(shell echo 'int main(){}' | $(CC) -Wl,--version-script=/dev/null -x c - -o /dev/null 2>/dev/null && echo y)
+ 
+-ifeq ($(HOSTOS),darwin)
++# "cross compile detection"
++ifeq ($(findstring bolthur,$(CC)),bolthur)
++SHAREDLIB_EXT     = so
++SHAREDLIB_CFLAGS  = -fPIC $(EXTRA_CFLAGS)
++SHAREDLIB_LDFLAGS = -fPIC $(EXTRA_CFLAGS) -shared -Wl,--version-script=$(LIBFDT_version) -Wl,-soname,
++else ifeq ($(HOSTOS),darwin)
+ SHAREDLIB_EXT     = dylib
+ SHAREDLIB_CFLAGS  = -fPIC
+ SHAREDLIB_LDFLAGS = -fPIC -dynamiclib -Wl,-install_name -Wl,
+@@ -80,8 +79,8 @@ SHAREDLIB_CFLAGS  =
+ SHAREDLIB_LDFLAGS = -shared -Wl,-soname,
+ else
+ SHAREDLIB_EXT     = so
+-SHAREDLIB_CFLAGS  = -fPIC
+-SHAREDLIB_LDFLAGS = -fPIC -shared -Wl,-soname,
++SHAREDLIB_CFLAGS  = -fPIC $(EXTRA_CFLAGS)
++SHAREDLIB_LDFLAGS = -fPIC $(EXTRA_CFLAGS) -shared -Wl,--version-script=$(LIBFDT_version) -Wl,-soname,
+ endif
+ 
+ ifeq ($(HAS_VERSION_SCRIPT),y)
+diff --git checks.c checks.c
+index a6037ed..b207e29 100644
+--- checks.c
++++ checks.c
+@@ -5,6 +5,7 @@
+ 
+ #include "dtc.h"
+ #include "srcpos.h"
++#include <inttypes.h>
+ 
+ #ifdef TRACE_CHECKS
+ #define TRACE(c, ...) \
+@@ -530,7 +531,7 @@ static cell_t check_phandle_prop(struct check *c, struct dt_info *dti,
+ 	phandle = propval_cell(prop);
+ 
+ 	if (!phandle_is_valid(phandle)) {
+-		FAIL_PROP(c, dti, node, prop, "bad value (0x%x) in %s property",
++		FAIL_PROP(c, dti, node, prop, "bad value (0x%"PRIx32") in %s property",
+ 		     phandle, prop->name);
+ 		return 0;
+ 	}
+@@ -565,7 +566,7 @@ static void check_explicit_phandles(struct check *c, struct dt_info *dti,
+ 
+ 	other = get_node_by_phandle(root, phandle);
+ 	if (other && (other != node)) {
+-		FAIL(c, dti, node, "duplicated phandle 0x%x (seen before at %s)",
++		FAIL(c, dti, node, "duplicated phandle 0x%"PRIx32" (seen before at %s)",
+ 		     phandle, other->fullpath);
+ 		return;
+ 	}
+@@ -1080,7 +1081,7 @@ static void check_i2c_bus_reg(struct check *c, struct dt_info *dti, struct node
+ 	reg = fdt32_to_cpu(*cells);
+ 	/* Ignore I2C_OWN_SLAVE_ADDRESS */
+ 	reg &= ~I2C_OWN_SLAVE_ADDRESS;
+-	snprintf(unit_addr, sizeof(unit_addr), "%x", reg);
++	snprintf(unit_addr, sizeof(unit_addr), "%"PRIx32, reg);
+ 	if (!streq(unitname, unit_addr))
+ 		FAIL(c, dti, node, "I2C bus unit address format error, expected \"%s\"",
+ 		     unit_addr);
+@@ -1092,10 +1093,10 @@ static void check_i2c_bus_reg(struct check *c, struct dt_info *dti, struct node
+ 
+ 		if (reg & I2C_TEN_BIT_ADDRESS) {
+ 			if ((reg & ~I2C_TEN_BIT_ADDRESS) > 0x3ff)
+-				FAIL_PROP(c, dti, node, prop, "I2C address must be less than 10-bits, got \"0x%x\"",
++				FAIL_PROP(c, dti, node, prop, "I2C address must be less than 10-bits, got \"0x%"PRIx32"\"",
+ 				  reg);
+ 		} else if (reg > 0x7f)
+-			FAIL_PROP(c, dti, node, prop, "I2C address must be less than 7-bits, got \"0x%x\". Set I2C_TEN_BIT_ADDRESS for 10 bit addresses or fix the property",
++			FAIL_PROP(c, dti, node, prop, "I2C address must be less than 7-bits, got \"0x%"PRIx32"\". Set I2C_TEN_BIT_ADDRESS for 10 bit addresses or fix the property",
+ 				  reg);
+ 	}
+ }
+@@ -1170,7 +1171,7 @@ static void check_spi_bus_reg(struct check *c, struct dt_info *dti, struct node
+ 	}
+ 
+ 	reg = fdt32_to_cpu(*cells);
+-	snprintf(unit_addr, sizeof(unit_addr), "%x", reg);
++	snprintf(unit_addr, sizeof(unit_addr), "%"PRIx32, reg);
+ 	if (!streq(unitname, unit_addr))
+ 		FAIL(c, dti, node, "SPI bus unit address format error, expected \"%s\"",
+ 		     unit_addr);
+@@ -1823,7 +1824,7 @@ static void check_graph_reg(struct check *c, struct dt_info *dti,
+ 		return;
+ 	}
+ 
+-	snprintf(unit_addr, sizeof(unit_addr), "%x", propval_cell(prop));
++	snprintf(unit_addr, sizeof(unit_addr), "%"PRIx32, propval_cell(prop));
+ 	if (!streq(unitname, unit_addr))
+ 		FAIL(c, dti, node, "graph node unit address error, expected \"%s\"",
+ 		     unit_addr);
+diff --git fdtget.c fdtget.c
+index dd70985..22dd6bb 100644
+--- fdtget.c
++++ fdtget.c
+@@ -15,6 +15,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <inttypes.h>
+ 
+ #include <libfdt.h>
+ 
+@@ -199,7 +200,7 @@ static int list_subnodes(const void *blob, int node)
+ 			break;
+ 		default:
+ 			if (level <= depth)
+-				printf("Unknown tag 0x%08X\n", tag);
++				printf("Unknown tag 0x%08"PRIX32"\n", tag);
+ 			return 1;
+ 		}
+ 		node = nextoffset;
+diff --git flattree.c flattree.c
+index f3b698c..05ee82b 100644
+--- flattree.c
++++ flattree.c
+@@ -5,6 +5,7 @@
+ 
+ #include "dtc.h"
+ #include "srcpos.h"
++#include <inttypes.h>
+ 
+ #define FTF_FULLPATH	0x1
+ #define FTF_VARALIGN	0x2
+@@ -124,8 +125,8 @@ static void asm_emit_cell(void *e, cell_t val)
+ {
+ 	FILE *f = e;
+ 
+-	fprintf(f, "\t.byte\t0x%02x\n" "\t.byte\t0x%02x\n"
+-		"\t.byte\t0x%02x\n" "\t.byte\t0x%02x\n",
++	fprintf(f, "\t.byte\t0x%02"PRIx32"\n" "\t.byte\t0x%02"PRIx32"\n"
++		"\t.byte\t0x%02"PRIx32"\n" "\t.byte\t0x%02"PRIx32"\n",
+ 		(val >> 24) & 0xff, (val >> 16) & 0xff,
+ 		(val >> 8) & 0xff, val & 0xff);
+ }
+@@ -781,7 +782,7 @@ static struct node *unflatten_tree(struct inbuf *dtbuf,
+ 			break;
+ 
+ 		default:
+-			die("Invalid opcode word %08x in device tree blob\n",
++			die("Invalid opcode word %08"PRIx32" in device tree blob\n",
+ 			    val);
+ 		}
+ 	} while (val != FDT_END_NODE);
+@@ -838,7 +839,7 @@ struct dt_info *dt_from_blob(const char *fname)
+ 
+ 	totalsize = fdt32_to_cpu(totalsize_buf);
+ 	if (totalsize < FDT_V1_SIZE)
+-		die("DT blob size (%d) is too small\n", totalsize);
++		die("DT blob size (%"PRId32") is too small\n", totalsize);
+ 
+ 	blob = xmalloc(totalsize);
+ 
+@@ -851,7 +852,7 @@ struct dt_info *dt_from_blob(const char *fname)
+ 
+ 	while (sizeleft) {
+ 		if (feof(f))
+-			die("EOF before reading %d bytes of DT blob\n",
++			die("EOF before reading %"PRId32" bytes of DT blob\n",
+ 			    totalsize);
+ 
+ 		rc = fread(p, 1, sizeleft, f);
+@@ -908,7 +909,7 @@ struct dt_info *dt_from_blob(const char *fname)
+ 	val = flat_read_word(&dtbuf);
+ 
+ 	if (val != FDT_BEGIN_NODE)
+-		die("Device tree blob doesn't begin with FDT_BEGIN_NODE (begins with 0x%08x)\n", val);
++		die("Device tree blob doesn't begin with FDT_BEGIN_NODE (begins with 0x%08"PRIx32")\n", val);
+ 
+ 	tree = unflatten_tree(&dtbuf, &strbuf, "", flags);
+ 
+diff --git livetree.c livetree.c
+index 5d72abc..57c4655 100644
+--- livetree.c
++++ livetree.c
+@@ -1234,7 +1234,7 @@ void fixup_phandles(struct dt_info *dti, const char *name)
+ 				continue;
+ 
+ 			offset = strtol(soffset, NULL, 0);
+-			if (offset < 0 || offset + 4 > p->val.len) {
++			if (offset < 0 || ((unsigned int)(offset + 4)) > p->val.len) {
+ 				if (quiet < 1)
+ 					fprintf(stderr,
+ 						"Warning: Label %s contains invalid offset for property %s in node %s\n",
+diff --git treesource.c treesource.c
+index bf648bf..6126e03 100644
+--- treesource.c
++++ treesource.c
+@@ -5,6 +5,7 @@
+ 
+ #include "dtc.h"
+ #include "srcpos.h"
++#include <inttypes.h>
+ 
+ extern FILE *yyin;
+ extern int yyparse(void);
+@@ -209,7 +210,7 @@ void add_phandle_marker(struct dt_info *dti, struct property *prop, unsigned int
+ 	if (!refn) {
+ 		if (quiet < 1)
+ 			fprintf(stderr,
+-				"Warning: node referenced by phandle 0x%x in property %s not found\n",
++				"Warning: node referenced by phandle 0x%"PRIx32" in property %s not found\n",
+ 				phandle, prop->name);
+ 		return;
+ 	}

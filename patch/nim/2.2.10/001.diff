@@ -1,0 +1,131 @@
+diff --git compiler/installer.ini compiler/installer.ini
+index 97d4feb2a..2e1d5b538 100644
+--- compiler/installer.ini
++++ compiler/installer.ini
+@@ -17,6 +17,7 @@ Platforms: """
+   haiku: i386;amd64
+   android: i386;arm;arm64
+   nintendoswitch: arm64
++  bolthur: arm
+ """
+ 
+ Authors: "Andreas Rumpf"
+diff --git compiler/options.nim compiler/options.nim
+index 23ef20180..c2941469b 100644
+--- compiler/options.nim
++++ compiler/options.nim
+@@ -647,7 +647,8 @@ proc isDefined*(conf: ConfigRef; symbol: string): bool =
+                             osQnx, osAtari, osAix,
+                             osHaiku, osVxWorks, osSolaris, osNetbsd,
+                             osFreebsd, osOpenbsd, osDragonfly, osMacosx, osIos,
+-                            osAndroid, osNintendoSwitch, osFreeRTOS, osCrossos, osZephyr, osNuttX}
++                            osAndroid, osNintendoSwitch, osFreeRTOS, osCrossos, osZephyr, osNuttX,
++                            osBolthur}
+     of "linux":
+       result = conf.target.targetOS in {osLinux, osAndroid}
+     of "bsd":
+@@ -667,6 +668,8 @@ proc isDefined*(conf: ConfigRef; symbol: string): bool =
+       result = conf.target.targetOS == osNintendoSwitch
+     of "freertos", "lwip":
+       result = conf.target.targetOS == osFreeRTOS
++    of "bolthur":
++      result = conf.target.targetOS == osBolthur
+     of "zephyr":
+       result = conf.target.targetOS == osZephyr
+     of "nuttx":
+diff --git compiler/platform.nim compiler/platform.nim
+index 4b99cd893..30df3f1e0 100644
+--- compiler/platform.nim
++++ compiler/platform.nim
+@@ -27,7 +27,7 @@ type
+     osIrix, osNetbsd, osFreebsd, osOpenbsd, osDragonfly, osCrossos, osAix, osPalmos, osQnx,
+     osAmiga, osAtari, osNetware, osMacos, osMacosx, osIos, osHaiku, osAndroid, osVxWorks
+     osGenode, osJS, osNimVM, osStandalone, osNintendoSwitch, osFreeRTOS, osZephyr,
+-    osNuttX, osAny
++    osNuttX, osBolthur, osAny
+ 
+ type
+   TInfoOSProp* = enum
+@@ -198,6 +198,10 @@ const
+       objExt: ".o", newLine: "\x0A", pathSep: ":", dirSep: "/",
+       scriptExt: ".sh", curDir: ".", exeExt: "", extSep: ".",
+       props: {ospPosix}),
++     (name: "Bolthur", parDir: "..", dllFrmt: "lib$1.so", altDirSep: "/",
++      objExt: ".o", newLine: "\x0A", pathSep: ":", dirSep: "/",
++      scriptExt: ".sh", curDir: ".", exeExt: ".elf", extSep: ".",
++      props: {ospNeedsPIC, ospPosix}),
+      (name: "Any", parDir: "..", dllFrmt: "lib$1.so", altDirSep: "/",
+       objExt: ".o", newLine: "\x0A", pathSep: ":", dirSep: "/",
+       scriptExt: ".sh", curDir: ".", exeExt: "", extSep: ".",
+diff --git config/nim.cfg config/nim.cfg
+index 038c3c9be..d55e92e0b 100644
+--- config/nim.cfg
++++ config/nim.cfg
+@@ -139,6 +139,7 @@ nimblepath="$home/.nimble/pkgs/"
+     clang.options.linker = "-Wl,--as-needed -lnetwork"
+     clang.cpp.options.linker = "-Wl,--as-needed -lnetwork"
+     tcc.options.linker = "-Wl,--as-needed -lnetwork"
++  @elif bolthur:
+   @elif not genode:
+     # -fopenmp
+     gcc.options.linker = "-ldl"
+diff --git lib/pure/selectors.nim lib/pure/selectors.nim
+index 9bb490794..70d0f66f8 100644
+--- lib/pure/selectors.nim
++++ lib/pure/selectors.nim
+@@ -371,6 +371,8 @@ else:
+     include ioselects/ioselectors_select # TODO: use the native VFS layer
+   elif defined(nintendoswitch):
+     include ioselects/ioselectors_select
++  elif defined(bolthur):
++    include ioselects/ioselectors_select
+   elif defined(freertos) or defined(lwip):
+     include ioselects/ioselectors_select
+   elif defined(zephyr):
+diff --git lib/system.nim lib/system.nim
+index 1aebd08b3..1b63a32db 100644
+--- lib/system.nim
++++ lib/system.nim
+@@ -3052,6 +3052,7 @@ when notJSnotNims:
+                     not defined(freertos) and
+                     not defined(zephyr) and
+                     not defined(nuttx) and
++                    not defined(bolthur) and
+                     hostOS != "any"
+ 
+   proc raiseEIO(msg: string) {.noinline, noreturn.} =
+diff --git lib/system/ansi_c.nim lib/system/ansi_c.nim
+index 224354a84..046c9ad40 100644
+--- lib/system/ansi_c.nim
++++ lib/system/ansi_c.nim
+@@ -58,7 +58,7 @@ when defined(windows):
+ elif defined(macosx) or defined(linux) or defined(freebsd) or
+      defined(openbsd) or defined(netbsd) or defined(solaris) or
+      defined(dragonfly) or defined(nintendoswitch) or defined(genode) or
+-     defined(aix) or hostOS == "standalone":
++     defined(aix) or defined(bolthur) or hostOS == "standalone":
+   const
+     SIGABRT* = cint(6)
+     SIGFPE* = cint(8)
+diff --git lib/system/platforms.nim lib/system/platforms.nim
+index 0619f3fca..fe9b5c333 100644
+--- lib/system/platforms.nim
++++ lib/system/platforms.nim
+@@ -45,7 +45,8 @@ type
+   OsPlatform* {.pure.} = enum ## the OS this program will run on.
+     none, dos, windows, os2, linux, morphos, skyos, solaris,
+     irix, netbsd, freebsd, openbsd, aix, palmos, qnx, amiga,
+-    atari, netware, macos, macosx, haiku, android, js, standalone, nintendoswitch
++    atari, netware, macos, macosx, haiku, android, js, standalone, nintendoswitch,
++    bolthur
+ 
+ const
+   targetOS* = when defined(windows): OsPlatform.windows
+@@ -72,6 +73,7 @@ const
+               elif defined(js): OsPlatform.js
+               elif defined(standalone): OsPlatform.standalone
+               elif defined(nintendoswitch): OsPlatform.nintendoswitch
++              elif defined(bolthur): OsPlatform.bolthur
+               else: OsPlatform.none
+     ## the OS this program will run on.
+ 
